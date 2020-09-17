@@ -1,0 +1,54 @@
+En un struct:
+st.val si la estruct no és un punter (osigui una variable).
+st->val si la struct es un punter.
+
+puntero a estructura -> equivale a (* puntero).val (aquí ho expliquen també https://www.programiz.com/c-programming/c-structures-pointers)
+
+És a dir str->val == (*str).val. El contenido de un puntero es lo que contiene ese puntero.
+
+*lptrptr és un punter.
+*(*lptrptr) és una struct tipus elem, així que sí *(*lptrptr).val == *lptrptr->val
+
+DIFERENCIA ENTRE TAULES I PUNTERS.
+
+type *vptr; => apunta a depen del compilador. "Si no se sabe, apunta a donde más duele." és a dir, fora de memòria.
+type vtau[7] => apunta a una secció de memòria on hi tinc 7 elements. vtau només apunta al primer element de la taula.
+
+En canvi quan *vptr apunta a vtau, és un punter al primer element de la taula. És a dir, el contingut de vptr és el que hi hagi a la primera zona de memòria de vtau, ja que els dos apunten al mateix lloc. vtau[2] == vatu+2 ==vptr+2 == vptr[2]
+
+Evidentment, ULL A ON APUNTES, que si vas fora de memòria doncs DOLOR.
+
+gcc programa.c
+./a.out
+
+OPENGL: QUÈ COI ÉS
+
+Llibreria grafica de C.
+
+Sempre, per a iniciar opengl tenim dins del main:
+
+glutInit(&argc, argv)
+GlutInitDisplayMode(GLUT_DOUBLE,GLUT_RGB) //controla el color i les coses.
+glutInitWindowPosition(x,y) //on crea la finestra de la pantalla
+glutInitWindowSize(w,h) //com de gran
+glutCreateWindow(nombre) //nom de la finestra
+/* 
+establecer eventos. Aplicació basada en events.
+Aquí es defineixen els events pels quals la aplicació ha d'escoltar.
+
+glutDisplayFunc(display). retorna: void display (void) //per dibuixar. Tot lo relacionat amb el dibuix es fa amb variables globals, depenent del que sigui. No és el mateix el dibuix (una instància de l'escenari) amb com canvia l'escenari. glutDisplayFunc MAI HA DE MODIFICAR L'ESCENARI, NOMÉS INSTÀNCIES.
+
+
+glutKeyboardFunc(teclado)–void teclado(unsigned char c, int x, int y) //les coordenades x,y no serveixen, el teclat no es mou
+glutMouseFunc(raton)–void raton(int boton, int estado, int x, int y)–boton=GLUT_LEFT_BUTTON... state = GLUT_DOWN o UP //Com es modifica l'escenari amb el teclat i el ratolí.
+
+
+*/
+glutMainLoop() //el programa es posa a la espera fins que captura un event.
+
+popups no massa importants.
+
+Funcions de dibuixar:
+
+glBegin(tipoobjeto) //comença a dibuixar una de les següents coses: glVertex, glColor, glNormal, glEdgeFlag
+glEnd() //stop.
