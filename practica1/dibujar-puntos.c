@@ -43,7 +43,7 @@ static void marraztu(void)
 	// por ahora dibujamos todos los pixels de la ventana de 500x500 con el color que devuelve la función color_textura
 	// pero hay que llamar a la función que dibuja un triangulo con la textura mapeada:
 	/*
-	dibujar_triangulo(triangulosptr[indice]);
+	dibujar_triangulo(triangulosptr[indice]); //aquí el podem cridar com una llista, ja que el punter d'una taula és el mateix que el punter d'una llista, excepte que aquest el podem iterar.
 	*/
 	for (i=0;i<500;i++)
 	    for (j=0;j<500;j++)
@@ -70,7 +70,8 @@ static void teklatua (unsigned char key, int x, int y)
 			printf ("ENTER: que hay que dibujar el siguiente triángulo.\n");
 			/* hacer algo para que se dibuje el siguiente triangulo */
 			/*
-			indice ++;  // pero si es el último? hay que controlarlo!
+			indice ++;  // pero si es el último? hay que controlarlo! Vale no he pillat lo de indice
+			indice=(indice++)%num_triangles;
 			*/
 			break;
 		case 27:  // <ESC>
