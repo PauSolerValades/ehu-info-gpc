@@ -4,7 +4,7 @@
 
 typedef struct punto
 {
-float x, y, z, u,v;
+float x, y, z, u, v;
 } punto;
 
 typedef struct hiruki
@@ -54,7 +54,7 @@ void cargar_triangulos(int *hkopptr, hiruki **hptrptr)
  fclose(obj_file);
 }
 
-
+/*
 void main(int argc, char*argv[])
 {
 int num_triangles,i; 
@@ -68,3 +68,4 @@ for (i=0; i<num_triangles; i++)
 	printf("   (%.1f, %.1f, %.1f) (%.1f, %.1f)\n", tptr[i].p3.x, tptr[i].p3.y, tptr[i].p3.z, tptr[i].p3.u, tptr[i].p3.v);
 	}
 }
+*/
