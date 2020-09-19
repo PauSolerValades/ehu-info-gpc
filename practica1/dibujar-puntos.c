@@ -12,20 +12,7 @@
 
 #include <GL/glut.h>
 #include <stdio.h>
-
-
-//posar això en unpunt h
-
-typedef struct punto
-{
-float x, y, z, u,v;
-} punto;
-
-typedef struct hiruki
-{
-punto p1,p2,p3;
-} hiruki;
-
+#include "hiruki.h"
 
 /*
 VARIABLES GLOBALS
@@ -49,33 +36,43 @@ return(bufferra);
 
 
 /*
-This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis.
+This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
+
+Probablement aquesta funció no serveixi de res. En plan, segurament no serveix.
 */
-void determinar_orden(hiruki triangulo, punto altoptr, punto medioptr, punto bajoptr)
+void ordenar_vertices(hiruki *triangulo)
 {
 	punto aux;
 	
-	if(triangulo.p1.y > triangulo.p3.y)
-	{
-		aux = triangulo.p1;
-		triangulo.p1 = triangulo.p3;
-		triangulo.p3 = aux;
-	}
 	
-	if(triangulo.p1.y > triangulo.p2.y)
+	if(triangulo->p1.y > triangulo->p3.y)
 	{
-		aux = triangulo.p1;
-		triangulo.p1 = triangulo.p2;
-		triangulo.p2 = aux;
+		printf("Canvio A per C\n");
+		aux = triangulo->p1;
+		triangulo->p1 = triangulo->p3;
+		triangulo->p3 = aux;
+	}
+	/*
+	if(triangulo->p1.y > triangulo->p2.y)
+	{
+		printf("Canvio A per B\n");
+		triangulo->p1 = triangulo.p2;
+		triangulo->p2 = aux;
 	}
 	
 	if(triangulo.p2.y > triangulo.p3.y)
 	{
+		printf("Canvio B per C\n");
 		aux = triangulo.p2;
 		triangulo.p2 = triangulo.p3;
 		triangulo.p3 = aux;
 	}
+	*/
 	
+}
+
+determinar_orden(hiruki triangulo, punto *altoptr, punto* medioptr, punto* bajoptr)
+{
 	
 }
 
@@ -84,9 +81,14 @@ void dibujar_triangulo(hiruki triangulo)
 {
 	int h;
 	
-	//printf("A: %f, %f, %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p1.u, triangulo.p1.v);
+	printf("A: %f, %f, %f B: %f, %f, %f C: %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
 	
+	/*La lamamos con & para passar EL VALOR EXACTO, no una cópia de los puntos.*/
 	determinar_orden(triangulo, &triangulo.p1, &triangulo.p2, &triangulo.p3);
+	
+	printf("A: %f, %f, %f B: %f, %f, %f C: %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
+	
+	
 }
 
 /*

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <malloc.h>
+#include "hiruki.h"
 
 void load_ppm(char *file, unsigned char **bufferptr, int *dimxptr, int * dimyptr)
 {
