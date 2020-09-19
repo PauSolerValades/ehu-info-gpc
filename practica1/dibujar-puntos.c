@@ -27,6 +27,10 @@ punto p1,p2,p3;
 } hiruki;
 
 
+/*
+VARIABLES GLOBALS
+*/
+
 // texturaren informazioa
 
 extern void load_ppm(char *file, unsigned char **bufferptr, int *dimxptr, int * dimyptr);
@@ -34,11 +38,7 @@ unsigned char *bufferra;
 int dimx,dimy;
 
 int indice, num_triangles;
-hiruki *triangulosptr; //aquest és el punter que apuntarà a la linked list de triangles.
-
-indice = 0;	
-num_triangles = 3; //hi ha 3 triangles a triangles.txt. Es podria fer una funció que obrís el fitxes i en comptes quantes t té.
-triangulosptr = 0; //inicialitzem el punter a null.
+hiruki *triangulosptr; //pointer to triangles.
 
 
 unsigned char * color_textura(float u, float v)
@@ -48,9 +48,45 @@ return(bufferra);
 }
 
 
+/*
+This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis.
+*/
+void determinar_orden(hiruki triangulo, punto altoptr, punto medioptr, punto bajoptr)
+{
+	punto aux;
+	
+	if(triangulo.p1.y > triangulo.p3.y)
+	{
+		aux = triangulo.p1;
+		triangulo.p1 = triangulo.p3;
+		triangulo.p3 = aux;
+	}
+	
+	if(triangulo.p1.y > triangulo.p2.y)
+	{
+		aux = triangulo.p1;
+		triangulo.p1 = triangulo.p2;
+		triangulo.p2 = aux;
+	}
+	
+	if(triangulo.p2.y > triangulo.p3.y)
+	{
+		aux = triangulo.p2;
+		triangulo.p2 = triangulo.p3;
+		triangulo.p3 = aux;
+	}
+	
+	
+}
+
+
 void dibujar_triangulo(hiruki triangulo)
 {
-	printf("A: %f, %f, %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p1.u, triangulo.p1.v);
+	int h;
+	
+	//printf("A: %f, %f, %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p1.u, triangulo.p1.v);
+	
+	determinar_orden(triangulo, &triangulo.p1, &triangulo.p2, &triangulo.p3);
 }
 
 /*
@@ -79,7 +115,6 @@ static void marraztu(void)
 	unsigned char* colorv;
 	unsigned char r,g,b;
 
-	printf("Hola\n");
 	// borramos lo que haya...
 	glClear( GL_COLOR_BUFFER_BIT );
 
@@ -120,18 +155,21 @@ static void teklatua (unsigned char key, int x, int y)
 	switch(key)
 		{
 		case 13: // <INTRO>
-			printf ("ENTER: que hay que dibujar el siguiente triángulo.\n");
-			/* hacer algo para que se dibuje el siguiente triangulo */
-			/*
-			indice ++;  // pero si es el último? hay que controlarlo! Vale no he pillat lo de indice
-			indice=(indice++)%num_triangles;
-			*/
+			
+			
+			/*indice itera de 0 a num_triangles*/
+			indice=(indice+1)%num_triangles;
+			
+			printf("Triangulo %d/%d\n", indice+1, num_triangles);
+			printf ("Pulsa ENTER para dibujar el siguente triangulo\n");
+			
+			//printf("%d indice\n", indice);
 			break;
 		case 27:  // <ESC>
 			exit( 0 );
 			break;
 		default:
-			printf("%d %c..\n", key, key );
+			printf("%d %c\n", key, key );
 		}
 
 	// The screen must be drawn to show the new triangle
@@ -140,7 +178,10 @@ static void teklatua (unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
-
+	indice = 0;	
+	num_triangles = 3; //TODO: comptar les t al fitxer.
+	triangulosptr = 0; //inicialitzem el punter a null.
+	
 	printf("This program draws points in the viewport \n");
 	printf("Press <ESC> to finish\n");
 	glutInit(&argc,argv);
@@ -152,14 +193,10 @@ int main(int argc, char** argv)
 	glutDisplayFunc( marraztu ); // Aquí escriure com es dibuixen les imatges.
 	glutKeyboardFunc( teklatua ); // Aquí arrelgar el bucle (apretar intro avançar, apretar esc seguir.)
 	/* we put the information of the texture in the buffer pointed by bufferra. The dimensions of the texture are loaded into dimx and dimy */ 
-    load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
-        
-        /* preguntar si definint un nombre com a int, si l'argument de la funció és un punter i li passes la direcció de memòria, la funció rep el punter que apunta al valor de la direcció de memòria de l'int.
-        preguntar si el triangulos ptr hem de passat un punter d'un struct hiruki, per anar apuntant als triangles del fitxer triangles.txt.
-        */
-        
-        
-    cargar_triangulos(&num_triangles, &triangulosptr);
+    	load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
+              
+    	/*Loading the contents of triangles.txt*/
+    	cargar_triangulos(&num_triangles, &triangulosptr);
         
 	glClearColor( 0.0f, 0.0f, 0.7f, 1.0f );
 
