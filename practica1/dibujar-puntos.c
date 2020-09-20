@@ -39,7 +39,15 @@ return(bufferra);
 This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
 
 Probablement aquesta funció no serveixi de res. En plan, segurament no serveix.
+
+Podria canviar la definició dels punts per només canviar coordenades i deixar el color igual, però tocar els structs del profe no es la millor idea.
 */
+
+void print_triangle(hiruki triangulo)
+{
+	printf("A: x: %f, y: %f, z: %f\nB: x: %f, y: %f, z: %f\nC: x: %f, y: %f, z: %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
+}
+
 void ordenar_vertices(hiruki *triangulo)
 {
 	punto aux;
@@ -71,22 +79,58 @@ void ordenar_vertices(hiruki *triangulo)
 	
 }
 
+/*Si no es lo de dalt pos no ha de retornar res pero canviar el triangle directament*/
 determinar_orden(hiruki triangulo, punto *altoptr, punto* medioptr, punto* bajoptr)
 {
 	
 }
 
+/*punto o directamente void?*/
+punto calcular_interseccion(punto P, punto Q, &pin1, h)
+{
+	int altura, anchura;
+	float pin;
+	
+	altura = Q.y - P.y;
+	anchura = Q.x - P.x;
+	
+	pin = anchura*h/altura;
+{
+
 
 void dibujar_triangulo(hiruki triangulo)
 {
-	int h;
+
+	/*
+	La definición del triangulo es la siguiente:
+	VERTICE A: el vertice con las y mas cercanas a 0
+	VERTICE C: el vertice con las y mas lejanas a 0
+	VERTICE B: el sobrante.
+	*/
 	
-	printf("A: %f, %f, %f B: %f, %f, %f C: %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
+	int h,x;
+	punto *Aptr, *Bptr, *Cptr;
 	
-	/*La lamamos con & para passar EL VALOR EXACTO, no una cópia de los puntos.*/
+	//aquests valors s'hauran de carregar de determinar_orden.
+	Aptr = &triangulo.p1;
+	Bptr = &triangulo.p2;
+	Cptr = &triangulo.p3;
+	
+	/*
+	print_triangle(triangulo);
+	
+	//La lamamos con & para passar EL VALOR EXACTO, no una cópia de los puntos.
 	determinar_orden(triangulo, &triangulo.p1, &triangulo.p2, &triangulo.p3);
-	
-	printf("A: %f, %f, %f B: %f, %f, %f C: %f, %f, %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
+	*/
+
+	for(h=Aptr->y; h>Bptr->y; h--)
+	{
+		calcular_interseccion(Aptr, Bptr, &pin1, h);
+		for(x=)
+		{
+		
+		}
+	}
 	
 	
 }
