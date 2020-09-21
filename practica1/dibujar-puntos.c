@@ -94,7 +94,7 @@ punto calcular_interseccion(punto P, punto Q, &pin1, h)
 	altura = Q.y - P.y;
 	anchura = Q.x - P.x;
 	
-	pin = anchura*h/altura;
+	pin = P.x+(anchura*h/altura);
 {
 
 
@@ -126,10 +126,7 @@ void dibujar_triangulo(hiruki triangulo)
 	for(h=Aptr->y; h>Bptr->y; h--)
 	{
 		calcular_interseccion(Aptr, Bptr, &pin1, h);
-		for(x=)
-		{
 		
-		}
 	}
 	
 	
