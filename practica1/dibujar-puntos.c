@@ -79,23 +79,53 @@ void ordenar_vertices(hiruki *triangulo)
 	
 }
 
-/*Si no es lo de dalt pos no ha de retornar res pero canviar el triangle directament*/
-determinar_orden(hiruki triangulo, punto *altoptr, punto* medioptr, punto* bajoptr)
+/*Això no funciona encara, falta determinar com. 
+Idees: ordenar una còpia dels punts en una llista, després ja faria punters fins als punts REALS del triangle
+*/
+void determinar_orden(hiruki triangulo, punto *Aptr, punto* Bptr, punto* Cptr)
 {
 	
+	punto aux;
+	*Aptr = triangulo.p1;
+	*Bptr = triangulo.p2;
+	*Cptr = triangulo.p3;
+	
+	if(triangulo.p1.y > triangulo.p3.y)
+	{
+		printf("Canvio A per C\n");
+		*Aptr = triangulo.p3;
+		*Cptr = triangulo.p1;
+	}
+	
+	if(triangulo.p1.y > triangulo.p2.y)
+	{
+		printf("Canvio A per B\n");
+		*Aptr = triangulo.p2;
+		*Bptr = triangulo.p1;
+	}
+	
+	if(triangulo.p2.y > triangulo.p3.y)
+	{
+		printf("Canvio B per C\n");
+		*Aptr = triangulo.p2;
+		*Bptr = triangulo.p1;
+	}
 }
 
 /*punto o directamente void?*/
-punto calcular_interseccion(punto P, punto Q, &pin1, h)
+void calcular_interseccion(punto A, punto B, float *pin, int h)
 {
-	int altura, anchura;
-	float pin;
+	int x, y;
+	float y_bis, prova;
 	
-	altura = Q.y - P.y;
-	anchura = Q.x - P.x;
+	y = B.y - A.y;
+	x = B.x - A.x;
 	
-	pin = P.x+(anchura*h/altura);
-{
+	y_bis = h - A.y;
+	
+	*pin = A.x+(x*y_bis/y);
+	
+}
 
 
 void dibujar_triangulo(hiruki triangulo)
@@ -110,11 +140,17 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	int h,x;
 	punto *Aptr, *Bptr, *Cptr;
+	float pin1, pin2;
 	
 	//aquests valors s'hauran de carregar de determinar_orden.
+	
+		
 	Aptr = &triangulo.p1;
 	Bptr = &triangulo.p2;
 	Cptr = &triangulo.p3;
+	
+	
+	//determinar_orden(triangulo, &Aptr, &Bptr, &Cptr);
 	
 	/*
 	print_triangle(triangulo);
@@ -123,12 +159,17 @@ void dibujar_triangulo(hiruki triangulo)
 	determinar_orden(triangulo, &triangulo.p1, &triangulo.p2, &triangulo.p3);
 	*/
 
+	/*
 	for(h=Aptr->y; h>Bptr->y; h--)
 	{
-		calcular_interseccion(Aptr, Bptr, &pin1, h);
+		calcular_interseccion(*Aptr, *Bptr, &pin1, h);
 		
 	}
-	
+	*/
+	calcular_interseccion(*Aptr, *Bptr, &pin1, 150);
+	calcular_interseccion(*Cptr, *Bptr, &pin2, 150);
+	printf("%f, %f\n", pin1, pin2);
+		
 	
 }
 
