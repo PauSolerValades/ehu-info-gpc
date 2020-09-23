@@ -120,6 +120,7 @@ void determinar_orden(hiruki triangulo, punto *Aptr, punto* Bptr, punto* Cptr)
 /*punto o directamente void?*/
 void calcular_interseccion(punto A, punto B, int *pin, int h)
 {
+    //nota: no hi posis valors absoluts que es desmadarda que filpes.
 	int x, y;
 	float y_bis, prova;
 	
@@ -129,8 +130,6 @@ void calcular_interseccion(punto A, punto B, int *pin, int h)
 	y_bis = h - A.y;
 	
 	*pin = (int) round(A.x+(x*y_bis/y));
-	
-	//printf("%d\n", *pin);
 	
 }
 
@@ -191,6 +190,8 @@ void dibujar_triangulo(hiruki triangulo)
 	*/
 
 	//començes a la altura d'A i vas cap a B pujant la altura
+
+    //això funciona!!! (sempre que li passis ABC ordenat.)
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
 		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
@@ -200,10 +201,18 @@ void dibujar_triangulo(hiruki triangulo)
 		{
 			dibujar_pixel(x, h);
 		}
-		
 	}
+    for(h=Bptr->y; h<=Cptr->y; h++)
+    {
+        calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
+		calcular_interseccion(*Bptr, *Cptr, &pin_right, h);
+        for(x=pin_left; x<=pin_right; x++)
+		{
+			dibujar_pixel(x, h);
+		}
+    }
 	
-	printf("%d, %d\n", pin_left, pin_right);
+	//printf("%d, %d\n", pin_left, pin_right);
 		
 	
 }

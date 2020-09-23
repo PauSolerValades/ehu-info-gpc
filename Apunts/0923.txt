@@ -1,0 +1,26 @@
+DISCRETIZACIÓN:
+Pantalla formada por píxels => represntar la realidad contíuna en una discreta => problemas.
+Aliasing = problema generado por la capacidad de nuestra mente de símlies (alias). https://es.wikipedia.org/wiki/Aliasing
+
+rectas/aristas: un objeto puede tener cientos de miles de rectas.
+    - no s'aplica mx +n, ja que és molt costós. A partir del punt anterior, dibuixo el seguent.
+ALGORITMO DEL VALOR MEDIO: té en compte l'error d'arrodoniment en dibuixar al següent respecte l'anterior.
+    subir decrementa el error, derecha incrementa el error. Este esta acotado por 0.5.
+    es parteixen per casos el dibuixar el píxel de dalt i el píxel de la dreta (assumim pendent positiu.)
+
+    Es bastant complicat, hauré de mirar-m'ho.
+
+Relleno de polígonos:
+TEOREMA DE JORDAN: Això és projectiva! Com s'aplica?
+Es fa tal qual amb rectes paraleles "tendint al punt de l'infinit", però quan el píxel és l'aresta què fem? Forma part del polígon o no? Si l'aresta és superior sí, si no no.
+
+ALGORITMO LINEA A LINEA:
+OPENGL calcula d'entrada a sortida, si hi ha convexitats de les menja xd. Per això es fan servir triangles, amb només tres punts està clar que no hi poden haver concavitats (amb >3 punts sí que podria passar).
+
+Brasenham NO permite determinar puntos de entrada de cortes con aristas, ni lo intentemos.
+
+Coordenadas Baricentricas: puedes determinar el interor de un nsimplex si la suma de las coordenadas da 1. Esto es una ecuacion diofántica.
+- las coordenadas de cualquier punto son únicas. Puedes interpolar cualquier atributo en los tres puntos.
+- el valor de l'escalar de les coordeandes et diu també la posicio relativa del punt que estas mirant (1,0,0) es una aresta (1/2, 1/4,1/4) et diu que està a 1/2 d'a (a qualsevol lloc de la recta perpendicular a la normal d'a que esta a 1/2 de distància d'a) i a 1/4 de b i de c (analogament per aquestes dues al paréntesi)(això es la polla, les mates rules.)
+
+Coordenades baricentriques per la practica: tA + (1-t)B + oC, on t és immediat i et xiva exactament el valor del píxel que has de posar, yes. també es pot fer servir pels punts de tall de manera molt més elegant, és a dir: els valors dels escalars que compleixen que h se sap, els dos escalars han de donar 1 i el tercer ha de ser 0.

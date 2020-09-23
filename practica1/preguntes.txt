@@ -1,0 +1,5 @@
+Preguntar:
+- Què (i com si és possible) ha de fer ordenar_vertices
+- Com funciona el dibuix del color, que npi i no puc provar si va
+- Si calcular_interseccion està ben feta: ha de truncar el valor quan dona un float o com? RESPOSTA: ha d'arrodonir el valor i transformar-lo a int.
+- Com es mapa la foto al triangle, per això no s'hi val reeordenar els vèrtexs del triangle (funció que ja està feta.)
