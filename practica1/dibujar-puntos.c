@@ -83,38 +83,45 @@ void ordenar_vertices(hiruki *triangulo)
 /*Això no funciona encara, falta determinar com. 
 Idees: ordenar una còpia dels punts en una llista, després ja faria punters fins als punts REALS del triangle
 */
-void determinar_orden(hiruki triangulo, punto *Aptr, punto* Bptr, punto* Cptr)
+void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 {
 	
 	punto aux;
+	*Aptr = triangulo->p1;
+	*Bptr = triangulo->p2;
+	*Cptr = triangulo->p3;
 	
-	if(triangulo.p1.y > triangulo.p3.y)
+	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+	
+	if(triangulo->p1.y > triangulo->p3.y)
 	{
 		printf("Canvio A per C\n");
-		aux = triangulo.p1;
-		triangulo.p1 = triangulo.p3;
-		triangulo.p3 = triangulo.p1;
+		aux = *Cptr;
+		printf("%f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+		*Cptr = *Aptr;
+		*Aptr = aux;
+
 	}
 	
-	if(triangulo.p1.y > triangulo.p2.y)
+	if(triangulo->p1.y > triangulo->p2.y)
 	{
 		printf("Canvio A per B\n");
-		aux = triangulo.p1;
-		triangulo.p1 = triangulo.p2;
-		triangulo.p2 = aux;
+		aux = *Bptr;
+		*Bptr = *Aptr;
+		*Aptr = aux;
 	}
 	
-	if(triangulo.p2.y > triangulo.p3.y)
+	if(triangulo->p2.y > triangulo->p3.y)
 	{
 		printf("Canvio B per C\n");
-		aux = triangulo.p2;
-		triangulo.p2 = triangulo.p3;
-		triangulo.p3 = triangulo.p2;
+		aux = *Cptr;
+		*Cptr = *Bptr;
+		*Bptr = aux;
 	}
 	
-	*Aptr = triangulo.p1;
-	*Bptr = triangulo.p2;
-	*Cptr = triangulo.p3;
+	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+	
+	
 }
 
 /*punto o directamente void?*/
@@ -165,52 +172,59 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	int h,x;
 	punto *Aptr, *Bptr, *Cptr;
-	int pin_left, pin_right;
+	int pin_left, pin_right, aux;
 	
 	h = 0;
 	x = 0;
+	aux = 0;
 	
-	//aquests valors s'hauran de carregar de determinar_orden, assumim que venen ordenats tal que A es el mes alt, C el mes baix i B l'altre
-	
-		
+	/*
+	This pointers have to be inicialitzed pointing to a point struct because the program 	runs itself a first time without opening openGL. If you point null, the for above does 		not work in any way due to not being albe to acess y, therefore segmentation fault.
+	*/	
 	Aptr = &triangulo.p1;
 	Bptr = &triangulo.p2;
 	Cptr = &triangulo.p3;
 	
 	//triangulo es una copia, puedo hacer con el lo que quiera
-	//determinar_orden(triangulo, Aptr, Bptr, Cptr);
-	
-	//printf("%f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	
-	/*
-	print_triangle(triangulo);
-	
-	//La lamamos con & para passar EL VALOR EXACTO, no una cópia de los puntos.
-	determinar_orden(triangulo, &triangulo.p1, &triangulo.p2, &triangulo.p3);
-	*/
+	determinar_orden(&triangulo, Aptr, Bptr, Cptr);
 
 	//començes a la altura d'A i vas cap a B pujant la altura
 
-    //això funciona!!! (sempre que li passis ABC ordenat.)
+    	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
 		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
 		calcular_interseccion(*Aptr, *Bptr, &pin_right, h);
 		printf("%d, %d\n", pin_left, pin_right);
+		if(pin_left>=pin_right)
+		{
+			aux = pin_left;
+			pin_left = pin_right;
+			pin_right = aux;
+		}
 		for(x=pin_left; x<=pin_right; x++)
 		{
 			dibujar_pixel(x, h);
 		}
 	}
-    for(h=Bptr->y; h<=Cptr->y; h++)
-    {
-        calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
+	//the second goes from B to C, thus making the h all the way up to 500
+	for(h=Bptr->y; h<=Cptr->y; h++)
+	{
+
+		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
 		calcular_interseccion(*Bptr, *Cptr, &pin_right, h);
-        for(x=pin_left; x<=pin_right; x++)
+		//aixo es millorable, em sembla que evalua cada vegada i que si passa UN cop ja n'hi ha prou com per fer-les totes iguals
+		if(pin_left>=pin_right)
 		{
-			dibujar_pixel(x, h);
+			aux = pin_left;
+			pin_left = pin_right;
+			pin_right = aux;
 		}
-    }
+		for(x=pin_left; x<=pin_right; x++)
+		{
+				dibujar_pixel(x, h);
+		}
+	}
 	
 	//printf("%d, %d\n", pin_left, pin_right);
 		
@@ -284,11 +298,13 @@ static void teklatua (unsigned char key, int x, int y)
 			
 			/*indice itera de 0 a num_triangles*/
 			indice=(indice+1)%num_triangles;
+			printf("%d indice\n", indice);
+			
 			
 			printf("Triangulo %d/%d\n", indice+1, num_triangles);
 			printf ("Pulsa ENTER para dibujar el siguente triangulo\n");
 			
-			//printf("%d indice\n", indice);
+			
 			break;
 		case 27:  // <ESC>
 			exit( 0 );
@@ -304,7 +320,7 @@ static void teklatua (unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {
 	indice = 0;	
-	num_triangles = 3; //TODO: comptar les t al fitxer.
+	num_triangles = 1; //TODO: comptar les t al fitxer.
 	triangulosptr = 0; //inicialitzem el punter a null.
 	
 	printf("This program draws points in the viewport \n");
