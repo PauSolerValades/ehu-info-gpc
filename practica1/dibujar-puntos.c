@@ -91,6 +91,7 @@ void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 	*Bptr = triangulo->p2;
 	*Cptr = triangulo->p3;
 	
+	printf("Triangle original: %f, %f, %f\n", triangulo->p1.y, triangulo->p2.y, triangulo->p3.y);
 	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
 	
 	if(triangulo->p1.y > triangulo->p3.y)
@@ -119,7 +120,9 @@ void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 		*Bptr = aux;
 	}
 	
+	printf("Triangle original: %f, %f, %f\n", triangulo->p1.y, triangulo->p2.y, triangulo->p3.y);
 	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+	
 	
 	
 }
@@ -189,13 +192,14 @@ void dibujar_triangulo(hiruki triangulo)
 	determinar_orden(&triangulo, Aptr, Bptr, Cptr);
 
 	//començes a la altura d'A i vas cap a B pujant la altura
+	printf("Triangle original: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
 
     	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
 		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
 		calcular_interseccion(*Aptr, *Bptr, &pin_right, h);
-		printf("%d, %d\n", pin_left, pin_right);
+		//printf("%d, %d\n", pin_left, pin_right);
 		if(pin_left>=pin_right)
 		{
 			aux = pin_left;
