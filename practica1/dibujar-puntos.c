@@ -35,15 +35,6 @@ unsigned char * color_textura(float u, float v)
 return(bufferra);
 }
 
-
-/*
-This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
-
-Probablement aquesta funció no serveixi de res. En plan, segurament no serveix.
-
-Podria canviar la definició dels punts per només canviar coordenades i deixar el color igual, però tocar els structs del profe no es la millor idea.
-*/
-
 void print_triangle(hiruki triangulo)
 {
 	printf("A: x: %f, y: %f, z: %f\nB: x: %f, y: %f, z: %f\nC: x: %f, y: %f, z: %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
@@ -80,18 +71,20 @@ void ordenar_vertices(hiruki *triangulo)
 	
 }
 
-/*Això no funciona encara, falta determinar com. 
-Idees: ordenar una còpia dels punts en una llista, després ja faria punters fins als punts REALS del triangle
+/*
+This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
 */
-void determinar_orden_bien(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
+void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
 {
+	printf("Triangle original DINS: %f, %f, %f\n", t.p1.y, t.p2.y, t.p3.y);
+	
 	punto aux;
-	*Aptr = triangulo.p1;
-	*Bptr = triangulo.p2;
-	*Cptr = triangulo.p3;
+	*Aptr = t.p1;
+	*Bptr = t.p2;
+	*Cptr = t.p3;
 
-	printf("Triangle original DINS: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
 	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+	
 
 	if(Aptr->y > Cptr->y)
 	{
@@ -99,6 +92,7 @@ void determinar_orden_bien(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cp
 		aux = *Cptr;
 		*Cptr = *Aptr;
 		*Aptr = aux;
+	
 	}
 
 	if(Aptr->y > Bptr->y)
@@ -116,67 +110,50 @@ void determinar_orden_bien(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cp
 		*Cptr = *Bptr;
 		*Bptr = aux;
 	}
-
-	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	printf("Triangle original: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
-}
-//si ho posem com he passat el pin_left,pin_right podria anar bé. Tot i que no entenc ara matiex perque els canvia...
-void determinar_orden(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
-{
 	
-	punto aux;
-	*Aptr = triangulo.p1;
-	*Bptr = triangulo.p2;
-	*Cptr = triangulo.p3;
-	
-	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	
-
-	if(Aptr->y > Cptr->y)
+	/*
+	if(Aptr->y == Bptr->y)
 	{
-		printf("Canvio A per C\n");
+		printf("Vertex contiguus iguals: Canvio A per C\n");
 		aux = *Cptr;
-		printf("%f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
 		*Cptr = *Aptr;
 		*Aptr = aux;
-
 	}
-	
-	if(Aptr->y > Cptr->y)
-	{
-		printf("Canvio A per B\n");
-		aux = *Bptr;
-		*Bptr = *Aptr;
-		*Aptr = aux;
-	}
-	
-	if(Bptr->y > Cptr->y)
-	{
-		printf("Canvio B per C\n");
-		aux = *Cptr;
-		*Cptr = *Bptr;
-		*Bptr = aux;
-	}
+	*/
 	
 
 	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	
-	
+	printf("Triangle original: %f, %f, %f\n", t.p1.y, t.p2.y, t.p3.y);
 }
+//si ho posem com he passat el pin_left,pin_right podria anar bé. Tot i que no entenc ara matiex perque els canvia...
 
 /*punto o directamente void?*/
 void calcular_interseccion(punto A, punto B, int *pin, int h)
 {
     //nota: no hi posis valors absoluts que es desmadarda que filpes.
 	int x, y;
+	punto aux;
 	float y_bis, prova;
+	
+	if(B.y<A.y){
+		aux = A;
+		A = B;
+		B = aux;
+	}
 	
 	y = B.y - A.y;
 	x = B.x - A.x;
 	
 	y_bis = h - A.y;
 	
-	*pin = (int) round(A.x+(x*y_bis/y));
+	if(y != 0) //just in case...
+	{
+		*pin = (int) round(A.x+(x*y_bis/y));
+	}
+	else
+	{
+		*pin = (int) round(A.x);
+	}
 	
 }
 
@@ -211,8 +188,7 @@ void dibujar_triangulo(hiruki triangulo)
 	*/
 	
 	int h,x;
-	punto *Aptr, *Bptr, *Cptr;
-	punto aptr, bptr, cptr;
+	punto Aptr, Bptr, Cptr;
 	int pin_left, pin_right, aux;
 	
 	h = 0;
@@ -222,59 +198,57 @@ void dibujar_triangulo(hiruki triangulo)
 	/*
 	This pointers have to be inicialitzed pointing to a point struct because the program 	runs itself a first time without opening openGL. If you point null, the for above does 		not work in any way due to not being albe to acess y, therefore segmentation fault.
 	*/
-		
-	Aptr = &triangulo.p1;
-	Bptr = &triangulo.p2;
-	Cptr = &triangulo.p3;
-	
-	
-	//triangulo es una copia, puedo hacer con el lo que quiera
-	//determinar_orden(triangulo, Aptr, Bptr, Cptr);
+	Aptr = triangulo.p1;
+	Bptr = triangulo.p2;
+	Cptr = triangulo.p3;
 
-	determinar_orden_bien(triangulo, &aptr, &aptr, &cptr);
-	//començes a la altura d'A i vas cap a B pujant la altura
-	
-	printf("Triangle original FORA: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
+	determinar_orden(triangulo, &Aptr, &Bptr, &Cptr);
 
-    //the first for goes from A-> (the nearest from 0) to B->y.
-	for(h=Aptr->y; h<=Bptr->y; h++)
+    	//the first for goes from A-> (the nearest from 0) to B->y.
+	for(h=Aptr.y; h<=Bptr.y; h++)
 	{
-		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
-		calcular_interseccion(*Aptr, *Bptr, &pin_right, h);
-		//printf("%d, %d\n", pin_left, pin_right);
+		calcular_interseccion(Aptr, Cptr, &pin_left, h);
+		calcular_interseccion(Aptr, Bptr, &pin_right, h);
+		
+		/*
+		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
+		*/
 		if(pin_left>=pin_right)
 		{
 			aux = pin_left;
 			pin_left = pin_right;
 			pin_right = aux;
 		}
+		
+		//printf("%d, %d\n", pin_left, pin_right);
+		
 		for(x=pin_left; x<=pin_right; x++)
 		{
 			dibujar_pixel(x, h);
 		}
 	}
 	//the second goes from B to C, thus making the h all the way up to 500
-	for(h=Bptr->y; h<=Cptr->y; h++)
+	for(h=Bptr.y; h<=Cptr.y; h++)
 	{
 
-		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
-		calcular_interseccion(*Bptr, *Cptr, &pin_right, h);
-		//aixo es millorable, em sembla que evalua cada vegada i que si passa UN cop ja n'hi ha prou com per fer-les totes iguals
+		calcular_interseccion(Aptr, Cptr, &pin_left, h);
+		calcular_interseccion(Bptr, Cptr, &pin_right, h);
+		
 		if(pin_left>=pin_right)
 		{
 			aux = pin_left;
 			pin_left = pin_right;
 			pin_right = aux;
 		}
+		
+		//printf("%d, %d\n", pin_left, pin_right);
+		
 		for(x=pin_left; x<=pin_right; x++)
 		{
-				dibujar_pixel(x, h);
+			dibujar_pixel(x, h);
 		}
 	}
-	
-	//printf("%d, %d\n", pin_left, pin_right);
 		
-	
 }
 
 /*
