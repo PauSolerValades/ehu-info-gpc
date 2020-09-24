@@ -35,56 +35,17 @@ unsigned char * color_textura(float u, float v)
 return(bufferra);
 }
 
-void print_triangle(hiruki triangulo)
-{
-	printf("A: x: %f, y: %f, z: %f\nB: x: %f, y: %f, z: %f\nC: x: %f, y: %f, z: %f\n", triangulo.p1.x, triangulo.p1.y, triangulo.p1.z, triangulo.p2.x, triangulo.p2.y, triangulo.p2.z, triangulo.p3.x, triangulo.p3.y, triangulo.p3.z);
-}
-
-void ordenar_vertices(hiruki *triangulo)
-{
-	punto aux;
-	
-	
-	if(triangulo->p1.y > triangulo->p3.y)
-	{
-		printf("Canvio A per C\n");
-		aux = triangulo->p1;
-		triangulo->p1 = triangulo->p3;
-		triangulo->p3 = aux;
-	}
-	/*
-	if(triangulo->p1.y > triangulo->p2.y)
-	{
-		printf("Canvio A per B\n");
-		triangulo->p1 = triangulo.p2;
-		triangulo->p2 = aux;
-	}
-	
-	if(triangulo.p2.y > triangulo.p3.y)
-	{
-		printf("Canvio B per C\n");
-		aux = triangulo.p2;
-		triangulo.p2 = triangulo.p3;
-		triangulo.p3 = aux;
-	}
-	*/
-	
-}
-
 /*
 This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
 */
 void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
 {
-	printf("Triangle original DINS: %f, %f, %f\n", t.p1.y, t.p2.y, t.p3.y);
 	
 	punto aux;
 	*Aptr = t.p1;
 	*Bptr = t.p2;
 	*Cptr = t.p3;
 
-	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	
 
 	if(Aptr->y > Cptr->y)
 	{
@@ -111,23 +72,9 @@ void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
 		*Bptr = aux;
 	}
 	
-	/*
-	if(Aptr->y == Bptr->y)
-	{
-		printf("Vertex contiguus iguals: Canvio A per C\n");
-		aux = *Cptr;
-		*Cptr = *Aptr;
-		*Aptr = aux;
-	}
-	*/
-	
-
-	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	printf("Triangle original: %f, %f, %f\n", t.p1.y, t.p2.y, t.p3.y);
 }
-//si ho posem com he passat el pin_left,pin_right podria anar bé. Tot i que no entenc ara matiex perque els canvia...
 
-/*punto o directamente void?*/
+/*This function, given two points and a entrance, gives the image of f(x) = line between A and B*/
 void calcular_interseccion(punto A, punto B, int *pin, int h)
 {
     //nota: no hi posis valors absoluts que es desmadarda que filpes.
@@ -179,18 +126,11 @@ void dibujar_pixel(int x, int y)
 
 void dibujar_triangulo(hiruki triangulo)
 {
-
-	/*
-	La definición del triangulo es la siguiente:
-	VERTICE A: el vertice con las y mas cercanas a 0
-	VERTICE C: el vertice con las y mas lejanas a 0
-	VERTICE B: el sobrante.
-	*/
 	
 	int h,x;
-	punto Aptr, Bptr, Cptr;
 	int pin_left, pin_right, aux;
-	
+	punto Aptr, Bptr, Cptr;
+		
 	h = 0;
 	x = 0;
 	aux = 0;
@@ -286,11 +226,13 @@ static void marraztu(void)
 
 	// pero hay que llamar a la función que dibuja un triangulo con la textura mapeada:
 	
+	
 	dibujar_triangulo(triangulosptr[indice]);
 
 	glFlush();
 
-	/* Aquest bucle dibuixa tots els píxels de la pantalla, no res més. Això s'ha de fer a dibujar_triangulo adequadament.
+
+	/*
 	for (i=0;i<500;i++)
 	    for (j=0;j<500;j++)
 		{
@@ -306,6 +248,7 @@ static void marraztu(void)
 			glEnd();
 		}
 	glFlush();
+	
 	*/
 }
 // This function will be called whenever the user pushes one key
