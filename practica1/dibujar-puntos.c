@@ -83,18 +83,56 @@ void ordenar_vertices(hiruki *triangulo)
 /*Això no funciona encara, falta determinar com. 
 Idees: ordenar una còpia dels punts en una llista, després ja faria punters fins als punts REALS del triangle
 */
-void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
+void determinar_orden_bien(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
+{
+	punto aux;
+	*Aptr = triangulo.p1;
+	*Bptr = triangulo.p2;
+	*Cptr = triangulo.p3;
+
+	printf("Triangle original DINS: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
+	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+
+	if(Aptr->y > Cptr->y)
+	{
+		printf("Canvio A per C\n");
+		aux = *Cptr;
+		*Cptr = *Aptr;
+		*Aptr = aux;
+	}
+
+	if(Aptr->y > Bptr->y)
+	{
+		printf("Canvio A per B\n");
+		aux = *Bptr;
+		*Bptr = *Aptr;
+		*Aptr = aux;
+	}
+	
+	if(Bptr->y > Cptr->y)
+	{
+		printf("Canvio B per C\n");
+		aux = *Cptr;
+		*Cptr = *Bptr;
+		*Bptr = aux;
+	}
+
+	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
+	printf("Triangle original: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
+}
+//si ho posem com he passat el pin_left,pin_right podria anar bé. Tot i que no entenc ara matiex perque els canvia...
+void determinar_orden(hiruki triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 {
 	
 	punto aux;
-	*Aptr = triangulo->p1;
-	*Bptr = triangulo->p2;
-	*Cptr = triangulo->p3;
+	*Aptr = triangulo.p1;
+	*Bptr = triangulo.p2;
+	*Cptr = triangulo.p3;
 	
-	printf("Triangle original: %f, %f, %f\n", triangulo->p1.y, triangulo->p2.y, triangulo->p3.y);
 	printf("Arriba: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
 	
-	if(triangulo->p1.y > triangulo->p3.y)
+
+	if(Aptr->y > Cptr->y)
 	{
 		printf("Canvio A per C\n");
 		aux = *Cptr;
@@ -104,7 +142,7 @@ void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 
 	}
 	
-	if(triangulo->p1.y > triangulo->p2.y)
+	if(Aptr->y > Cptr->y)
 	{
 		printf("Canvio A per B\n");
 		aux = *Bptr;
@@ -112,7 +150,7 @@ void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 		*Aptr = aux;
 	}
 	
-	if(triangulo->p2.y > triangulo->p3.y)
+	if(Bptr->y > Cptr->y)
 	{
 		printf("Canvio B per C\n");
 		aux = *Cptr;
@@ -120,9 +158,8 @@ void determinar_orden(hiruki *triangulo, punto *Aptr, punto *Bptr, punto *Cptr)
 		*Bptr = aux;
 	}
 	
-	printf("Triangle original: %f, %f, %f\n", triangulo->p1.y, triangulo->p2.y, triangulo->p3.y);
+
 	printf("Marxa: %f, %f, %f\n", Aptr->y, Bptr->y, Cptr->y);
-	
 	
 	
 }
@@ -175,6 +212,7 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	int h,x;
 	punto *Aptr, *Bptr, *Cptr;
+	punto aptr, bptr, cptr;
 	int pin_left, pin_right, aux;
 	
 	h = 0;
@@ -183,18 +221,22 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	/*
 	This pointers have to be inicialitzed pointing to a point struct because the program 	runs itself a first time without opening openGL. If you point null, the for above does 		not work in any way due to not being albe to acess y, therefore segmentation fault.
-	*/	
+	*/
+		
 	Aptr = &triangulo.p1;
 	Bptr = &triangulo.p2;
 	Cptr = &triangulo.p3;
 	
+	
 	//triangulo es una copia, puedo hacer con el lo que quiera
-	determinar_orden(&triangulo, Aptr, Bptr, Cptr);
+	//determinar_orden(triangulo, Aptr, Bptr, Cptr);
 
+	determinar_orden_bien(triangulo, &aptr, &aptr, &cptr);
 	//començes a la altura d'A i vas cap a B pujant la altura
-	printf("Triangle original: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
+	
+	printf("Triangle original FORA: %f, %f, %f\n", triangulo.p1.y, triangulo.p2.y, triangulo.p3.y);
 
-    	//the first for goes from A-> (the nearest from 0) to B->y.
+    //the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
 		calcular_interseccion(*Aptr, *Cptr, &pin_left, h);
@@ -302,7 +344,7 @@ static void teklatua (unsigned char key, int x, int y)
 			
 			/*indice itera de 0 a num_triangles*/
 			indice=(indice+1)%num_triangles;
-			printf("%d indice\n", indice);
+			//printf("%d indice\n", indice);
 			
 			
 			printf("Triangulo %d/%d\n", indice+1, num_triangles);

@@ -1,0 +1,28 @@
+Seguim amb COORDENADES BARICÈNTRIQUES:
+- la suma dels coeficients dels vèrtexs és 1 vol dir que està dins d'un triangle, lo més important
+
+DEMOSTRACIÓ de que dona 1:
+Sigui R = {A; AB, AC} la referencia sobre un triangle ABC (assumim A, B, C no alineats). Llavors podem representar qualsevol punt com a combinació lineal de A més els vectors de la base. Sabem que P (punt que volem representar és) = (1-b-c)A + bB + cC = A + b(B-A)+c(C-A) = A + k(B-A) +k'(C-A). Aquesta última expressió és una combinació lineal sobre la base. Anem a veure que sempre és dins del triangle-> es deixa pel lector.
+
+CANVI DE CARTESIANES A BARICÈNTRIQUES
+Un sistema d'equacions:
+P.x = aA.x+bB.x+cC.x
+P.y = aA.y+bB.y+cC.y
+1 = a+b+c
+
+Apa sistema compatible determinat: PERÒ hi ha una altra manera, amb el producte escalar.
+v*w = |v|*|w|+cos(phi).
+
+Suposem que w es unitari, llavors el que et torna el producte escalar et torna la projecció de v sobre l'eix de les x.
+
+a = d(P, BC)/d(A, BC) on d() és la funció distància i BC el producte escalar.
+La cosa es anar poc a poc si s'ha de programar, si em sobra temps ho faré però no té pinta.
+
+EVITAR ALIASING:
+- supersampling: más de lo que cuenta.
+- filtro antialiasing  opcupando solo una parte del píxel de la area difuminando los píxeles de alrededor de los objetos dónde no se llegaria a ocupar un píxel para dar la sensación de que no hay bordes de sierra..
+- mostreo estocàstico:
+
+SUPERSAMPLING: realiza un mostreo superior a la resolución del dispositivo y se difuminan los bordes dependiendo del siguente color que venga, utilizando un FILTRO
+
+Últim cop que faig apunts amb el pc sense haver aacabat el programa, no he escoltat quasi res.
