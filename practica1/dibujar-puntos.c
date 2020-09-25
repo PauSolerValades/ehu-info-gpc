@@ -132,15 +132,12 @@ void calcular_interseccion(punto A, punto B, punto *pin, int h)
 
 
 //(x, y, r,g,b) D'on putes treus els valors de rgb? de bufferra amb u i v, entenc que es una matriu.
-void dibujar_pixel(int x, int y)
+void dibujar_pixel(int x, int y, float u1, float v1)
 {
 
-	float u,v;
 	unsigned char* colorv;
 	unsigned char r,g,b;
 	
-	u = x/500.0;
-	v = y/500.0;
 	colorv = color_textura(u, v); //TODO: si esta función es correcta se ve la foto en la ventana
 	r= colorv[0];
 	g=colorv[1];
@@ -151,6 +148,31 @@ void dibujar_pixel(int x, int y)
 	glEnd();
 }
 
+void linea_triangulo(punto pin_left, punto pin_right, int h)
+{
+	int x, a;
+	float u_dif, v_dif, u, v;
+	
+	u = pin_left.u;
+	v = pin_left.v;
+	
+	if(pin_right.x != pin_left.x)
+	{
+		v_dif = (pin_right.v - pin_left.v)/(pin_right.x - pin_left.x);
+		u_dif = (pin_right.u - pin_left.u)/(pin_right.x - pin_left.x); //això sempre serà positiu.
+	}
+	//printf("%f, %f\n", u_dif, v_dif);
+	
+	for(x=pin_left.x; x<=pin_right.x; x++)
+	{
+		dibujar_pixel(x, h, u, v);
+		u = u + u_dif;
+		v = v + v_dif;
+		
+		//printf("%f, %f\n", u, v);
+	}
+}
+
 
 void dibujar_triangulo(hiruki triangulo)
 {
@@ -159,12 +181,11 @@ void dibujar_triangulo(hiruki triangulo)
 	punto Aptr, Bptr, Cptr, pin_left, pin_right, aux;
 		
 	h = 0;
-	x = 0;
 	
 
 	determinar_orden(triangulo, &Aptr, &Bptr, &Cptr);
 
-    //the first for goes from A-> (the nearest from 0) to B->y.
+    	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr.y; h<=Bptr.y; h++)
 	{
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
@@ -173,21 +194,16 @@ void dibujar_triangulo(hiruki triangulo)
 		/*
 		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
 		*/
-		if(pin_left.x>=pin_right.x)
-		{
-			aux = pin_left;
-			pin_left = pin_right;
-			pin_right = aux;
-		}
 		
-		//printf("%d, %d\n", pin_left, pin_right);
-		printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
-		printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
+		//printf("INT: %d, %d\n", pin_left, pin_right);
+		//printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
+		//printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
 		
-		for(x=pin_left.x; x<=pin_right.x; x++)
-		{
-			dibujar_pixel(x, h);
-		}
+		if(pin_left.x < pin_right.x)
+			linea_triangulo(pin_left, pin_right, h);
+		else
+			linea_triangulo(pin_right, pin_left, h);
+		
 	}
 	//the second goes from B to C, thus making the h all the way up to 500
 	for(h=Bptr.y; h<=Cptr.y; h++)
@@ -196,19 +212,16 @@ void dibujar_triangulo(hiruki triangulo)
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Bptr, Cptr, &pin_right, h);
 		
-		if(pin_left.x>=pin_right.x)
-		{
-			aux = pin_left;
-			pin_left = pin_right;
-			pin_right = aux;
-		}
+
+		//printf("INT: %d, %d\n", pin_left, pin_right);
+		//printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
+		//printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
 		
-		//printf("%d, %d\n", pin_left, pin_right);
-		
-		for(x=pin_left.x; x<=pin_right.x; x++)
-		{
-			dibujar_pixel(x, h);
-		}
+		if(pin_left.x < pin_right.x)
+			linea_triangulo(pin_left, pin_right, h);
+		else
+			linea_triangulo(pin_right, pin_left, h);
+
 	}
 		
 }
