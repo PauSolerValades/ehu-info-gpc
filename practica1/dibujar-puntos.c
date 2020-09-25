@@ -46,8 +46,13 @@ volem doncs u*x = 63, (1-v)*y = 199.
 */
 unsigned char * color_textura(float u, float v)
 {
-/* debe devolver un puntero al pixel adecuado, no al primero!! */
-return(bufferra);
+
+	int i, j;
+	
+	i = u*(dimx-1);
+	j = (1-v)*(dimy-1);
+
+return(bufferra + ((i-1)*dimx +j));
 }
 
 /*
@@ -132,7 +137,7 @@ void calcular_interseccion(punto A, punto B, punto *pin, int h)
 
 
 //(x, y, r,g,b) D'on putes treus els valors de rgb? de bufferra amb u i v, entenc que es una matriu.
-void dibujar_pixel(int x, int y, float u1, float v1)
+void dibujar_pixel(int x, int y, float u, float v)
 {
 
 	unsigned char* colorv;
