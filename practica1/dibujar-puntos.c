@@ -15,9 +15,6 @@
 #include <math.h>
 #include "hiruki.h"
 
-/*
-VARIABLES GLOBALS
-*/
 
 // texturaren informazioa
 
@@ -28,7 +25,25 @@ int dimx,dimy;
 int indice, num_triangles;
 hiruki *triangulosptr; //pointer to triangles.
 
+/* bufferra els guarda en ordre desde 0 a l'últim, tots en ordre (fila1, fila2, ... fila n)
+el sistema de referencia del buffer comença a dalt. així que u va igual però v és 1-va
 
+x=250 (del 0 al 249)
+y=800 (del 0 al 799)
+u=0.25
+v=0.75
+buffer[0] = primera fila primera columna
+buffer[1] = primera fila segona columna
+buffer[n] = primera fila n columna
+buffer[n+1] = segona fila primera columna
+buffer[n^2-1] = última fila ultima columna. 
+
+en n*n
+bufferra[i,j] =  
+
+bufferra + [199+250+63]*3
+volem doncs u*x = 63, (1-v)*y = 199.
+*/
 unsigned char * color_textura(float u, float v)
 {
 /* debe devolver un puntero al pixel adecuado, no al primero!! */
@@ -38,6 +53,8 @@ return(bufferra);
 /*
 This function gets the triangle hiruki and changes the order of the vertices from higest to lowest in y axis for the higest verticie is always called A and the lowest always C.
 */
+
+/*Això es pot fer sense passar el triangle i usant que és una vairable global, però necessites un doble punter, el primer a on és el triangle i el segon al punt concret*/
 void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
 {
 	
@@ -75,12 +92,12 @@ void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
 }
 
 /*This function, given two points and a entrance, gives the image of f(x) = line between A and B*/
-void calcular_interseccion(punto A, punto B, int *pin, int h)
+void calcular_interseccion(punto A, punto B, punto *pin, int h)
 {
-    //nota: no hi posis valors absoluts que es desmadarda que filpes.
+
 	int x, y;
 	punto aux;
-	float y_bis, prova;
+	float y_bis, u, v;
 	
 	if(B.y<A.y){
 		aux = A;
@@ -90,20 +107,31 @@ void calcular_interseccion(punto A, punto B, int *pin, int h)
 	
 	y = B.y - A.y;
 	x = B.x - A.x;
-	
+	u = B.u - A.u;
+	v = B.v - A.v;
+
 	y_bis = h - A.y;
 	
-	if(y != 0) //just in case...
+	if(y != 0)//just in case...
 	{
-		*pin = (int) round(A.x+(x*y_bis/y));
+		pin->x = (int) round(A.x+(x*y_bis/y));
+		pin->u = A.u + (u*y_bis/y);
+		pin->v = A.v * (v*y_bis/y);
 	}
 	else
 	{
-		*pin = (int) round(A.x);
+		pin->x = (int) round(A.x);
+		pin->u = A.u;
+		pin->v = A.v;
 	}
+
+	pin->y = h;
+	pin->z = 0;
 	
 }
 
+
+//(x, y, r,g,b) D'on putes treus els valors de rgb? de bufferra amb u i v, entenc que es una matriu.
 void dibujar_pixel(int x, int y)
 {
 
@@ -128,23 +156,15 @@ void dibujar_triangulo(hiruki triangulo)
 {
 	
 	int h,x;
-	int pin_left, pin_right, aux;
-	punto Aptr, Bptr, Cptr;
+	punto Aptr, Bptr, Cptr, pin_left, pin_right, aux;
 		
 	h = 0;
 	x = 0;
-	aux = 0;
 	
-	/*
-	This pointers have to be inicialitzed pointing to a point struct because the program 	runs itself a first time without opening openGL. If you point null, the for above does 		not work in any way due to not being albe to acess y, therefore segmentation fault.
-	*/
-	Aptr = triangulo.p1;
-	Bptr = triangulo.p2;
-	Cptr = triangulo.p3;
 
 	determinar_orden(triangulo, &Aptr, &Bptr, &Cptr);
 
-    	//the first for goes from A-> (the nearest from 0) to B->y.
+    //the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr.y; h<=Bptr.y; h++)
 	{
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
@@ -153,7 +173,7 @@ void dibujar_triangulo(hiruki triangulo)
 		/*
 		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
 		*/
-		if(pin_left>=pin_right)
+		if(pin_left.x>=pin_right.x)
 		{
 			aux = pin_left;
 			pin_left = pin_right;
@@ -161,8 +181,10 @@ void dibujar_triangulo(hiruki triangulo)
 		}
 		
 		//printf("%d, %d\n", pin_left, pin_right);
+		printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
+		printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
 		
-		for(x=pin_left; x<=pin_right; x++)
+		for(x=pin_left.x; x<=pin_right.x; x++)
 		{
 			dibujar_pixel(x, h);
 		}
@@ -174,7 +196,7 @@ void dibujar_triangulo(hiruki triangulo)
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Bptr, Cptr, &pin_right, h);
 		
-		if(pin_left>=pin_right)
+		if(pin_left.x>=pin_right.x)
 		{
 			aux = pin_left;
 			pin_left = pin_right;
@@ -183,7 +205,7 @@ void dibujar_triangulo(hiruki triangulo)
 		
 		//printf("%d, %d\n", pin_left, pin_right);
 		
-		for(x=pin_left; x<=pin_right; x++)
+		for(x=pin_left.x; x<=pin_right.x; x++)
 		{
 			dibujar_pixel(x, h);
 		}
@@ -224,9 +246,7 @@ static void marraztu(void)
 	glLoadIdentity();
 	glOrtho(0.0, 500.0, 0.0, 500.0,-250.0, 250.0);
 
-	// pero hay que llamar a la función que dibuja un triangulo con la textura mapeada:
-	
-	
+	/*Drawing the triangles*/
 	dibujar_triangulo(triangulosptr[indice]);
 
 	glFlush();
@@ -294,13 +314,13 @@ int main(int argc, char** argv)
 	glutInitWindowPosition ( 100, 100 );
 	glutCreateWindow( "GL_POINTS" );
 
-	glutDisplayFunc( marraztu ); // Aquí escriure com es dibuixen les imatges.
-	glutKeyboardFunc( teklatua ); // Aquí arrelgar el bucle (apretar intro avançar, apretar esc seguir.)
+	glutDisplayFunc( marraztu );
+	glutKeyboardFunc( teklatua );
 	/* we put the information of the texture in the buffer pointed by bufferra. The dimensions of the texture are loaded into dimx and dimy */ 
-    	load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
+    load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
               
-    	/*Loading the contents of triangles.txt*/
-    	cargar_triangulos(&num_triangles, &triangulosptr);
+    /*Loading the contents of triangles.txt*/
+    cargar_triangulos(&num_triangles, &triangulosptr);
         
 	glClearColor( 0.0f, 0.0f, 0.7f, 1.0f );
 
