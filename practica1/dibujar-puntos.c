@@ -41,7 +41,7 @@ buffer[n^2-1] = última fila ultima columna.
 en n*n
 bufferra[i,j] =  
 
-bufferra + [199+250+63]*3
+bufferra + [199*250+63]*3
 volem doncs u*x = 63, (1-v)*y = 199.
 */
 unsigned char * color_textura(float u, float v)
@@ -49,10 +49,10 @@ unsigned char * color_textura(float u, float v)
 
 	int i, j;
 	
-	i = u*(dimx-1);
-	j = (1-v)*(dimy-1);
+	i = trunc(u*(dimx));
+	j = trunc((1-v)*(dimy));
 
-return(bufferra + ((j)*dimy +i));
+return(bufferra + 3*(j*dimx + i));
 }
 
 /*
@@ -140,7 +140,7 @@ void dibujar_pixel(int x, int y, float u, float v)
 	unsigned char r,g,b;
 	
 	//printf("(%d, %d) %f %f\n",x, y, u,v);
-	colorv = color_textura(u, v); //TODO: si esta función es correcta se ve la foto en la ventana
+	colorv = color_textura(u, v); 	
 	r= colorv[0];
 	g=colorv[1];
 	b=colorv[2];     
@@ -161,13 +161,14 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 	if(pin_right.x != pin_left.x)
 	{
 		v_dif = (pin_right.v - pin_left.v)/(pin_right.x - pin_left.x);
-		u_dif = (pin_right.u - pin_left.u)/(pin_right.x - pin_left.x); //això sempre serà positiu.
+		u_dif = (pin_right.u - pin_left.u)/(pin_right.x - pin_left.x); 
 	}
 	else
 	{
 		v_dif = 0.0;
 		u_dif = 0.0;
 	}
+	
 	//printf("%f, %f\n", u_dif, v_dif);
 	
 	for(x=pin_left.x; x<=pin_right.x; x++)
@@ -178,6 +179,7 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 			
 	}
 	
+
 	//printf("%d: (U, V): (%f, %f)\n", h, u, v);
 }
 
