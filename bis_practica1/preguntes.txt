@@ -1,0 +1,5 @@
+Preguntar:
+- Com funciona el dibuix del color, que npi i no puc provar si va
+- Ordre de pin_left, pinh_right, a veure si puc fer menys comparacions
+- Com es mapa la foto al triangle, per això no s'hi val reeordenar els vèrtexs del triangle (funció que ja està feta.)
+- Els meus Aptr, Bptr i Cptr no son punters però funciona, tot ok?

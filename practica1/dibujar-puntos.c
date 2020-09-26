@@ -60,13 +60,13 @@ This function gets the triangle hiruki and changes the order of the vertices fro
 */
 
 /*Això es pot fer sense passar el triangle i usant que és una vairable global, però necessites un doble punter, el primer a on és el triangle i el segon al punt concret*/
-void determinar_orden(hiruki t, punto *Aptr, punto *Bptr, punto *Cptr)
+void determinar_orden(punto *Aptr, punto *Bptr, punto *Cptr)
 {
 	
 	punto aux;
-	*Aptr = t.p1;
-	*Bptr = t.p2;
-	*Cptr = t.p3;
+	*Aptr = triangulosptr[indice].p1;
+	*Bptr = triangulosptr[indice].p2;
+	*Cptr = triangulosptr[indice].p3;
 
 
 	if(Aptr->y > Cptr->y)
@@ -187,13 +187,13 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 void dibujar_triangulo(hiruki triangulo)
 {
 	
-	int h,x;
+	int h;
 	punto Aptr, Bptr, Cptr, pin_left, pin_right, aux;
 		
 	h = 0;
 	
 
-	determinar_orden(triangulo, &Aptr, &Bptr, &Cptr);
+	determinar_orden(&Aptr, &Bptr, &Cptr);
 
     	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr.y; h<=Bptr.y; h++)
@@ -201,14 +201,13 @@ void dibujar_triangulo(hiruki triangulo)
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Aptr, Bptr, &pin_right, h);
 		
-		/*
-		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
-		*/
-		
 		//printf("INT: %d, %d\n", pin_left, pin_right);
 		//printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
 		//printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
 		
+		/*
+		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
+		*/
 		if(pin_left.x < pin_right.x)
 			linea_triangulo(pin_left, pin_right, h);
 		else
@@ -236,25 +235,6 @@ void dibujar_triangulo(hiruki triangulo)
 		
 }
 
-/*
-void dibujar_tiangulo(hiruki triangulo)
-{
-
-1. determinar on estan ubicats el punts. Quin és el més alt bla bla. determinar_orden(hiruki, &altoptr, &medioptr, &bajoptr)
-	for(h=altoptr->y;h>medioprt->y;h--) //controlar quan els punts estiguin alienats/dos siguin el mateix.
-	{
-		calcular_interseccion(altoptr, bajoptr, &pinterseccion1)
-		calcular_interseccion(altoptr, bajoptr, &pinterseccion2)
-		for(x=izda(pin1,pin2);x<=dcha(pin1,pin2); x++){
-			dibujar(x,h,color);
-		}
-	}
-	for(; h>bajoptr->y;h--){
-		//lo mismo que arriba cambiando los puntos
-	}
-
-}
-*/
 static void marraztu(void)
 {
 	float u,v;
@@ -340,10 +320,10 @@ int main(int argc, char** argv)
 	glutDisplayFunc( marraztu );
 	glutKeyboardFunc( teklatua );
 	/* we put the information of the texture in the buffer pointed by bufferra. The dimensions of the texture are loaded into dimx and dimy */ 
-    load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
-              
+    	load_ppm("foto.ppm", &bufferra, &dimx, &dimy);
+    	          
     /*Loading the contents of triangles.txt*/
-    cargar_triangulos(&num_triangles, &triangulosptr);
+    	cargar_triangulos(&num_triangles, &triangulosptr);
         
 	glClearColor( 0.0f, 0.0f, 0.7f, 1.0f );
 
