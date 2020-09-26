@@ -52,7 +52,7 @@ unsigned char * color_textura(float u, float v)
 	i = u*(dimx-1);
 	j = (1-v)*(dimy-1);
 
-return(bufferra + ((i-1)*dimx +j));
+return(bufferra + ((j)*dimy +i));
 }
 
 /*
@@ -104,12 +104,6 @@ void calcular_interseccion(punto A, punto B, punto *pin, int h)
 	punto aux;
 	float y_bis, u, v;
 	
-	if(B.y<A.y){
-		aux = A;
-		A = B;
-		B = aux;
-	}
-	
 	y = B.y - A.y;
 	x = B.x - A.x;
 	u = B.u - A.u;
@@ -117,11 +111,11 @@ void calcular_interseccion(punto A, punto B, punto *pin, int h)
 
 	y_bis = h - A.y;
 	
-	if(y != 0)//just in case...
+	if(y != 0)
 	{
 		pin->x = (int) round(A.x+(x*y_bis/y));
 		pin->u = A.u + (u*y_bis/y);
-		pin->v = A.v * (v*y_bis/y);
+		pin->v = A.v + (v*y_bis/y);
 	}
 	else
 	{
@@ -133,6 +127,8 @@ void calcular_interseccion(punto A, punto B, punto *pin, int h)
 	pin->y = h;
 	pin->z = 0;
 	
+	//printf("%d: pin_u, pin_v: %f, %f\n", h, u, v);
+	
 }
 
 
@@ -143,6 +139,7 @@ void dibujar_pixel(int x, int y, float u, float v)
 	unsigned char* colorv;
 	unsigned char r,g,b;
 	
+	//printf("(%d, %d) %f %f\n",x, y, u,v);
 	colorv = color_textura(u, v); //TODO: si esta función es correcta se ve la foto en la ventana
 	r= colorv[0];
 	g=colorv[1];
@@ -166,6 +163,11 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 		v_dif = (pin_right.v - pin_left.v)/(pin_right.x - pin_left.x);
 		u_dif = (pin_right.u - pin_left.u)/(pin_right.x - pin_left.x); //això sempre serà positiu.
 	}
+	else
+	{
+		v_dif = 0.0;
+		u_dif = 0.0;
+	}
 	//printf("%f, %f\n", u_dif, v_dif);
 	
 	for(x=pin_left.x; x<=pin_right.x; x++)
@@ -173,9 +175,10 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 		dibujar_pixel(x, h, u, v);
 		u = u + u_dif;
 		v = v + v_dif;
-		
-		//printf("%f, %f\n", u, v);
+			
 	}
+	
+	//printf("%d: (U, V): (%f, %f)\n", h, u, v);
 }
 
 
@@ -286,8 +289,8 @@ static void marraztu(void)
 			glEnd();
 		}
 	glFlush();
-	
 	*/
+	
 }
 // This function will be called whenever the user pushes one key
 static void teklatua (unsigned char key, int x, int y)
