@@ -60,68 +60,67 @@ This function gets the triangle hiruki and changes the order of the vertices fro
 */
 
 /*Això es pot fer sense passar el triangle i usant que és una vairable global, però necessites un doble punter, el primer a on és el triangle i el segon al punt concret*/
-void determinar_orden(punto *Aptr, punto *Bptr, punto *Cptr)
+void determinar_orden(punto **Aptrptr, punto **Bptrptr, punto **Cptrptr)
 {
-	
-	punto aux;
-	*Aptr = triangulosptr[indice].p1;
-	*Bptr = triangulosptr[indice].p2;
-	*Cptr = triangulosptr[indice].p3;
 
+	printf("Entro determinar_orden\n");
 
-	if(Aptr->y > Cptr->y)
+	if(triangulosptr[indice].p1.y > triangulosptr[indice].p2.y)
 	{
-		printf("Canvio A per C\n");
-		aux = *Cptr;
-		*Cptr = *Aptr;
-		*Aptr = aux;
-	
+		*Aptrptr = &(triangulosptr[indice].p1);
+		*Bptrptr = &(triangulosptr[indice].p2);
+	}
+	else
+	{
+		*Bptrptr = &(triangulosptr[indice].p1);
+		*Aptrptr = &(triangulosptr[indice].p2);
 	}
 
-	if(Aptr->y > Bptr->y)
+	if(triangulosptr[indice].p3.y > (*Aptrptr)->y)
 	{
-		printf("Canvio A per B\n");
-		aux = *Bptr;
-		*Bptr = *Aptr;
-		*Aptr = aux;
+		*Cptrptr = *Aptrptr;
+		*Aptrptr = &(triangulosptr[indice].p3);
+	}
+	else if (triangulosptr[indice].p3.y > (*Bptrptr)->y)
+	{
+		*Cptrptr = *Bptrptr;
+		*Bptrptr = &(triangulosptr[indice].p3);
+	}
+	else
+	{
+		*Cptrptr = &(triangulosptr[indice].p3);
 	}
 	
-	if(Bptr->y > Cptr->y)
-	{
-		printf("Canvio B per C\n");
-		aux = *Cptr;
-		*Cptr = *Bptr;
-		*Bptr = aux;
-	}
+	printf("a\n");
 	
 }
 
 /*This function, given two points and a entrance, gives the image of f(x) = line between A and B*/
-void calcular_interseccion(punto A, punto B, punto *pin, int h)
+void calcular_interseccion(punto *A, punto *B, punto *pin, int h)
 {
 
 	int x, y;
 	punto aux;
 	float y_bis, u, v;
 	
-	y = B.y - A.y;
-	x = B.x - A.x;
-	u = B.u - A.u;
-	v = B.v - A.v;
+	y = B->y - A->y;
+	x = B->x - A->x;
+	u = B->u - A->u;
+	v = B->v - A->v;
 
-	y_bis = h - A.y;
+	y_bis = h - A->y;
 	
 	if(y != 0)
 	{
-		pin->x = (int) round(A.x+(x*y_bis/y));
-		pin->u = A.u + (u*y_bis/y);
-		pin->v = A.v + (v*y_bis/y);
+		pin->x = (int) round(A->x+(x*y_bis/y));
+		pin->u = A->u + (u*y_bis/y);
+		pin->v = A->v + (v*y_bis/y);
 	}
 	else
 	{
-		pin->x = (int) round(A.x);
-		pin->u = A.u;
-		pin->v = A.v;
+		pin->x = (int) round(A->x);
+		pin->u = A->u;
+		pin->v = A->v;
 	}
 
 	pin->y = h;
@@ -188,7 +187,8 @@ void dibujar_triangulo(hiruki triangulo)
 {
 	
 	int h;
-	punto Aptr, Bptr, Cptr, pin_left, pin_right, aux;
+	punto *Aptr, *Bptr, *Cptr;
+	punto pin_left, pin_right, aux;
 		
 	h = 0;
 	
@@ -196,8 +196,9 @@ void dibujar_triangulo(hiruki triangulo)
 	determinar_orden(&Aptr, &Bptr, &Cptr);
 
     	//the first for goes from A-> (the nearest from 0) to B->y.
-	for(h=Aptr.y; h<=Bptr.y; h++)
+	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
+		printf("a2\n");
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Aptr, Bptr, &pin_right, h);
 		
@@ -215,7 +216,7 @@ void dibujar_triangulo(hiruki triangulo)
 		
 	}
 	//the second goes from B to C, thus making the h all the way up to 500
-	for(h=Bptr.y; h<=Cptr.y; h++)
+	for(h=Bptr->y; h<=Cptr->y; h++)
 	{
 
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
