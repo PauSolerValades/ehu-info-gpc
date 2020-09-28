@@ -1,0 +1,100 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{color}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\makeatletter\makeatother
+\usepackage{listings}
+
+% Paketea konfiguratu behar dugu C lengoaiarekin erabiltzeko:
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\definecolor{gray}{rgb}{0.65,0.65,0.65}
+\lstset{language=C,
+		basicstyle=\scriptsize\ttfamily,
+		keywordstyle=\color{darkgreen}\bfseries,
+		identifierstyle=\color{blue},
+		commentstyle=\color{gray}, 
+		stringstyle=\ttfamily,
+		showstringspaces=false,
+		tabsize=2,
+		backgroundcolor=\color{lightgray}}
+
+
+\begin{document}
+
+\title{\begin{center}
+\resizebox*{0.50\textwidth}{0.15 \textheight}{
+\includegraphics{ehu-pdf}
+} 
+\end{center}
+\vspace{1cm}
+Ejemplo de manual}
+
+\author{J. Makazaga}
+
+\maketitle
+\begin{abstract}
+Ejemplo de documentación de una aplicación implementada en C y documentada mediante Latex.
+
+\end{abstract}
+
+\section{Objetivos de nuestra aplicación}
+
+Esta maravillosa aplicaciñon tiene como objetivo\ldots
+
+\section{Sobre este documento}
+
+Se trata de un documento editado mediante un editor cuyo único requerimiento es que escriba simplemente texto. Dicho texto puede ser contenido del documento o comandos de latex. Los comandos indican que empieza una nueva sección, capítulo o lo que sea, o incluso alguna referencia bibliográfica o referencia interna del deldocumento\ldots Tras la edición del documento hay que procesarlo mediante un comando en la terminal:
+\begin{verse}
+\$ latex manual.tex
+\end{verse}
+Ese comando genera el docuemnto \emph{manual.dvi} y partiendo de éste último documento podemos generar el documento pdf:
+\begin{verse}
+\$ dvipdf manual.dvi
+\end{verse}
+
+\section{Interacción con la usuaria}
+Las opciones de nuestra aplicación son: 
+\begin{enumerate}
+\item teclas del teclado
+
+Sirven para interactuar con los objetos tal y como se especifica en la sección \ref{sec:ficheros-de-objetos}
+
+\item ratón
+\item mirada. 
+
+La mirada permite un grado de interacción imposible hasta ayer. Nuestra aplicación nos da esa posibilidad.
+\end{enumerate}
+
+\section{Ficheros de objetos tridimensionales\label{sec:ficheros-de-objetos}}
+
+Utilizamos ficheros con la definición de los objetos a visualizar. El formato de los ficheros es el establecido en el libro \cite{key-1}
+
+
+\section{Código C}
+
+Se puede utilizar el paquete \textit{listings}. En el preámbulo del documento se puede ver la configuración del paquete. Su uso es muy sencillo!
+
+% entorno lstlisting para escribir código
+\begin{lstlisting}
+#include <stdio.h>
+#include <malloc.h>
+
+int main(int argc, char** argv) {
+	exit(0);
+}
+\end{lstlisting}
+
+\section{Trabajo futuro}
+
+Habrá que mantener y mejorar la aplicación.
+
+\begin{thebibliography}{Formats}
+\bibitem[Fromats]{key-1}Autor, \emph{Formatos de objetos tridimensionales}, 2023 
+\end{thebibliography}
+
+\end{document}

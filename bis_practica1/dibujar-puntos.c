@@ -52,7 +52,7 @@ unsigned char * color_textura(float u, float v)
 	i = trunc(u*(dimx));
 	j = trunc((1-v)*(dimy));
 
-return(bufferra + 3*(j*dimx + i));
+	return(bufferra + 3*(j*dimx + i));
 }
 
 /*
@@ -62,36 +62,33 @@ This function gets the triangle hiruki and changes the order of the vertices fro
 /*Això es pot fer sense passar el triangle i usant que és una vairable global, però necessites un doble punter, el primer a on és el triangle i el segon al punt concret*/
 void determinar_orden(punto **Aptrptr, punto **Bptrptr, punto **Cptrptr)
 {
+	punto *aux;
+	*Aptrptr = &(triangulosptr[indice].p1);
+	*Bptrptr = &(triangulosptr[indice].p2);
+	*Cptrptr = &(triangulosptr[indice].p3);
 
-	printf("Entro determinar_orden\n");
-
-	if(triangulosptr[indice].p1.y > triangulosptr[indice].p2.y)
+	if((*Aptrptr)->y > (*Cptrptr)->y)
 	{
-		*Aptrptr = &(triangulosptr[indice].p1);
-		*Bptrptr = &(triangulosptr[indice].p2);
-	}
-	else
-	{
-		*Bptrptr = &(triangulosptr[indice].p1);
-		*Aptrptr = &(triangulosptr[indice].p2);
-	}
-
-	if(triangulosptr[indice].p3.y > (*Aptrptr)->y)
-	{
-		*Cptrptr = *Aptrptr;
-		*Aptrptr = &(triangulosptr[indice].p3);
-	}
-	else if (triangulosptr[indice].p3.y > (*Bptrptr)->y)
-	{
-		*Cptrptr = *Bptrptr;
-		*Bptrptr = &(triangulosptr[indice].p3);
-	}
-	else
-	{
-		*Cptrptr = &(triangulosptr[indice].p3);
+		aux = *Aptrptr;
+		*Aptrptr = *Cptrptr;
+		*Cptrptr = aux;
 	}
 	
-	printf("a\n");
+	if((*Aptrptr)->y > (*Bptrptr)->y)
+	{
+		aux = *Aptrptr;
+		*Aptrptr = *Bptrptr;
+		*Bptrptr = aux;
+	}
+	
+	if((*Bptrptr)->y > (*Cptrptr)->y)
+	{
+		aux = *Bptrptr;
+		*Bptrptr = *Cptrptr;
+		*Cptrptr = aux;
+	}
+	
+	//printf("%f, %f, %f \n", (*Aptrptr)->y, (*Bptrptr)->y, (*Cptrptr)->y);
 	
 }
 
@@ -131,7 +128,6 @@ void calcular_interseccion(punto *A, punto *B, punto *pin, int h)
 }
 
 
-//(x, y, r,g,b) D'on putes treus els valors de rgb? de bufferra amb u i v, entenc que es una matriu.
 void dibujar_pixel(int x, int y, float u, float v)
 {
 
@@ -140,7 +136,7 @@ void dibujar_pixel(int x, int y, float u, float v)
 	
 	//printf("(%d, %d) %f %f\n",x, y, u,v);
 	colorv = color_textura(u, v); 	
-	r= colorv[0];
+	r=colorv[0];
 	g=colorv[1];
 	b=colorv[2];     
 	glBegin( GL_POINTS );
@@ -151,7 +147,7 @@ void dibujar_pixel(int x, int y, float u, float v)
 
 void linea_triangulo(punto pin_left, punto pin_right, int h)
 {
-	int x, a;
+	int x;
 	float u_dif, v_dif, u, v;
 	
 	u = pin_left.u;
@@ -170,7 +166,7 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 	
 	//printf("%f, %f\n", u_dif, v_dif);
 	
-	for(x=pin_left.x; x<=pin_right.x; x++)
+	for(x=pin_left.x; x<pin_right.x; x++)
 	{
 		dibujar_pixel(x, h, u, v);
 		u = u + u_dif;
@@ -188,17 +184,15 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	int h;
 	punto *Aptr, *Bptr, *Cptr;
-	punto pin_left, pin_right, aux;
-		
-	h = 0;
-	
+	punto pin_left, pin_right;
 
 	determinar_orden(&Aptr, &Bptr, &Cptr);
-
+	
+	h = 0;
+	
     	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
-		printf("a2\n");
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Aptr, Bptr, &pin_right, h);
 		
@@ -216,11 +210,11 @@ void dibujar_triangulo(hiruki triangulo)
 		
 	}
 	//the second goes from B to C, thus making the h all the way up to 500
-	for(h=Bptr->y; h<=Cptr->y; h++)
+	for(Bptr->y; h<=Cptr->y; h++)
 	{
 
-		calcular_interseccion(Aptr, Cptr, &pin_left, h);
-		calcular_interseccion(Bptr, Cptr, &pin_right, h);
+		calcular_interseccion(Cptr, Bptr, &pin_left, h);
+		calcular_interseccion(Cptr, Aptr, &pin_right, h);
 		
 
 		//printf("INT: %d, %d\n", pin_left, pin_right);
@@ -233,7 +227,7 @@ void dibujar_triangulo(hiruki triangulo)
 			linea_triangulo(pin_right, pin_left, h);
 
 	}
-		
+			
 }
 
 static void marraztu(void)
@@ -250,29 +244,10 @@ static void marraztu(void)
 	glLoadIdentity();
 	glOrtho(0.0, 500.0, 0.0, 500.0,-250.0, 250.0);
 
-	/*Drawing the triangles*/
+	/*Drawing the triangles and printing the foto*/
 	dibujar_triangulo(triangulosptr[indice]);
 
 	glFlush();
-
-
-	/*
-	for (i=0;i<500;i++)
-	    for (j=0;j<500;j++)
-		{
-			u = i/500.0;
-			v = j/500.0;
-			colorv = color_textura(u, v); //TODO: si esta función es correcta se ve la foto en la ventana
-			r= colorv[0];
-			g=colorv[1];
-			b=colorv[2];     
-			glBegin( GL_POINTS );
-			glColor3ub(r,g,b);
-			glVertex3f(i,j,0.);
-			glEnd();
-		}
-	glFlush();
-	*/
 	
 }
 // This function will be called whenever the user pushes one key

@@ -194,6 +194,8 @@ void dibujar_triangulo(hiruki triangulo)
 	
 
 	determinar_orden(&Aptr, &Bptr, &Cptr);
+	
+	printf("%f %f %f\n", Aptr.y, Bptr.y, Cptr.y);
 
     	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr.y; h<=Bptr.y; h++)
@@ -218,8 +220,8 @@ void dibujar_triangulo(hiruki triangulo)
 	for(h=Bptr.y; h<=Cptr.y; h++)
 	{
 
-		calcular_interseccion(Aptr, Cptr, &pin_left, h);
-		calcular_interseccion(Bptr, Cptr, &pin_right, h);
+		calcular_interseccion(Cptr, Bptr, &pin_left, h);
+		calcular_interseccion(Cptr, Aptr, &pin_right, h);
 		
 
 		//printf("INT: %d, %d\n", pin_left, pin_right);
