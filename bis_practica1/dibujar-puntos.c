@@ -67,6 +67,8 @@ void determinar_orden(punto **Aptrptr, punto **Bptrptr, punto **Cptrptr)
 	*Bptrptr = &(triangulosptr[indice].p2);
 	*Cptrptr = &(triangulosptr[indice].p3);
 
+	printf("Entra: A %f %f, B %f %f, C %f %f \n", (*Aptrptr)->x, (*Aptrptr)->y, (*Bptrptr)->x, (*Bptrptr)->y, (*Cptrptr)->x, (*Cptrptr)->y);
+
 	if((*Aptrptr)->y > (*Cptrptr)->y)
 	{
 		aux = *Aptrptr;
@@ -88,7 +90,29 @@ void determinar_orden(punto **Aptrptr, punto **Bptrptr, punto **Cptrptr)
 		*Cptrptr = aux;
 	}
 	
-	//printf("%f, %f, %f \n", (*Aptrptr)->y, (*Bptrptr)->y, (*Cptrptr)->y);
+	//if Aprt==Bptr
+	
+	if((*Cptrptr)->x == (*Aptrptr)->x)
+	{	
+		if((*Aptrptr)->y > (*Cptrptr)->y)
+		{
+			aux = *Aptrptr;
+			*Aptrptr = *Cptrptr;
+			*Cptrptr = aux;
+			printf("A>C\n");
+		}
+		else
+		{
+			aux = *Cptrptr;
+			*Cptrptr = *Aptrptr;
+			*Cptrptr = aux;
+			printf("A<C\n");
+		}
+		
+	}
+	
+	
+	printf("Surt: A %f %f, B %f %f, C %f %f \n", (*Aptrptr)->x, (*Aptrptr)->y, (*Bptrptr)->x, (*Bptrptr)->y, (*Cptrptr)->x, (*Cptrptr)->y);
 	
 }
 
@@ -107,21 +131,29 @@ void calcular_interseccion(punto *A, punto *B, punto *pin, int h)
 
 	y_bis = h - A->y;
 	
+
 	if(y != 0)
 	{
 		pin->x = (int) round(A->x+(x*y_bis/y));
 		pin->u = A->u + (u*y_bis/y);
 		pin->v = A->v + (v*y_bis/y);
 	}
+	else if(x==0)
+	{
+		printf("pin es A \n");
+		pin->x = (int) A->x;
+	}
 	else
 	{
-		pin->x = (int) round(A->x);
+		pin->x = (int) (A->x);
 		pin->u = A->u;
 		pin->v = A->v;
 	}
 
 	pin->y = h;
 	pin->z = 0;
+	
+	//printf("%f\n", pin->x);
 	
 	//printf("%d: pin_u, pin_v: %f, %f\n", h, u, v);
 	
@@ -166,11 +198,12 @@ void linea_triangulo(punto pin_left, punto pin_right, int h)
 	
 	//printf("%f, %f\n", u_dif, v_dif);
 	
-	for(x=pin_left.x; x<pin_right.x; x++)
+	for(x=pin_left.x; x<=pin_right.x; x++)
 	{
 		dibujar_pixel(x, h, u, v);
 		u = u + u_dif;
 		v = v + v_dif;
+		//printf("%d %d\n", x, h);
 			
 	}
 	
@@ -190,27 +223,42 @@ void dibujar_triangulo(hiruki triangulo)
 	
 	h = 0;
 	
-    	//the first for goes from A-> (the nearest from 0) to B->y.
+	if((Aptr->y==Cptr->y))
+	{
+		printf("Entro\n");
+		calcular_interseccion(Aptr, Cptr, &pin_left, h);
+		calcular_interseccion(Cptr, Aptr, &pin_right, h);
+		
+		linea_triangulo(pin_left, pin_right, Aptr->y);
+	}
+	if(Aptr->y==Bptr->y)
+	{
+		printf("Entro A=B\n");
+		calcular_interseccion(Aptr, Bptr, &pin_left, h);
+		calcular_interseccion(Bptr, Aptr, &pin_right, h);
+		
+		linea_triangulo(pin_left, pin_right, Aptr->y);
+	}
+	
+  	//the first for goes from A-> (the nearest from 0) to B->y.
 	for(h=Aptr->y; h<=Bptr->y; h++)
 	{
 		calcular_interseccion(Aptr, Cptr, &pin_left, h);
 		calcular_interseccion(Aptr, Bptr, &pin_right, h);
 		
-		//printf("INT: %d, %d\n", pin_left, pin_right);
-		//printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
-		//printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
-		
-		/*
-		Here we determine which intersection point is adequate. If left is bigger than right, we swap them
-		*/
 		if(pin_left.x < pin_right.x)
 			linea_triangulo(pin_left, pin_right, h);
 		else
 			linea_triangulo(pin_right, pin_left, h);
 		
+		//printf("INT: %f, %f\n", pin_left.x, pin_right.x);
+		//printf("LEFT: %f, %f\n", pin_left.u, pin_left.v);
+		//printf("RIGHT: %f, %f\n", pin_right.u, pin_right.v);
+		
+		
 	}
 	//the second goes from B to C, thus making the h all the way up to 500
-	for(Bptr->y; h<=Cptr->y; h++)
+	for(; h<=Cptr->y; h++)
 	{
 
 		calcular_interseccion(Cptr, Bptr, &pin_left, h);
@@ -227,6 +275,7 @@ void dibujar_triangulo(hiruki triangulo)
 			linea_triangulo(pin_right, pin_left, h);
 
 	}
+	
 			
 }
 
