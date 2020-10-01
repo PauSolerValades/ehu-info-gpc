@@ -1,0 +1,1 @@
+Cada objeto va a ser una colección de puntos. Si sabemos mover UN punto, podemos mover todos los puntos de un objecto, modificando el objeto en questión según lo esperado.
