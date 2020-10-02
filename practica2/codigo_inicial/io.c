@@ -44,7 +44,7 @@ void keyboard(unsigned char key, int x, int y) {
 
     switch (key) {
     case 'f':
-    case 'F':
+    case 'F': //carga un fichero.
         /*Ask for file*/
         printf("%s", KG_MSSG_SELECT_FILE);
         scanf("%s", fname);
@@ -73,37 +73,47 @@ void keyboard(unsigned char key, int x, int y) {
         }
         break;
 
-    case 9: /* <TAB> */
-        _selected_object = _selected_object->next;
-        /*The selection is circular, thus if we move out of the list we go back to the first element*/
-        if (_selected_object == 0) _selected_object = _first_object;
-        break;
+    case 9: /* <TAB> */ //cambiar de objeto
 
-    case 127: /* <SUPR> */
-        /*Erasing an object depends on whether it is the first one or not*/
-        if (_selected_object == _first_object)
+        /* Controlar la lista, si és diferente de 0 que apunte al primero.*/
+        if(_first_object !=0)
         {
-            /*To remove the first object we just set the first as the current's next*/
-            _first_object = _first_object->next;
-            /*Once updated the pointer to the first object it is save to free the memory*/
-            free(_selected_object);
-            /*Finally, set the selected to the new first one*/
-            _selected_object = _first_object;
-        } else {
-            /*In this case we need to get the previous element to the one we want to erase*/
-            auxiliar_object = _first_object;
-            while (auxiliar_object->next != _selected_object)
-                auxiliar_object = auxiliar_object->next;
-            /*Now we bypass the element to erase*/
-            auxiliar_object->next = _selected_object->next;
-            /*free the memory*/
-            free(_selected_object);
-            /*and update the selection*/
-            _selected_object = auxiliar_object;
+            _selected_object = _selected_object->next;
+            /*The selection is circular, thus if we move out of the list we go back to the first element*/
+            if (_selected_object == 0) _selected_object = _first_object;
         }
         break;
 
-    case '-':
+    case 127: /* <SUPR> */ //borrar objeto
+
+        /* si no hay objeto que borrar tiene que no borrar nada*/
+        /*Erasing an object depends on whether it is the first one or not*/
+        if(_first_object != 0){
+            if (_selected_object == _first_object)
+            {
+                /*To remove the first object we just set the first as the current's next*/
+                _first_object = _first_object->next;
+                /*Once updated the pointer to the first object it is save to free the memory*/
+                free(_selected_object);
+                /*Finally, set the selected to the new first one*/
+                _selected_object = _first_object;
+            } else {
+                /*In this case we need to get the previous element to the one we want to erase*/
+                auxiliar_object = _first_object;
+                while (auxiliar_object->next != _selected_object)
+                    auxiliar_object = auxiliar_object->next;
+                /*Now we bypass the element to erase*/
+                auxiliar_object->next = _selected_object->next;
+                /*free the memory*/
+                free(_selected_object);
+                /*and update the selection*/
+                _selected_object = auxiliar_object;
+            }
+        }
+        break;
+
+    case '+': //hace que todo se vea mas pequeño
+
         if (glutGetModifiers() == GLUT_ACTIVE_CTRL){
             /*Increase the projection plane; compute the new dimensions*/
             wd=(_ortho_x_max-_ortho_x_min)/KG_STEP_ZOOM;
@@ -119,8 +129,23 @@ void keyboard(unsigned char key, int x, int y) {
         }
         break;
 
-    case '+':
-        //INPLEMENTA EZAZU CTRL + + KONBINAZIOAREN FUNTZIOANLITATEA
+    case '-': //hace que todo se vea más grande.
+
+        /* Hacer la función que haga eso*/
+
+        if (glutGetModifiers() == GLUT_ACTIVE_CTRL){
+            /*Increase the projection plane; compute the new dimensions*/
+            wd=(_ortho_x_max-_ortho_x_min)*KG_STEP_ZOOM;
+            he=(_ortho_y_max-_ortho_y_min)*KG_STEP_ZOOM;
+            /*In order to avoid moving the center of the plane, we get its coordinates*/
+            midx = (_ortho_x_max+_ortho_x_min)/2;
+            midy = (_ortho_y_max+_ortho_y_min)/2;
+            /*The the new limits are set, keeping the center of the plane*/
+            _ortho_x_max = midx + wd/2;
+            _ortho_x_min = midx - wd/2;
+            _ortho_y_max = midy + he/2;
+            _ortho_y_min = midy - he/2;
+        }
         break;
 
     case '?':

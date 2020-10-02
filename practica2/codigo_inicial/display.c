@@ -55,9 +55,10 @@ void reshape(int width, int height) {
 /**
  * @brief Callback display function
  */
+//función que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
     GLint v_index, v, f;
-    object3d *aux_obj = _first_object;
+    object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
 
     /* Clear the screen */
     glClear(GL_COLOR_BUFFER_BIT);
@@ -91,7 +92,7 @@ void display(void) {
     draw_axes();
 
     /*Now each of the objects in the list*/
-    while (aux_obj != 0) {
+    while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.
 
         /* Select the color, depending on whether the current object is the selected one or not */
         if (aux_obj == _selected_object){
@@ -104,6 +105,7 @@ void display(void) {
         glLoadIdentity();
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
+            //dibujas cada estructura, en sus
             for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                 v_index = aux_obj->face_table[f].vertex_table[v];
                 glVertex3d(aux_obj->vertex_table[v_index].coord.x,

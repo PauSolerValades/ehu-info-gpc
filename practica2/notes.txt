@@ -1,1 +1,11 @@
 Cada objeto va a ser una colección de puntos. Si sabemos mover UN punto, podemos mover todos los puntos de un objecto, modificando el objeto en questión según lo esperado.
+
+La gestió de què li passa al món és diferent de l'observador que el mira.
+
+QUÈ FA CADA FITXER?
+- main.c: abre ventana i establece eventos
+- display.c: "sacafotos". El observador vamos.
+- load_obj_joseba.c:
+- io.c: input output.
+
+Puntos h varios: estructuras de los objetos que vamos a utilitzar.
