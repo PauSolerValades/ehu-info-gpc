@@ -101,19 +101,32 @@ typedef struct {
     GLint *vertex_table;                /* table with the index of each vertex */
 } face;
 
+/****************************
+ * Structure to store       *
+ * transformation           *
+ * matrixes                 *
+ ****************************/
+
+typedef struct elem_matrix
+{
+    double M[16]; 			/* Tabla M con 16 elementos */
+    struct elem_matrixptr *nextptr;	/* puntero a la siguiente matriz*/	
+} elem_matrix;				/* así el compliador reconoce elem_matrix como struct y no se tiene que poner struct elem_matrix cada vex*/
+
 
 /****************************
  * Structure to store a     *
  * pile of 3D objects       *
  ****************************/
 struct object3d{
-    GLint num_vertices;                 /* number of vertices in the object*/
-    vertex *vertex_table;               /* table of vertices */
-    GLint num_faces;                    /* number of faces in the object */
-    face *face_table;                   /* table of faces */
-    point3 min;                         /* coordinates' lower bounds */
-    point3 max;                         /* coordinates' bigger bounds */
-    struct object3d *next;              /* next element in the pile of objects */
+    GLint num_vertices;		/* number of vertices in the object*/
+    vertex *vertex_table;		/* table of vertices */
+    GLint num_faces;			/* number of faces in the object */
+    face *face_table;			/* table of faces */
+    point3 min;			/* coordinates' lower bounds */
+    point3 max;                   	/* coordinates' bigger bounds */
+    struct elem_matrix *next_matrix;	/* next element in the pile of matrixes */
+    struct object3d *next;		/* next element in the pile of objects */
 };
 
 typedef struct object3d object3d;

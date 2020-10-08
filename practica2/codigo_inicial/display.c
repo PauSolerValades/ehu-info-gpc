@@ -106,6 +106,7 @@ void display(void) {
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
             //dibujas cada estructura, en sus
+            /* TODO: aquí haurem de multiplicar la matriu pels vèrtexs */
             for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                 v_index = aux_obj->face_table[f].vertex_table[v];
                 glVertex3d(aux_obj->vertex_table[v_index].coord.x,
