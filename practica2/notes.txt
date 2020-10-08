@@ -9,3 +9,9 @@ QUÈ FA CADA FITXER?
 - io.c: input output.
 
 Puntos h varios: estructuras de los objetos que vamos a utilitzar.
+
+typedef struct elem_matriz
+{
+    double M[16]  //campo llamado M con 16 elementos
+    struct elem_matrixptr *sptr;
+}elem_matriz; //esto nombra para que el compliador reconozca elem_matriz como struct.
