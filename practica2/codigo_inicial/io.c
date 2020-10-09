@@ -213,7 +213,11 @@ void keyboard(unsigned char key, int x, int y) {
     case '?':
         print_help();
         break;
-    
+        
+    case 26: /* CONTROL+Z */
+    	printf("Deshacer\n");
+    	break;
+    	
     case 27: /* <ESC> */
         exit(0);
         break;
@@ -241,18 +245,23 @@ void special(int key, int x, int y)
     	case 100: /* LEFT ARROW */
     		printf("TECLA ESQUERRA\n");
     		break;
+    		
     	case 101: /* UP ARROW */
     		printf("TECLA AMUNT\n");
     		break;
+    		
     	case 102: /* RIGHT ARROW */
     		printf("TECLA DRETA\n");
     		break;
+    		
     	case 103: /* DOWN ARROW */
     		printf("TECLA AVALL\n");
     		break;
+    		
     	case 104: /* REPAG */
     		printf("TECLA REPAG\n");
     		break;
+    		
     	case 105: /* AVPAG */
     		printf("TECLA AVPAG\n");
     		break;
