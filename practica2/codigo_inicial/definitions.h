@@ -110,7 +110,7 @@ typedef struct {
 typedef struct elem_matrix
 {
     double M[16]; 			/* Tabla M con 16 elementos */
-    struct elem_matrixptr *nextptr;	/* puntero a la siguiente matriz*/	
+    struct elem_matrix *nextptr;	/* puntero a la siguiente matriz*/	
 } elem_matrix;				/* así el compliador reconoce elem_matrix como struct y no se tiene que poner struct elem_matrix cada vex*/
 
 

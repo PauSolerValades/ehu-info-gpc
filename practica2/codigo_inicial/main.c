@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display); //donde se hace "la foto". el observador que ve
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard); //evento de llamada por teclado.
+    glutSpecialFunc(special); //gestor teclas especiales
 
     /* this initialization has to be AFTER the creation of the window */
     initialization();

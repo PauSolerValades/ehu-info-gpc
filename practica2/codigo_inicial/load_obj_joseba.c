@@ -153,10 +153,7 @@ printf("2 pasada\n");
     object_ptr->vertex_table = vertex_table;
     object_ptr->face_table = face_table;
     object_ptr->num_vertices = num_vertices;
-    object_ptr->num_faces = num_faces;
-    
-    /* TODO: inicialitzar l'element matrix a identitat just quan carreguem un objecte???*/
-    
+    object_ptr->num_faces = num_faces;    
 
     /*
      * The maximum and minimum coordinates are obtained **/

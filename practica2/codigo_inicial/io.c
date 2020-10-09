@@ -37,6 +37,9 @@ void print_help(){
  */
 void keyboard(unsigned char key, int x, int y) {
 
+    elem_matrix *mptr;
+    int i;
+
     char* fname = malloc(sizeof (char)*128); /* Note that scanf adds a null character at the end of the vector*/
     int read = 0;
     object3d *auxiliar_object = 0;
@@ -68,6 +71,25 @@ void keyboard(unsigned char key, int x, int y) {
             auxiliar_object->next = _first_object;
             _first_object = auxiliar_object;
             _selected_object = _first_object;
+ 
+            /* DONE: cargar matriz */
+            mptr = (elem_matrix *) malloc(sizeof(elem_matrix)); //guardem espai per la matriu identitat
+            mptr->nextptr = 0; //apuntem el seguent punter a 0
+
+            //llenamos la tabla M
+            for(i=1; i<15; i++)
+            {
+                mptr->M[i] = 0.0;
+            }
+            //cutríssim pero va
+            mptr->M[0] = 1.0;
+            mptr->M[5] = 1.0;
+            mptr->M[10] = 1.0;
+            mptr->M[15] = 1.0;
+
+            //assignamos la matriz a la id.
+            _selected_object->next_matrix = mptr;
+
             printf("%s\n",KG_MSSG_FILEREAD);
             break;
         }
@@ -91,9 +113,11 @@ void keyboard(unsigned char key, int x, int y) {
         if(_first_object != 0){
             if (_selected_object == _first_object)
             {
+                /*DONE el free de elem_matrix*/
                 /*To remove the first object we just set the first as the current's next*/
                 _first_object = _first_object->next;
                 /*Once updated the pointer to the first object it is save to free the memory*/
+                free(_selected_object->next_matrix);
                 free(_selected_object);
                 /*Finally, set the selected to the new first one*/
                 _selected_object = _first_object;
@@ -105,6 +129,7 @@ void keyboard(unsigned char key, int x, int y) {
                 /*Now we bypass the element to erase*/
                 auxiliar_object->next = _selected_object->next;
                 /*free the memory*/
+                free(_selected_object->next_matrix);
                 free(_selected_object);
                 /*and update the selection*/
                 _selected_object = auxiliar_object;
@@ -130,8 +155,6 @@ void keyboard(unsigned char key, int x, int y) {
         break;
 
     case '-': //hace que todo se vea más grande.
-
-        /* Hacer la función que haga eso*/
 
         if (glutGetModifiers() == GLUT_ACTIVE_CTRL){
             /*Increase the projection plane; compute the new dimensions*/
@@ -162,5 +185,16 @@ void keyboard(unsigned char key, int x, int y) {
     }
     /*In case we have do any modification affecting the displaying of the object, we redraw them*/
     glutPostRedisplay();
+}
+
+/**
+ * @brief Callback function to control the special keys
+ * @param key Key that has been pressed
+ * @param x X coordinate of the mouse pointer when the key was pressed
+ * @param y Y coordinate of the mouse pointer when the key was pressed
+ */
+void special(int a, int x, int y)
+{
+    printf("quisde\n");
 }
 

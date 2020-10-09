@@ -55,7 +55,7 @@ void reshape(int width, int height) {
 /**
  * @brief Callback display function
  */
-//función que SOLO DIBUJA. No modifica nada. Este es el observador.
+//_first_objectfunción que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
     GLint v_index, v, f;
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
@@ -86,9 +86,9 @@ void display(void) {
 
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 
     /*First, we draw the axes*/
+    glLoadIdentity();
     draw_axes();
 
     /*Now each of the objects in the list*/
@@ -102,11 +102,10 @@ void display(void) {
         }
 
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
-        glLoadIdentity();
+        glLoadMatrixd(aux_obj->next_matrix->M);
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
             //dibujas cada estructura, en sus
-            /* TODO: aquí haurem de multiplicar la matriu pels vèrtexs */
             for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                 v_index = aux_obj->face_table[f].vertex_table[v];
                 glVertex3d(aux_obj->vertex_table[v_index].coord.x,
