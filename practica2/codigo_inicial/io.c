@@ -171,10 +171,49 @@ void keyboard(unsigned char key, int x, int y) {
         }
         break;
 
+    case 'm':
+    case 'M': /* Activar Translación */
+    	printf("Translación\n");
+    	break;
+    
+    case 'b':
+    case 'B': /* Rotación */
+    	printf("Rotación\n");
+    	break;
+    
+    case 't':
+    case 'T': /* Escalado */
+    	printf("Escalado\n");
+    	break;
+    
+    case 'g':
+    case 'G': /* Transformaciones ref mundo */
+    	printf("Mundo\n");
+    	break;
+    	
+    case 'l':
+    case 'L': /* Transformaciones ref objetos */
+    	printf("Objetos");
+    	break;
+    	
+    case 'o':
+    case 'O': /* Sistema referencia objeto */
+    	printf("Objeto\n");
+    	break;
+    	
+    case 'k':
+    case 'K': /* Transformaciones camara actual */
+    	printf("Transformaciones Camara Actual\n");
+    	break;
+    	
+    case 'a':
+    case 'A': /* Transformaciones luz selecionada */
+    	printf("Transformaciones luz actual\n");
+    	
     case '?':
         print_help();
         break;
-
+    
     case 27: /* <ESC> */
         exit(0);
         break;
@@ -193,8 +232,33 @@ void keyboard(unsigned char key, int x, int y) {
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
-void special(int a, int x, int y)
+void special(int key, int x, int y)
 {
-    printf("quisde\n");
+
+    /* Suposo que això s'implementarà amb booleans globals. Si esta activat un, els altres no i podrem posar un if o un altre switch amb un char o una variable més complexa. De moment no toca */
+    switch (key)
+    {
+    	case 100: /* LEFT ARROW */
+    		printf("TECLA ESQUERRA\n");
+    		break;
+    	case 101: /* UP ARROW */
+    		printf("TECLA AMUNT\n");
+    		break;
+    	case 102: /* RIGHT ARROW */
+    		printf("TECLA DRETA\n");
+    		break;
+    	case 103: /* DOWN ARROW */
+    		printf("TECLA AVALL\n");
+    		break;
+    	case 104: /* REPAG */
+    		printf("TECLA REPAG\n");
+    		break;
+    	case 105: /* AVPAG */
+    		printf("TECLA AVPAG\n");
+    		break;
+    		
+   	default:
+   		printf("%d \n", key);
+    }
 }
 
