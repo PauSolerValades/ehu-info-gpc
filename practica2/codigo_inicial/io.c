@@ -40,7 +40,8 @@ Freeing the linked list as normaly is done.
 */
 void destructor(object3d* object)
 {
-    int i,j;
+    int i;
+    elem_matrix *aux;
     /*
     //això allibera els vertexs de vertex_table
     for(i = 0; i<object3d->num_vertices; i++)
@@ -58,17 +59,27 @@ void destructor(object3d* object)
     }
     */
 
+    /*we free the vertex table*/
     free(object->vertex_table);
-
-    for(j=0; j<object->face_table->num_vertices; j++)
+    
+    /* we free every vertex table of all the positions in face_table */
+    for(i=0; i<object->face_table->num_vertices; i++)
     {
-        free(object->face_table[j].vertex_table);
+        free(object->face_table[i].vertex_table);
     }
+    /* we free the face_table */
     free(object->face_table);
 
-    /* TODO LIBERAR LA LINKED LIST */
-    free(_selected_object->next_matrix);
-    free(_selected_object);
+    /* we free the linked list */
+    while(object->next_matrix != 0)
+    {
+        aux = object->next_matrix;
+        object->next_matrix = object->next_matrix->nextptr;
+        free(aux);    
+    }
+    
+    /* finally, we delete the object itself */
+    free(object);
 
 }
 
@@ -163,6 +174,11 @@ void keyboard(unsigned char key, int x, int y) {
                 /*Once updated the pointer to the first object it is save to free the memory*/
                 /*TODO: free the memory properly*/
                 destructor(_selected_object);
+                /*
+                //codi d'abans
+                free(_selected_object->next_matrix);
+                free(_selected_object);
+                */
                 /*Finally, set the selected to the new first one*/
                 _selected_object = _first_object;
             } else {
@@ -173,8 +189,12 @@ void keyboard(unsigned char key, int x, int y) {
                 /*Now we bypass the element to erase*/
                 auxiliar_object->next = _selected_object->next;
                 /*TODO: free the memory*/
+                destructor(_selected_object);
+                /*
+                //codi d'abans
                 free(_selected_object->next_matrix);
                 free(_selected_object);
+                */
                 /*and update the selection*/
                 _selected_object = auxiliar_object;
             }
