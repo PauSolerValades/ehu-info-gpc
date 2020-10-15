@@ -28,6 +28,50 @@ void print_help(){
     printf("<CTRL + +>\t Bistaratze-eremua txikitu\n");
     printf("\n\n");
 }
+/*
+free the memory of a 3dobject.
+has to be freed:
+- vertex_table: table filled with struct vertex. Check if openGL objects have to be freed
+- face_table: table filled with struct face. Again, check if openGL objects need to be freed
+- elem_matrix: linked list of structs elem_matrix.
+
+We have a face_table, which contains as many vertex_tables as num_vertex in face_table. We have to run over the face_table freeing every vertex table, then free the face_table. Then we repeat for each face.
+Freeing the linked list as normaly is done.
+*/
+void destructor(object3d* object)
+{
+    int i,j;
+    /*
+    //això allibera els vertexs de vertex_table
+    for(i = 0; i<object3d->num_vertices; i++)
+    {
+        free(object3d->vertex_table[i]); //a cada element de vertex_table hi ha una struct vertex
+    }
+
+    for(i=0; i<object3d->num_faces; i++)
+    {
+        for(j=0; j<object3d->face_table->num_vertices; j++)
+        {
+            free(object3d->face_table[i]->vertex_table[j]);
+        }
+        free(object3d->face_table[i]);
+    }
+    */
+
+    free(object->vertex_table);
+
+    for(j=0; j<object->face_table->num_vertices; j++)
+    {
+        free(object->face_table[j].vertex_table);
+    }
+    free(object->face_table);
+
+    /* TODO LIBERAR LA LINKED LIST */
+    free(_selected_object->next_matrix);
+    free(_selected_object);
+
+}
+
 
 /**
  * @brief Callback function to control the basic keys
@@ -117,8 +161,8 @@ void keyboard(unsigned char key, int x, int y) {
                 /*To remove the first object we just set the first as the current's next*/
                 _first_object = _first_object->next;
                 /*Once updated the pointer to the first object it is save to free the memory*/
-                free(_selected_object->next_matrix);
-                free(_selected_object);
+                /*TODO: free the memory properly*/
+                destructor(_selected_object);
                 /*Finally, set the selected to the new first one*/
                 _selected_object = _first_object;
             } else {
@@ -128,7 +172,7 @@ void keyboard(unsigned char key, int x, int y) {
                     auxiliar_object = auxiliar_object->next;
                 /*Now we bypass the element to erase*/
                 auxiliar_object->next = _selected_object->next;
-                /*free the memory*/
+                /*TODO: free the memory*/
                 free(_selected_object->next_matrix);
                 free(_selected_object);
                 /*and update the selection*/
