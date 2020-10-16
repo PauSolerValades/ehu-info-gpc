@@ -15,3 +15,10 @@ typedef struct elem_matriz
     double M[16]  //campo llamado M con 16 elementos
     struct elem_matrixptr *sptr;
 }elem_matriz; //esto nombra para que el compliador reconozca elem_matriz como struct.
+
+PREGNTAS:
+- Como activar el modo objeto, modo referencia (booleano global?) BOOL GLOBAL
+- Como activar los modos rotación, translación y escalado (numeros 0,1,2 i un switch en cada tecla?) 0 TRANSLACIÓN, 1 ROTACION, 2 ESCALADO
+- Preguntar sobre la actualización del display/si el multiplicado de matrizes es el correcto. EL DISPLAY NO SE TOCA, SOLO ACTUALIZAR MATRIZ. LA MULTIPLICACION YA ESTA OK
+- Preguntar sobre como se multiplica por la izq???
+- En el borrar, preguntar sobre el if..., si se tiene que rectificar o algo.. NO TOCAR NADA

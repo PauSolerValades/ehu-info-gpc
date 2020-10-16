@@ -125,7 +125,7 @@ struct object3d{
     face *face_table;			/* table of faces */
     point3 min;			/* coordinates' lower bounds */
     point3 max;                   	/* coordinates' bigger bounds */
-    struct elem_matrix *next_matrix;	/* next element in the pile of matrixes */
+    struct elem_matrix *mptr;	/* next element in the pile of matrixes */
     struct object3d *next;		/* next element in the pile of objects */
 };
 

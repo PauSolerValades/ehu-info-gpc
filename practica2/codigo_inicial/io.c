@@ -63,7 +63,7 @@ void destructor(object3d* object)
     free(object->vertex_table);
     
     /* we free every vertex table of all the positions in face_table */
-    for(i=0; i<object->face_table->num_vertices; i++)
+    for(i=0; i<object->num_faces; i++)
     {
         free(object->face_table[i].vertex_table);
     }
@@ -71,10 +71,10 @@ void destructor(object3d* object)
     free(object->face_table);
 
     /* we free the linked list */
-    while(object->next_matrix != 0)
+    while(object->mptr != 0)
     {
-        aux = object->next_matrix;
-        object->next_matrix = object->next_matrix->nextptr;
+        aux = object->mptr;
+        object->mptr = object->mptr->nextptr;
         free(aux);    
     }
     
@@ -143,7 +143,7 @@ void keyboard(unsigned char key, int x, int y) {
             mptr->M[15] = 1.0;
 
             //assignamos la matriz a la id.
-            _selected_object->next_matrix = mptr;
+            _selected_object->mptr = mptr;
 
             printf("%s\n",KG_MSSG_FILEREAD);
             break;
@@ -238,6 +238,9 @@ void keyboard(unsigned char key, int x, int y) {
     case 'm':
     case 'M': /* Activar Translación */
     	printf("Translación\n");
+
+    	
+    	
     	break;
     
     case 'b':
@@ -308,6 +311,30 @@ void special(int key, int x, int y)
     {
     	case 100: /* LEFT ARROW */
     		printf("TECLA ESQUERRA\n");
+    		    	
+	    	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
+	    		glMultMatrix(A) => A*B, dónde B és la matrix de glLoadMatrix(B)
+	    		para multiplicar por la izquierda, cargas la otra matrix.
+	    	
+	    	 */
+	    	 
+	    	elem_matrix *new_mptr;
+	    	 
+	    	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
+	    	new_mptr->nextptr = _selected_object->mptr;
+	    	
+	    	glMatrixMode(GL_MODELVIEW);
+	    	glLoadMatrixd(_selected_object->mptr->M);
+	    	glTranslated(-1.0,0.0,0.0);
+	    	
+	    	_selected_object->mptr = new_mptr;
+	    	
+	    	glGetDoublev(GL_MODELVIEW_MATRIX,new_mptr->M);
+
+	    	
+	    	
+	    	glutPostRedisplay();
+    		
     		break;
     		
     	case 101: /* UP ARROW */
