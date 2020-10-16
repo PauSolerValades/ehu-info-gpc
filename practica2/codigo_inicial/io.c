@@ -6,6 +6,8 @@
 extern object3d * _first_object;
 extern object3d * _selected_object;
 
+extern elem_matrix * _actual_matrix;
+
 extern GLdouble _ortho_x_min,_ortho_x_max;
 extern GLdouble _ortho_y_min,_ortho_y_max;
 extern GLdouble _ortho_z_min,_ortho_z_max;
@@ -147,6 +149,9 @@ void keyboard(unsigned char key, int x, int y) {
 
             //assignamos la matriz a la id.
             _selected_object->mptr = mptr;
+            
+            //assignamos la variable global
+            _actual_matrix = mptr;
 
             printf("%s\n",KG_MSSG_FILEREAD);
             break;
@@ -302,6 +307,18 @@ void keyboard(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
+void new_transformation()
+{
+	elem_matrix *new_mptr;
+    	 
+    	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
+    	
+    	new_mptr->nextptr = _selected_object->mptr;
+    	_selected_object->mptr = new_mptr;
+    	
+    	_actual_matrix = _selected_object->mptr;
+}
+
 void translation(double x, double y, double z)
 {
 	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
@@ -321,11 +338,23 @@ void translation(double x, double y, double z)
     	
     	_selected_object->mptr = new_mptr;
     	
-    	glGetDoublev(GL_MODELVIEW_MATRIX,new_mptr->M);
-
-    	
+    	glGetDoublev(GL_MODELVIEW_MATRIX, new_mptr->M);
     	
     	glutPostRedisplay();
+}
+
+void translation_undo(double x, double y, double z)
+{
+	
+	glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_actual_matrix->M);
+    	glTranslated(x, y, z);
+    	
+ 	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+ 	
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	
+ 	glutPostRedisplay();
 }
 
 void rotation(double a)
@@ -360,7 +389,7 @@ void special(int key, int x, int y)
 	    			switch(mode)
 	    			{
 	    				case 0:
-	    					translation(-1.0,0.0,0.0);
+	    					translation_undo(-1.0,0.0,0.0);
 	    					break;
 	    				case 1:
 	    					rotation(0.0);
