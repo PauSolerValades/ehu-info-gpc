@@ -10,6 +10,9 @@ extern GLdouble _ortho_x_min,_ortho_x_max;
 extern GLdouble _ortho_y_min,_ortho_y_max;
 extern GLdouble _ortho_z_min,_ortho_z_max;
 
+extern int mode; //0: translación, 1: rotación, 2: escalado.
+extern int referencia; //0: objeto, 1: mundo
+
 /**
  * @brief This function just prints information about the use
  * of the keys
@@ -237,30 +240,32 @@ void keyboard(unsigned char key, int x, int y) {
 
     case 'm':
     case 'M': /* Activar Translación */
-    	printf("Translación\n");
-
-    	
-    	
+    	mode = 0;
+    	printf("Translaciones ACTIVADAS\n");
     	break;
     
     case 'b':
     case 'B': /* Rotación */
-    	printf("Rotación\n");
+    	mode = 1;
+    	printf("Rotaciones ACTIVADAS\n");
     	break;
     
     case 't':
     case 'T': /* Escalado */
-    	printf("Escalado\n");
+    	mode = 2;
+    	printf("Escalado ACTIVADO\n");
     	break;
     
     case 'g':
     case 'G': /* Transformaciones ref mundo */
-    	printf("Mundo\n");
+    	referencia = 1;
+    	printf("Referencia del MUNDO\n");
     	break;
     	
     case 'l':
     case 'L': /* Transformaciones ref objetos */
-    	printf("Objetos");
+    	referencia = 0;
+    	printf("Referencia del OBJETO\n");
     	break;
     	
     case 'o':
@@ -270,12 +275,12 @@ void keyboard(unsigned char key, int x, int y) {
     	
     case 'k':
     case 'K': /* Transformaciones camara actual */
-    	printf("Transformaciones Camara Actual\n");
+    	printf("Funcionalidad no implementada\n");
     	break;
     	
     case 'a':
     case 'A': /* Transformaciones luz selecionada */
-    	printf("Transformaciones luz actual\n");
+    	printf("Funcionalidad no implementada\n");
     	
     case '?':
         print_help();
@@ -297,6 +302,44 @@ void keyboard(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
+void translation(double x, double y, double z)
+{
+	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
+    		glMultMatrix(A) => A*B, dónde B és la matrix de glLoadMatrix(B)
+    		para multiplicar por la izquierda, cargas la otra matrix.
+    	
+    	 */
+    	 
+    	elem_matrix *new_mptr;
+    	 
+    	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
+    	new_mptr->nextptr = _selected_object->mptr;
+    	
+    	glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_selected_object->mptr->M);
+    	glTranslated(x, y, z);
+    	
+    	_selected_object->mptr = new_mptr;
+    	
+    	glGetDoublev(GL_MODELVIEW_MATRIX,new_mptr->M);
+
+    	
+    	
+    	glutPostRedisplay();
+}
+
+void rotation(double a)
+{
+
+}
+
+void scale(double lambda)
+{
+
+}
+
+
+
 /**
  * @brief Callback function to control the special keys
  * @param key Key that has been pressed
@@ -305,48 +348,177 @@ void keyboard(unsigned char key, int x, int y) {
  */
 void special(int key, int x, int y)
 {
-
-    /* Suposo que això s'implementarà amb booleans globals. Si esta activat un, els altres no i podrem posar un if o un altre switch amb un char o una variable més complexa. De moment no toca */
+    if(_selected_object != 0)
+    {
     switch (key)
     {
     	case 100: /* LEFT ARROW */
     		printf("TECLA ESQUERRA\n");
-    		    	
-	    	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
-	    		glMultMatrix(A) => A*B, dónde B és la matrix de glLoadMatrix(B)
-	    		para multiplicar por la izquierda, cargas la otra matrix.
-	    	
-	    	 */
-	    	 
-	    	elem_matrix *new_mptr;
-	    	 
-	    	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
-	    	new_mptr->nextptr = _selected_object->mptr;
-	    	
-	    	glMatrixMode(GL_MODELVIEW);
-	    	glLoadMatrixd(_selected_object->mptr->M);
-	    	glTranslated(-1.0,0.0,0.0);
-	    	
-	    	_selected_object->mptr = new_mptr;
-	    	
-	    	glGetDoublev(GL_MODELVIEW_MATRIX,new_mptr->M);
-
-	    	
-	    	
-	    	glutPostRedisplay();
-    		
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(-1.0,0.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(-1.0,0.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			default:
+    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				
+    		}
     		break;
     		
     	case 101: /* UP ARROW */
     		printf("TECLA AMUNT\n");
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,1.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,1.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			default:
+    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				
+    		}
     		break;
+    		
     		
     	case 102: /* RIGHT ARROW */
     		printf("TECLA DRETA\n");
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(1.0,0.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(1.0,0.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			default:
+    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				
+    		}
     		break;
     		
     	case 103: /* DOWN ARROW */
     		printf("TECLA AVALL\n");
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,-1.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,-1.0,0.0);
+	    					break;
+	    				case 1:
+	    					rotation(0.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0);
+	    					break;
+	    				default:
+	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    			}
+	    			break;
+    			default:
+    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				
+    		}
     		break;
     		
     	case 104: /* REPAG */
@@ -359,6 +531,11 @@ void special(int key, int x, int y)
     		
    	default:
    		printf("%d \n", key);
+    }
+    }
+    else
+    {
+    	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
     }
 }
 

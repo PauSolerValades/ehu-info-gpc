@@ -16,8 +16,14 @@ GLdouble _ortho_z_min,_ortho_z_max;         /*Variables for the control of the o
 object3d * _first_object= 0;                /*List of objects*/
 object3d * _selected_object = 0;            /*Object currently selected*/
 
+int mode;
+int referencia;
+
 /** GENERAL INITIALIZATION **/
 void initialization (){
+
+    mode = -1;
+    referencia = -1;
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
