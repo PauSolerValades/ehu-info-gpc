@@ -56,6 +56,11 @@
 
 #define KG_MAX_DOUBLE                       10E25
 
+#define T					0.5
+#define A					10.0
+#define US					1.1
+#define DS					0.9
+
 /** STRUCTURES **/
 
 /****************************

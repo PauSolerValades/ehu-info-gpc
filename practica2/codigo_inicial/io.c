@@ -33,6 +33,21 @@ void print_help(){
     printf("<CTRL + +>\t Bistaratze-eremua txikitu\n");
     printf("\n\n");
 }
+
+void print_enonmode()
+{
+	printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+}
+void print_eworld()
+{
+	printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+}
+
+void print_enonobject()
+{
+	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
+}
+
 /*
 free the memory of a 3dobject.
 has to be freed:
@@ -47,22 +62,6 @@ void destructor(object3d* object)
 {
     int i;
     elem_matrix *aux;
-    /*
-    //això allibera els vertexs de vertex_table
-    for(i = 0; i<object3d->num_vertices; i++)
-    {
-        free(object3d->vertex_table[i]); //a cada element de vertex_table hi ha una struct vertex
-    }
-
-    for(i=0; i<object3d->num_faces; i++)
-    {
-        for(j=0; j<object3d->face_table->num_vertices; j++)
-        {
-            free(object3d->face_table[i]->vertex_table[j]);
-        }
-        free(object3d->face_table[i]);
-    }
-    */
 
     /*we free the vertex table*/
     free(object->vertex_table);
@@ -293,6 +292,17 @@ void keyboard(unsigned char key, int x, int y) {
         
     case 26: /* CONTROL+Z */
     	printf("Deshacer\n");
+    	/* TODO: PREGUNTAR PERQUÈ NO VA :( */
+    	// la carrega bé però no l'hi fa el display correctament! Honestament, no entenc exactament perque...
+        	
+    	_actual_matrix = _actual_matrix->nextptr;
+    	
+    	glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_actual_matrix->M);
+    	
+    	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	glutPostRedisplay();
+ 	
     	break;
     	
     case 27: /* <ESC> */
@@ -321,6 +331,20 @@ void new_transformation()
 
 void translation(double x, double y, double z)
 {
+	
+	glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_actual_matrix->M);
+    	glTranslated(x, y, z);
+    	
+ 	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+ 	
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	
+ 	glutPostRedisplay();
+}
+
+void translation_nomes(double x, double y, double z)
+{
 	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
     		glMultMatrix(A) => A*B, dónde B és la matrix de glLoadMatrix(B)
     		para multiplicar por la izquierda, cargas la otra matrix.
@@ -343,12 +367,11 @@ void translation(double x, double y, double z)
     	glutPostRedisplay();
 }
 
-void translation_undo(double x, double y, double z)
+void rotation(double a, double x, double y, double z)
 {
-	
 	glMatrixMode(GL_MODELVIEW);
     	glLoadMatrixd(_actual_matrix->M);
-    	glTranslated(x, y, z);
+    	glRotated(a, x, y, z);
     	
  	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
  	
@@ -357,14 +380,17 @@ void translation_undo(double x, double y, double z)
  	glutPostRedisplay();
 }
 
-void rotation(double a)
+void scale(double lx, double ly, double lz)
 {
-
-}
-
-void scale(double lambda)
-{
-
+	glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_actual_matrix->M);
+    	glScaled(lx, ly, lz);
+    	
+ 	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+ 	
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	
+ 	glutPostRedisplay();
 }
 
 
@@ -389,36 +415,38 @@ void special(int key, int x, int y)
 	    			switch(mode)
 	    			{
 	    				case 0:
-	    					translation_undo(-1.0,0.0,0.0);
+	    					translation(-T,0.0,0.0);
+	    					//translation(-1.0,0.0,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					//angle is in degrees
+	    					rotation(A, 0.0, -1.0, 0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					scale(DS, 1.0, 1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			case 1: //mundo
     				switch(mode)
 	    			{
 	    				case 0:
-	    					translation(-1.0,0.0,0.0);
+	    					translation(-T,0.0,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					rotation(A, 0.0, 1.0, 0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					//scale(2.0, 2.0, 2.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			default:
-    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				print_enonmode();
     				
     		}
     		break;
@@ -431,36 +459,37 @@ void special(int key, int x, int y)
 	    			switch(mode)
 	    			{
 	    				case 0:
-	    					translation(0.0,1.0,0.0);
+	    					translation(0.0, T, 0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					rotation(A, -1.0, 0.0, 0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					scale(1.0, US, 1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();		
+	    					
 	    			}
 	    			break;
     			case 1: //mundo
     				switch(mode)
 	    			{
 	    				case 0:
-	    					translation(0.0,1.0,0.0);
+	    					translation(0.0,T,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					//rotation(0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					//scale(1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			default:
-    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				print_eworld();
     				
     		}
     		break;
@@ -474,36 +503,36 @@ void special(int key, int x, int y)
 	    			switch(mode)
 	    			{
 	    				case 0:
-	    					translation(1.0,0.0,0.0);
+	    					translation(T,0.0,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					rotation(A, 0.0, 1.0, 0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					scale(US, 1.0, 1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			case 1: //mundo
     				switch(mode)
 	    			{
 	    				case 0:
-	    					translation(1.0,0.0,0.0);
+	    					translation(T,0.0,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					//rotation(0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					//scale(1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			default:
-    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				print_eworld();
     				
     		}
     		break;
@@ -516,46 +545,121 @@ void special(int key, int x, int y)
 	    			switch(mode)
 	    			{
 	    				case 0:
-	    					translation(0.0,-1.0,0.0);
+	    					translation(0.0,-T,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					rotation(A, 1.0, 0.0, 0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					scale(1.0, DS, 1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			case 1: //mundo
     				switch(mode)
 	    			{
 	    				case 0:
-	    					translation(0.0,-1.0,0.0);
+	    					translation(0.0,-T,0.0);
 	    					break;
 	    				case 1:
-	    					rotation(0.0);
+	    					//rotation(0.0);
 	    					break;
 	    				case 2:
-	    					scale(1.0);
+	    					//scale(1.0);
 	    					break;
 	    				default:
-	    					printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+	    					print_enonmode();
 	    			}
 	    			break;
     			default:
-    				printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
+    				print_enonmode();
     				
     		}
     		break;
     		
     	case 104: /* REPAG */
     		printf("TECLA REPAG\n");
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0, 0.0, T);
+	    					break;
+	    				case 1:
+	    					rotation(A, 0.0, 0.0, 1.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0, 1.0, DS);
+	    					break;
+	    				default:
+	    					print_enonmode();
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,T,0.0);
+	    					break;
+	    				case 1:
+	    					//rotation(0.0);
+	    					break;
+	    				case 2:
+	    					//scale(1.0);
+	    					break;
+	    				default:
+	    					print_enonmode();
+	    			}
+	    			break;
+    			default:
+    				print_eworld();    				
+    		}
     		break;
-    		
+    		   		
     	case 105: /* AVPAG */
     		printf("TECLA AVPAG\n");
+    		switch(referencia)
+    		{
+    			case 0: //objeto
+	    			switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,0.0,T);
+	    					break;
+	    				case 1:
+	    					rotation(A, 0.0, 0.0, -1.0);
+	    					break;
+	    				case 2:
+	    					scale(1.0, 1.0, US);
+	    					break;
+	    				default:
+	    					print_enonmode();
+	    			}
+	    			break;
+    			case 1: //mundo
+    				switch(mode)
+	    			{
+	    				case 0:
+	    					translation(0.0,T,0.0);
+	    					break;
+	    				case 1:
+	    					//rotation(0.0);
+	    					break;
+	    				case 2:
+	    					//scale(1.0);
+	    					break;
+	    				default:
+	    					print_enonmode();
+	    			}
+	    			break;
+    			default:
+    				print_eworld();
+    				
+    		}
     		break;
     		
    	default:
@@ -564,7 +668,9 @@ void special(int key, int x, int y)
     }
     else
     {
-    	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
+    	print_enonobject();
     }
+    
+    glutPostRedisplay();
 }
 
