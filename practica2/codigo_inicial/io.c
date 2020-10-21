@@ -314,43 +314,48 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 25:
-		printf("Rehacer\n");
-
+		
 		//_selected_object->display = _selected_object->mptr + ((_selected_object->num_undos) - 1) * (sizeof(elem_matrix));
 
-		elem_matrix *iter;
-		elem_matrix *ant;
-
-		iter = _selected_object->mptr->nextptr;
-		ant = _selected_object->mptr;
-		
-    	
-		while(1)
+		if(_selected_object->num_undos > 0)
 		{
-
-			if(_selected_object->display==iter)
-				break;
-
-			ant = iter;
-			iter = iter->nextptr;
+			printf("Rehacer\n");
 			
+			elem_matrix *iter;
+			elem_matrix *ant;
+
+			iter = _selected_object->mptr->nextptr;
+			ant = _selected_object->mptr;
+			
+	    	
+			while(1)
+			{
+
+				if(_selected_object->display==iter)
+					break;
+
+				ant = iter;
+				iter = iter->nextptr;
+				
+			}
+			
+			_selected_object->display = ant;	
+			_selected_object->num_undos -= 1;
+    		}
+		else
+		{
+			printf("No más redo\n");
 		}
-		
-		_selected_object->display = ant;	
-		_selected_object->num_undos -= 1;
-    	
-
-		printf("%d\n", _selected_object->num_undos);
-
 		glutPostRedisplay();
 
 		break;
 
 	case 26: /* CONTROL+Z */
-		printf("Deshacer\n");
 
 		if (_selected_object->display->nextptr != 0)
 		{
+			printf("Deshacer\n");
+			
 			_selected_object->display = _selected_object->display->nextptr;
 			_selected_object->num_undos++;
 		}
@@ -358,10 +363,7 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			printf("No más undos\n");
 		}
-		//glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixd(_selected_object->display->M);
 
-		glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 		glutPostRedisplay();
 
 		break;
