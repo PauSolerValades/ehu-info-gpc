@@ -102,7 +102,7 @@ void display(void) {
         }
 
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
-        glLoadMatrixd(aux_obj->mptr->M);
+        glLoadMatrixd(aux_obj->display->M); //TODO: ULL QUE AIXÒ ESTA CANVIAT
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
             //dibujas cada estructura, en sus

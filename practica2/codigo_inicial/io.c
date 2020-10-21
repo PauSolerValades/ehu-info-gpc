@@ -6,8 +6,6 @@
 extern object3d * _first_object;
 extern object3d * _selected_object;
 
-extern elem_matrix * _actual_matrix;
-
 extern GLdouble _ortho_x_min,_ortho_x_max;
 extern GLdouble _ortho_y_min,_ortho_y_max;
 extern GLdouble _ortho_z_min,_ortho_z_max;
@@ -87,6 +85,20 @@ void destructor(object3d* object)
 
 }
 
+void borrar_lista_objetos()
+{
+	/* PREGUNTAR SI ES NECESARIO */	
+	
+	object3d *del;
+    	
+    	while(_first_object->next != 0)
+	{
+		del = _first_object;
+		_first_object = _first_object->next;
+		destructor(del);    
+	}
+}
+
 
 /**
  * @brief Callback function to control the basic keys
@@ -146,11 +158,14 @@ void keyboard(unsigned char key, int x, int y) {
             mptr->M[10] = 1.0;
             mptr->M[15] = 1.0;
 
-            //assignamos la matriz a la id.
+            //asignamos la matriz a la id.
             _selected_object->mptr = mptr;
             
-            //assignamos la variable global
-            _actual_matrix = mptr;
+            //asignamos la variable global
+            _selected_object->display = mptr;
+            
+            //declaramos el num_undos
+            _selected_object->num_undos = 0;
 
             printf("%s\n",KG_MSSG_FILEREAD);
             break;
@@ -290,22 +305,62 @@ void keyboard(unsigned char key, int x, int y) {
         print_help();
         break;
         
+    case 25:
+    	printf("Rehacer\n");
+    	
+    	int toAdd = ((_selected_object->num_undos)-1)*(sizeof(elem_matrix));
+    	
+    	_selected_object->display = _selected_object->mptr + toAdd;
+    	
+    	/*
+    	int i;
+    	elem_matrix *aux;
+    	elem_matrix *first_matrix;
+    	
+    	//printf("%d\n", _selected_object->num_undos);
+    	
+    	first_matrix = _selected_object->display; 
+    	
+    	for(i=_selected_object->num_undos-1; i>0; i--)
+    		aux = first_matrix->nextptr;
+    		
+	_selected_object->display = aux; 
+	 	
+    	_selected_object->num_undos -= 1;
+    	*/
+    	
+    	printf("%d\n", _selected_object->num_undos);
+
+    	
+ 	glutPostRedisplay();
+    	
+    	break;
+        
     case 26: /* CONTROL+Z */
     	printf("Deshacer\n");
-    	/* TODO: PREGUNTAR PERQUÈ NO VA :( */
-    	// la carrega bé però no l'hi fa el display correctament! Honestament, no entenc exactament perque...
-        	
-    	_actual_matrix = _actual_matrix->nextptr;
+        
+        if (_selected_object->display->nextptr != 0)
+        {
+		_selected_object->display = _selected_object->display->nextptr;
+		_selected_object->num_undos;
+	}
+	else
+	{
+		printf("No más undos\n");
+	}
+    	//glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_selected_object->display->M);
     	
-    	glMatrixMode(GL_MODELVIEW);
-    	glLoadMatrixd(_actual_matrix->M);
-    	
-    	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+    	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
  	glutPostRedisplay();
  	
     	break;
     	
     case 27: /* <ESC> */
+    	/* TODO: eliminar los objetos que no se han suprimido manualmente */
+    	
+    	borrar_lista_objetos();
+    	
         exit(0);
         break;
 
@@ -323,72 +378,49 @@ void new_transformation()
     	 
     	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
     	
-    	new_mptr->nextptr = _selected_object->mptr;
     	_selected_object->mptr = new_mptr;
+    	new_mptr->nextptr = _selected_object->display;
+    	_selected_object->display = _selected_object->mptr; //new_mptr;
     	
-    	_actual_matrix = _selected_object->mptr;
+    	/* TODO: BORRAR LES MATRIUS QUE ES PERDEN AQUÍ */
 }
 
 void translation(double x, double y, double z)
 {
 	
-	glMatrixMode(GL_MODELVIEW);
-    	glLoadMatrixd(_actual_matrix->M);
+	//glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_selected_object->display->M);
     	glTranslated(x, y, z);
     	
  	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
  	
- 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
  	
  	glutPostRedisplay();
 }
 
-void translation_nomes(double x, double y, double z)
-{
-	/* OpenGl SIEMPRE MULTIPLICA POR LA DERECHA
-    		glMultMatrix(A) => A*B, dónde B és la matrix de glLoadMatrix(B)
-    		para multiplicar por la izquierda, cargas la otra matrix.
-    	
-    	 */
-    	 
-    	elem_matrix *new_mptr;
-    	 
-    	new_mptr = (elem_matrix *) malloc(sizeof(elem_matrix));
-    	new_mptr->nextptr = _selected_object->mptr;
-    	
-    	glMatrixMode(GL_MODELVIEW);
-    	glLoadMatrixd(_selected_object->mptr->M);
-    	glTranslated(x, y, z);
-    	
-    	_selected_object->mptr = new_mptr;
-    	
-    	glGetDoublev(GL_MODELVIEW_MATRIX, new_mptr->M);
-    	
-    	glutPostRedisplay();
-}
-
 void rotation(double a, double x, double y, double z)
 {
-	glMatrixMode(GL_MODELVIEW);
-    	glLoadMatrixd(_actual_matrix->M);
+	//glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_selected_object->display->M);
     	glRotated(a, x, y, z);
     	
  	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
  	
- 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
  	
  	glutPostRedisplay();
 }
 
 void scale(double lx, double ly, double lz)
 {
-	glMatrixMode(GL_MODELVIEW);
-    	glLoadMatrixd(_actual_matrix->M);
+	//glMatrixMode(GL_MODELVIEW);
+    	glLoadMatrixd(_selected_object->display->M);
     	glScaled(lx, ly, lz);
     	
  	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
  	
- 	glGetDoublev(GL_MODELVIEW_MATRIX, _actual_matrix->M);
+ 	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
  	
  	glutPostRedisplay();
 }
