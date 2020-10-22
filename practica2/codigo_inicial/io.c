@@ -68,8 +68,8 @@ void borrar_matrices(elem_matrix *first_ptr, elem_matrix *last_ptr)
 			break;
 
 		aux = first_ptr;
+		first_ptr = first_ptr->nextptr;
 		free(aux);
-		first_ptr = last_ptr;
 		
 	}
 
@@ -106,19 +106,6 @@ void destructor(object3d *object)
 	free(object);
 }
 
-void borrar_lista_objetos()
-{
-	/* PREGUNTAR SI ES NECESARIO */
-
-	object3d *del;
-
-	while (_first_object->next != 0)
-	{
-		del = _first_object;
-		_first_object = _first_object->next;
-		destructor(del);
-	}
-}
 
 /**
  * @brief Callback function to control the basic keys
@@ -332,8 +319,6 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 25:
-		
-		//_selected_object->display = _selected_object->mptr + ((_selected_object->num_undos) - 1) * (sizeof(elem_matrix));
 
 		if(_selected_object->display != _selected_object->mptr)
 		{
@@ -402,7 +387,7 @@ void new_transformation()
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 
-	if(_selected_object->mptr == _selected_object->display)
+	if(_selected_object->mptr != _selected_object->display)
 	{
 		borrar_matrices(_selected_object->mptr, _selected_object->display);
 	}
@@ -412,45 +397,6 @@ void new_transformation()
 	_selected_object->display = _selected_object->mptr; //new_mptr
 
 	/* TODO: BORRAR LES MATRIUS QUE ES PERDEN AQUÍ */
-}
-
-void translation(double x, double y, double z)
-{
-
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadMatrixd(_selected_object->display->M);
-	glTranslated(x, y, z);
-
-
-	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->mptr->M);
-
-	glutPostRedisplay();
-}
-
-void rotation(double a, double x, double y, double z)
-{
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadMatrixd(_selected_object->display->M);
-	glRotated(a, x, y, z);
-
-	//new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-
-	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
-
-	glutPostRedisplay();
-}
-
-void scale(double lx, double ly, double lz)
-{
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadMatrixd(_selected_object->display->M);
-	glScaled(lx, ly, lz);
-
-	//new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-
-	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
-
-	glutPostRedisplay();
 }
 
 /**
@@ -473,17 +419,23 @@ void special(int key, int x, int y)
 	{
 	case 0:
 		switch (key){
-			case GLUT_KEY_UP :
+			case GLUT_KEY_UP:
 				glTranslated(0.0, T, 0.0);
 				break;
 			case GLUT_KEY_DOWN:
 				glTranslated(0.0, -T, 0.0);
 				break;
-			case GLUT_KEY_RIGHT :
+			case GLUT_KEY_RIGHT:
 				glTranslated(T, 0.0, 0.0);
 				break;
-			case GLUT_KEY_LEFT :
+			case GLUT_KEY_LEFT:
 				glTranslated(-T, 0.0, 0.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glTranslated(0.0, 0.0, T);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glTranslated(0.0, 0.0, -T);
 				break;
 			default:
 				break;
@@ -503,6 +455,12 @@ void special(int key, int x, int y)
 			case GLUT_KEY_LEFT :
 				glRotated(A, 0.0, -1.0, 0.0);
 				break;
+			case GLUT_KEY_PAGE_UP:
+				glRotated(A, 0.0, 0.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glRotated(A, 0.0, 0.0, -1.0);
+				break;
 			default:
 				break;
 		}
@@ -521,6 +479,12 @@ void special(int key, int x, int y)
 				break;
 			case GLUT_KEY_LEFT :
 				glScaled(DS, 1.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glScaled(0.0, 0.0, US);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glScaled(0.0, 0.0, DS);
 				break;
 			default:
 				break;
@@ -548,269 +512,4 @@ void special(int key, int x, int y)
 
 
 
-void special_MAL(int key, int x, int y)
-{
-	if (_selected_object != 0)
-	{
-		switch (key)
-		{
-		case 100: /* LEFT ARROW */
-			printf("TECLA ESQUERRA\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(-T, 0.0, 0.0);
-					//translation(-1.0,0.0,0.0);
-					break;
-				case 1:
-					//angle is in degrees
-					rotation(A, 0.0, -1.0, 0.0);
-					break;
-				case 2:
-					scale(DS, 1.0, 1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(-T, 0.0, 0.0);
-					break;
-				case 1:
-					rotation(A, 0.0, 1.0, 0.0);
-					break;
-				case 2:
-					//scale(2.0, 2.0, 2.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_enonmode();
-			}
-			break;
-
-		case 101: /* UP ARROW */
-			printf("TECLA AMUNT\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, T, 0.0);
-					break;
-				case 1:
-					rotation(A, -1.0, 0.0, 0.0);
-					break;
-				case 2:
-					scale(1.0, US, 1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, T, 0.0);
-					break;
-				case 1:
-					//rotation(0.0);
-					break;
-				case 2:
-					//scale(1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_eworld();
-			}
-			break;
-
-		case 102: /* RIGHT ARROW */
-			printf("TECLA DRETA\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(T, 0.0, 0.0);
-					break;
-				case 1:
-					rotation(A, 0.0, 1.0, 0.0);
-					break;
-				case 2:
-					scale(US, 1.0, 1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(T, 0.0, 0.0);
-					break;
-				case 1:
-					//rotation(0.0);
-					break;
-				case 2:
-					//scale(1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_eworld();
-			}
-			break;
-
-		case 103: /* DOWN ARROW */
-			printf("TECLA AVALL\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, -T, 0.0);
-					break;
-				case 1:
-					rotation(A, 1.0, 0.0, 0.0);
-					break;
-				case 2:
-					scale(1.0, DS, 1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, -T, 0.0);
-					break;
-				case 1:
-					//rotation(0.0);
-					break;
-				case 2:
-					//scale(1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_enonmode();
-			}
-			break;
-
-		case 104: /* REPAG */
-			printf("TECLA REPAG\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, 0.0, T);
-					break;
-				case 1:
-					rotation(A, 0.0, 0.0, 1.0);
-					break;
-				case 2:
-					scale(1.0, 1.0, DS);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, T, 0.0);
-					break;
-				case 1:
-					//rotation(0.0);
-					break;
-				case 2:
-					//scale(1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_eworld();
-			}
-			break;
-
-		case 105: /* AVPAG */
-			printf("TECLA AVPAG\n");
-			switch (referencia)
-			{
-			case 0: //objeto
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, 0.0, T);
-					break;
-				case 1:
-					rotation(A, 0.0, 0.0, -1.0);
-					break;
-				case 2:
-					scale(1.0, 1.0, US);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			case 1: //mundo
-				switch (mode)
-				{
-				case 0:
-					translation(0.0, T, 0.0);
-					break;
-				case 1:
-					//rotation(0.0);
-					break;
-				case 2:
-					//scale(1.0);
-					break;
-				default:
-					print_enonmode();
-				}
-				break;
-			default:
-				print_eworld();
-			}
-			break;
-
-		default:
-			printf("%d \n", key);
-		}
-	}
-	else
-	{
-		print_enonobject();
-	}
-
-	glutPostRedisplay();
-}
 
