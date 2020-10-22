@@ -22,3 +22,10 @@ PREGNTAS:
 - Preguntar sobre la actualización del display/si el multiplicado de matrizes es el correcto. EL DISPLAY NO SE TOCA, SOLO ACTUALIZAR MATRIZ. LA MULTIPLICACION YA ESTA OK
 - Preguntar sobre como se multiplica por la izq???
 - En el borrar, preguntar sobre el if..., si se tiene que rectificar o algo.. NO TOCAR NADA
+
+
+PREGUNTAS 2:
+- Borrar todos los objetos en el esc?
+- Borrar las matrices si haces undo, redo, undo: sí, eliminar l'int.
+- Preguntar si he hecho bien el redo/undo: sí, era la idea
+- Preguntar como va el modo mundo, qué tiene que hacer aprox.

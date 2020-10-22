@@ -9,5 +9,6 @@ void print_help();
 void print_enonmode();
 void print_eworld();
 void print_enonobject();
+void borrar_matrices(elem_matrix *first_prt, elem_matrix *last_ptr);
 
 #endif // IO_H

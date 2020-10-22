@@ -57,6 +57,24 @@ has to be freed:
 We have a face_table, which contains as many vertex_tables as num_vertex in face_table. We have to run over the face_table freeing every vertex table, then free the face_table. Then we repeat for each face.
 Freeing the linked list as normaly is done.
 */
+
+void borrar_matrices(elem_matrix *first_ptr, elem_matrix *last_ptr)
+{
+	elem_matrix *aux;
+
+	while(1)
+	{
+		if(first_ptr==last_ptr)
+			break;
+
+		aux = first_ptr;
+		free(aux);
+		first_ptr = last_ptr;
+		
+	}
+
+}
+
 void destructor(object3d *object)
 {
 	int i;
@@ -74,13 +92,16 @@ void destructor(object3d *object)
 	free(object->face_table);
 
 	/* we free the linked list */
+
+	borrar_matrices(_selected_object->mptr, NULL);
+	/*
 	while (object->mptr != 0)
 	{
 		aux = object->mptr;
 		object->mptr = object->mptr->nextptr;
 		free(aux);
 	}
-
+	*/
 	/* finally, we delete the object itself */
 	free(object);
 }
@@ -165,9 +186,6 @@ void keyboard(unsigned char key, int x, int y)
 
 			//asignamos la variable global
 			_selected_object->display = mptr;
-
-			//declaramos el num_undos
-			_selected_object->num_undos = 0;
 
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
@@ -317,7 +335,7 @@ void keyboard(unsigned char key, int x, int y)
 		
 		//_selected_object->display = _selected_object->mptr + ((_selected_object->num_undos) - 1) * (sizeof(elem_matrix));
 
-		if(_selected_object->num_undos > 0)
+		if(_selected_object->display != _selected_object->mptr)
 		{
 			printf("Rehacer\n");
 			
@@ -340,7 +358,6 @@ void keyboard(unsigned char key, int x, int y)
 			}
 			
 			_selected_object->display = ant;	
-			_selected_object->num_undos -= 1;
     		}
 		else
 		{
@@ -352,12 +369,11 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 26: /* CONTROL+Z */
 
-		if (_selected_object->display->nextptr != 0)
+		if (_selected_object->display->nextptr != NULL)
 		{
 			printf("Deshacer\n");
 			
 			_selected_object->display = _selected_object->display->nextptr;
-			_selected_object->num_undos++;
 		}
 		else
 		{
@@ -369,10 +385,6 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 27: /* <ESC> */
-		/* TODO: eliminar los objetos que no se han suprimido manualmente */
-
-		borrar_lista_objetos();
-
 		exit(0);
 		break;
 
@@ -390,6 +402,11 @@ void new_transformation()
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 
+	if(_selected_object->mptr == _selected_object->display)
+	{
+		borrar_matrices(_selected_object->mptr, _selected_object->display);
+	}
+
 	_selected_object->mptr = new_mptr;
 	new_mptr->nextptr = _selected_object->display;
 	_selected_object->display = _selected_object->mptr; //new_mptr
@@ -401,12 +418,11 @@ void translation(double x, double y, double z)
 {
 
 	//glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(_selected_object->display->M);
+	//glLoadMatrixd(_selected_object->display->M);
 	glTranslated(x, y, z);
 
-	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->mptr->M);
+	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->mptr->M);
 
 	glutPostRedisplay();
 }
@@ -414,12 +430,12 @@ void translation(double x, double y, double z)
 void rotation(double a, double x, double y, double z)
 {
 	//glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(_selected_object->display->M);
+	//glLoadMatrixd(_selected_object->display->M);
 	glRotated(a, x, y, z);
 
-	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+	//new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
+	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
 	glutPostRedisplay();
 }
@@ -427,12 +443,12 @@ void rotation(double a, double x, double y, double z)
 void scale(double lx, double ly, double lz)
 {
 	//glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(_selected_object->display->M);
+	//glLoadMatrixd(_selected_object->display->M);
 	glScaled(lx, ly, lz);
 
-	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+	//new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
+	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
 	glutPostRedisplay();
 }
@@ -443,7 +459,96 @@ void scale(double lx, double ly, double lz)
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
+
 void special(int key, int x, int y)
+{
+	glMatrixMode(GL_MODELVIEW);
+	
+	if(referencia == 0)
+		glLoadMatrixd(_selected_object->display->M);
+	else
+		glLoadIdentity();
+
+	switch (mode)
+	{
+	case 0:
+		switch (key){
+			case GLUT_KEY_UP :
+				glTranslated(0.0, T, 0.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glTranslated(0.0, -T, 0.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glTranslated(T, 0.0, 0.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glTranslated(-T, 0.0, 0.0);
+				break;
+			default:
+				break;
+		}
+		break;
+	case 1:
+		switch (key){
+			case GLUT_KEY_UP :
+				glRotated(A, -1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glRotated(A, 1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glRotated(A, 0.0, 1.0, 0.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glRotated(A, 0.0, -1.0, 0.0);
+				break;
+			default:
+				break;
+		}
+		break;
+
+	case 2:
+		switch (key){
+			case GLUT_KEY_UP :
+				glScaled(1.0, US, 1.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glScaled(1.0, DS, 1.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glScaled(US, 1.0, 1.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glScaled(DS, 1.0, 1.0);
+				break;
+			default:
+				break;
+		}
+		break;
+
+	default:
+		break;
+		
+	}
+
+	if(referencia == 0) printf("No voy a hacer nada \n");
+	else
+	{
+	
+		glMultMatrixd(_selected_object->mptr->M);
+	}
+
+	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
+
+	glutPostRedisplay();
+}
+		
+
+
+
+void special_MAL(int key, int x, int y)
 {
 	if (_selected_object != 0)
 	{
@@ -708,3 +813,4 @@ void special(int key, int x, int y)
 
 	glutPostRedisplay();
 }
+
