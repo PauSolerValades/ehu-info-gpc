@@ -61,16 +61,21 @@ Freeing the linked list as normaly is done.
 void borrar_matrices(elem_matrix *first_ptr, elem_matrix *last_ptr)
 {
 	elem_matrix *aux;
-
+	int control;	
+	
+	control = 1;
+	//quan entren en aquesta funció, saps que first es diferent de last.
+	//si last es null, borra tota la linked list de matrius
 	while(1)
 	{
-		if(first_ptr==last_ptr)
-			break;
-
 		aux = first_ptr;
 		first_ptr = first_ptr->nextptr;
-		free(aux);
+		free(first_ptr);
 		
+		if(first_ptr==last_ptr)
+			break;
+		printf("Borro %d\n", control);
+		control++;
 	}
 
 }
@@ -93,15 +98,15 @@ void destructor(object3d *object)
 
 	/* we free the linked list */
 
-	borrar_matrices(_selected_object->mptr, NULL);
-	/*
+	//borrar_matrices(_selected_object->mptr, NULL);
+	
 	while (object->mptr != 0)
 	{
 		aux = object->mptr;
 		object->mptr = object->mptr->nextptr;
 		free(aux);
 	}
-	*/
+	
 	/* finally, we delete the object itself */
 	free(object);
 }
@@ -116,7 +121,7 @@ void destructor(object3d *object)
 void keyboard(unsigned char key, int x, int y)
 {
 
-	elem_matrix *mptr;
+	elem_matrix *new_mptr;
 	int i;
 
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
@@ -154,25 +159,25 @@ void keyboard(unsigned char key, int x, int y)
 			_selected_object = _first_object;
 
 			/* DONE: cargar matriz */
-			mptr = (elem_matrix *)malloc(sizeof(elem_matrix)); //guardem espai per la matriu identitat
-			mptr->nextptr = 0;								   //apuntem el seguent punter a 0
+			new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix)); //guardem espai per la matriu identitat
+			new_mptr->nextptr = NULL;//apuntem el seguent punter a 0
 
 			//llenamos la tabla M
 			for (i = 1; i < 15; i++)
 			{
-				mptr->M[i] = 0.0;
+				new_mptr->M[i] = 0.0;
 			}
 			//cutríssim pero va
-			mptr->M[0] = 1.0;
-			mptr->M[5] = 1.0;
-			mptr->M[10] = 1.0;
-			mptr->M[15] = 1.0;
+			new_mptr->M[0] = 1.0;
+			new_mptr->M[5] = 1.0;
+			new_mptr->M[10] = 1.0;
+			new_mptr->M[15] = 1.0;
 
 			//asignamos la matriz a la id.
-			_selected_object->mptr = mptr;
+			_selected_object->mptr = new_mptr;
 
 			//asignamos la variable global
-			_selected_object->display = mptr;
+			_selected_object->display = new_mptr;
 
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
@@ -203,13 +208,9 @@ void keyboard(unsigned char key, int x, int y)
 				/*To remove the first object we just set the first as the current's next*/
 				_first_object = _first_object->next;
 				/*Once updated the pointer to the first object it is save to free the memory*/
-				/*TODO: free the memory properly*/
-				destructor(_selected_object);
-				/*
-                //codi d'abans
-                free(_selected_object->next_matrix);
-                free(_selected_object);
-                */
+				/* Free all the memory object */
+				destructor(_selected_object);			
+
 				/*Finally, set the selected to the new first one*/
 				_selected_object = _first_object;
 			}
@@ -221,13 +222,9 @@ void keyboard(unsigned char key, int x, int y)
 					auxiliar_object = auxiliar_object->next;
 				/*Now we bypass the element to erase*/
 				auxiliar_object->next = _selected_object->next;
-				/*TODO: free the memory*/
+				/* Free all the memory object*/
 				destructor(_selected_object);
-				/*
-                //codi d'abans
-                free(_selected_object->next_matrix);
-                free(_selected_object);
-                */
+
 				/*and update the selection*/
 				_selected_object = auxiliar_object;
 			}
@@ -342,7 +339,7 @@ void keyboard(unsigned char key, int x, int y)
 				
 			}
 			
-			_selected_object->display = ant;	
+			_selected_object->display = ant;
     		}
 		else
 		{
@@ -354,11 +351,12 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 26: /* CONTROL+Z */
 
-		if (_selected_object->display->nextptr != NULL)
+		if (_selected_object->display->nextptr != 0)
 		{
 			printf("Deshacer\n");
-			
+				
 			_selected_object->display = _selected_object->display->nextptr;
+		
 		}
 		else
 		{
@@ -386,17 +384,36 @@ void new_transformation()
 	elem_matrix *new_mptr;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
-
+	
+	printf("NEW OBJECT ADDED\n");
+	
 	if(_selected_object->mptr != _selected_object->display)
 	{
-		borrar_matrices(_selected_object->mptr, _selected_object->display);
+		printf("BORRO MATRIUS\n");
+		//borrar_matrices(_selected_object->mptr, _selected_object->display);
+		
+		elem_matrix *aux;
+		
+		int control = 1;
+		
+		while(_selected_object->mptr != _selected_object->display)
+		{
+			aux = _selected_object->mptr;
+			_selected_object->mptr = _selected_object->mptr->nextptr;
+			free(aux);
+			
+			printf("Borro %d\n", control);
+			control++;
+		}
+		
 	}
-
+	
 	_selected_object->mptr = new_mptr;
 	new_mptr->nextptr = _selected_object->display;
-	_selected_object->display = _selected_object->mptr; //new_mptr
+	//new_mptr->nextptr = _selected_object->display;
+	_selected_object->display = new_mptr; //new_mptr
 
-	/* TODO: BORRAR LES MATRIUS QUE ES PERDEN AQUÍ */
+
 }
 
 /**
@@ -405,15 +422,15 @@ void new_transformation()
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
-
 void special(int key, int x, int y)
 {
 	glMatrixMode(GL_MODELVIEW);
 	
-	if(referencia == 0)
+	if(!referencia)
 		glLoadMatrixd(_selected_object->display->M);
 	else
 		glLoadIdentity();
+
 
 	switch (mode)
 	{
@@ -496,11 +513,9 @@ void special(int key, int x, int y)
 		
 	}
 
-	if(referencia == 0) printf("No voy a hacer nada \n");
-	else
+	if(referencia)
 	{
-	
-		glMultMatrixd(_selected_object->mptr->M);
+		glMultMatrixd(_selected_object->display->M);
 	}
 
 	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
