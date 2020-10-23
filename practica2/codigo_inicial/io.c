@@ -367,6 +367,10 @@ void keyboard(unsigned char key, int x, int y)
 
 		break;
 
+    case 114:
+        printf("He pulsado control\n");
+        break;
+
 	case 27: /* <ESC> */
 		exit(0);
 		break;
@@ -374,6 +378,7 @@ void keyboard(unsigned char key, int x, int y)
 	default:
 		/*In the default case we just print the code of the key. This is usefull to define new cases*/
 		printf("%d %c\n", key, key);
+        break;
 	}
 	/*In case we have do any modification affecting the displaying of the object, we redraw them*/
 	glutPostRedisplay();
@@ -422,8 +427,15 @@ void new_transformation()
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
-void special(int key, int x, int y)
+void special(int k, int x, int y)
 {
+    int elPutoControl;
+
+    elPutoControl = 0;
+    
+    if(_selected_object != NULL)
+    {
+
 	glMatrixMode(GL_MODELVIEW);
 	
 	if(!referencia)
@@ -435,7 +447,8 @@ void special(int key, int x, int y)
 	switch (mode)
 	{
 	case 0:
-		switch (key){
+		switch (k)
+        {
 			case GLUT_KEY_UP:
 				glTranslated(0.0, T, 0.0);
 				break;
@@ -454,12 +467,14 @@ void special(int key, int x, int y)
 			case GLUT_KEY_PAGE_DOWN:
 				glTranslated(0.0, 0.0, -T);
 				break;
-			default:
-				break;
+            default:
+                elPutoControl = 1;
+                printf("Tecla con funcionalidad no definida\n");
+                break;
 		}
 		break;
 	case 1:
-		switch (key){
+		switch (k){
 			case GLUT_KEY_UP :
 				glRotated(A, -1.0, 0.0, 0.0);
 				break;
@@ -478,13 +493,15 @@ void special(int key, int x, int y)
 			case GLUT_KEY_PAGE_DOWN:
 				glRotated(A, 0.0, 0.0, -1.0);
 				break;
-			default:
-				break;
+            default:
+                elPutoControl = 1;
+                printf("Tecla con funcionalidad no definida\n");
+                break;
 		}
 		break;
 
 	case 2:
-		switch (key){
+		switch (k){
 			case GLUT_KEY_UP :
 				glScaled(1.0, US, 1.0);
 				break;
@@ -503,25 +520,35 @@ void special(int key, int x, int y)
 			case GLUT_KEY_PAGE_DOWN:
 				glScaled(0.0, 0.0, DS);
 				break;
-			default:
-				break;
+            default:
+                elPutoControl = 1;
+                printf("Tecla con funcionalidad no definida\n");
+                break;
 		}
 		break;
 
 	default:
+        
 		break;
-		
 	}
 
 	if(referencia)
 	{
 		glMultMatrixd(_selected_object->display->M);
 	}
-
-	new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
-
+    
+    if(!elPutoControl)
+    {
+	    new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+	    glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
+    }
 	glutPostRedisplay();
+
+    }
+    else
+    {
+        print_enonobject();
+    }
 }
 		
 
