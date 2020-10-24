@@ -47,39 +47,6 @@ void print_enonobject()
 	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
 }
 
-/*
-free the memory of a 3dobject.
-has to be freed:
-- vertex_table: table filled with struct vertex. Check if openGL objects have to be freed
-- face_table: table filled with struct face. Again, check if openGL objects need to be freed
-- elem_matrix: linked list of structs elem_matrix.
-
-We have a face_table, which contains as many vertex_tables as num_vertex in face_table. We have to run over the face_table freeing every vertex table, then free the face_table. Then we repeat for each face.
-Freeing the linked list as normaly is done.
-*/
-
-void borrar_matrices(elem_matrix *first_ptr, elem_matrix *last_ptr)
-{
-	elem_matrix *aux;
-	int control;	
-	
-	control = 1;
-	//quan entren en aquesta funció, saps que first es diferent de last.
-	//si last es null, borra tota la linked list de matrius
-	while(1)
-	{
-		aux = first_ptr;
-		first_ptr = first_ptr->nextptr;
-		free(first_ptr);
-		
-		if(first_ptr==last_ptr)
-			break;
-		printf("Borro %d\n", control);
-		control++;
-	}
-
-}
-
 void destructor(object3d *object)
 {
 	int i;
@@ -97,9 +64,6 @@ void destructor(object3d *object)
 	free(object->face_table);
 
 	/* we free the linked list */
-
-	//borrar_matrices(_selected_object->mptr, NULL);
-	
 	while (object->mptr != 0)
 	{
 		aux = object->mptr;
@@ -288,13 +252,13 @@ void keyboard(unsigned char key, int x, int y)
 	case 'g':
 	case 'G': /* Transformaciones ref mundo */
 		referencia = 1;
-		printf("Referencia del MUNDO\n");
+		printf("Referencia GLOBAL\n");
 		break;
 
 	case 'l':
 	case 'L': /* Transformaciones ref objetos */
 		referencia = 0;
-		printf("Referencia del OBJETO\n");
+		printf("Referencia OBJETO\n");
 		break;
 
 	case 'o':
@@ -381,41 +345,36 @@ void keyboard(unsigned char key, int x, int y)
         break;
 	}
 	/*In case we have do any modification affecting the displaying of the object, we redraw them*/
+	
+	free(fname);
 	glutPostRedisplay();
 }
 
 void new_transformation()
 {
-	elem_matrix *new_mptr;
+	int control;
+	elem_matrix *new_mptr, *aux;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 	
-	printf("NEW OBJECT ADDED\n");
+	//printf("NEW OBJECT ADDED\n");
 	
-	if(_selected_object->mptr != _selected_object->display)
+	control = 1;
+	
+	while(_selected_object->mptr != _selected_object->display)
 	{
-		printf("BORRO MATRIUS\n");
-		//borrar_matrices(_selected_object->mptr, _selected_object->display);
+		aux = _selected_object->mptr;
+		_selected_object->mptr = _selected_object->mptr->nextptr;
+		free(aux);
 		
-		elem_matrix *aux;
-		
-		int control = 1;
-		
-		while(_selected_object->mptr != _selected_object->display)
-		{
-			aux = _selected_object->mptr;
-			_selected_object->mptr = _selected_object->mptr->nextptr;
-			free(aux);
-			
-			printf("Borro %d\n", control);
-			control++;
-		}
-		
+		//printf("Borro %d\n", control);
+		control++;
 	}
+	
+
 	
 	_selected_object->mptr = new_mptr;
 	new_mptr->nextptr = _selected_object->display;
-	//new_mptr->nextptr = _selected_object->display;
 	_selected_object->display = new_mptr; //new_mptr
 
 
@@ -429,9 +388,9 @@ void new_transformation()
  */
 void special(int k, int x, int y)
 {
-    int elPutoControl;
+    int isAKey;
 
-    elPutoControl = 0;
+    isAKey = 0;
     
     if(_selected_object != NULL)
     {
@@ -468,8 +427,7 @@ void special(int k, int x, int y)
 				glTranslated(0.0, 0.0, -T);
 				break;
             default:
-                elPutoControl = 1;
-                printf("Tecla con funcionalidad no definida\n");
+                isAKey = 1;
                 break;
 		}
 		break;
@@ -494,8 +452,7 @@ void special(int k, int x, int y)
 				glRotated(A, 0.0, 0.0, -1.0);
 				break;
             default:
-                elPutoControl = 1;
-                printf("Tecla con funcionalidad no definida\n");
+                isAKey = 1;
                 break;
 		}
 		break;
@@ -521,14 +478,13 @@ void special(int k, int x, int y)
 				glScaled(0.0, 0.0, DS);
 				break;
             default:
-                elPutoControl = 1;
-                printf("Tecla con funcionalidad no definida\n");
+                isAKey = 1;
                 break;
 		}
 		break;
 
 	default:
-        
+        	print_enonmode();
 		break;
 	}
 
@@ -537,7 +493,7 @@ void special(int k, int x, int y)
 		glMultMatrixd(_selected_object->display->M);
 	}
     
-    if(!elPutoControl)
+    if(!isAKey)
     {
 	    new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 	    glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);

@@ -24,8 +24,8 @@ int referencia;
 /** GENERAL INITIALIZATION **/
 void initialization (){
 
-    mode = 0;
-    referencia = 0;
+    mode = -1; //ninguna por defecro.
+    referencia = 0; //por defecto a objeto.
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
