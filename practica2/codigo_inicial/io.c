@@ -47,6 +47,12 @@ void print_enonobject()
 	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
 }
 
+/**
+Called in supr, this function frees al the dynamic memory used in a 3d objet:
+	- elem_matrices
+	- vertices_table
+	- face_tables
+*/
 void destructor(object3d *object)
 {
 	int i;
@@ -75,6 +81,173 @@ void destructor(object3d *object)
 	free(object);
 }
 
+/**
+new_transformation() allocates memory for a new element matrix, adds it to the first element in the linked list matrixes of object3d and deletes all the matrixes that cannot be used again due to redo and undo functions.
+1
+*/
+void new_transformation()
+{
+	int control;
+	elem_matrix *new_mptr, *aux;
+
+	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
+	
+	//printf("NEW OBJECT ADDED\n");
+	
+	control = 1;
+	
+	while(_selected_object->mptr != _selected_object->display)
+	{
+		aux = _selected_object->mptr;
+		_selected_object->mptr = _selected_object->mptr->nextptr;
+		free(aux);
+		
+		//printf("Borro %d\n", control);
+		control++;
+	}
+	
+
+	
+	_selected_object->mptr = new_mptr;
+	new_mptr->nextptr = _selected_object->display;
+	_selected_object->display = new_mptr; //new_mptr
+
+
+}
+
+
+/**
+ * @brief Callback function to control the special keys
+ * @param key Key that has been pressed
+ * @param x X coordinate of the mouse pointer when the key was pressed
+ * @param y Y coordinate of the mouse pointer when the key was pressed
+ */
+void special(int k, int x, int y)
+{
+    int isAKey;
+
+    isAKey = 0;
+    
+    if(_selected_object != NULL)
+    {
+
+	glMatrixMode(GL_MODELVIEW);
+	
+	if(!referencia)
+		glLoadMatrixd(_selected_object->display->M);
+	else
+		glLoadIdentity();
+
+
+	switch (mode)
+	{
+	case 0:
+		switch (k)
+		{
+			case GLUT_KEY_UP:
+				glTranslated(0.0, T, 0.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glTranslated(0.0, -T, 0.0);
+				break;
+			case GLUT_KEY_RIGHT:
+				glTranslated(T, 0.0, 0.0);
+				break;
+			case GLUT_KEY_LEFT:
+				glTranslated(-T, 0.0, 0.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glTranslated(0.0, 0.0, T);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glTranslated(0.0, 0.0, -T);
+				break;
+			default:
+				isAKey = 1;
+				break;
+			}
+		break;
+	case 1:
+		switch (k)
+		{
+			case GLUT_KEY_UP :
+				glRotated(A, -1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glRotated(A, 1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glRotated(A, 0.0, 1.0, 0.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glRotated(A, 0.0, -1.0, 0.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glRotated(A, 0.0, 0.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glRotated(A, 0.0, 0.0, -1.0);
+				break;
+			default:
+				isAKey = 1;
+	        		break;
+		}
+		break;
+
+	case 2:
+		switch (k)
+		{
+			case GLUT_KEY_UP :
+				glScaled(1.0, US, 1.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glScaled(1.0, DS, 1.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glScaled(US, 1.0, 1.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glScaled(DS, 1.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glScaled(0.0, 0.0, US);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glScaled(0.0, 0.0, DS);
+				break;
+			case 43:
+				glScaled(DS, DS, DS);
+				printf("A\n");
+				break;
+			case 45:
+				glScaled(US, US, US);
+				break;
+			default:
+				isAKey = 1;
+				printf("AAA\n");
+				break;
+				}
+		break;
+
+	default:
+        	print_enonmode();
+		break;
+	}
+
+	if(referencia)
+		glMultMatrixd(_selected_object->display->M);
+    
+	    if(!isAKey)
+	    {
+		    new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+		    glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
+	    }
+		glutPostRedisplay();
+
+    }
+    else
+        print_enonobject();
+}
 
 /**
  * @brief Callback function to control the basic keys
@@ -82,6 +255,7 @@ void destructor(object3d *object)
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
+
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -195,7 +369,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-	case '+': //hace que todo se vea mas pequeño
+	case '-': //hace que todo se vea mas pequeño
 
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
@@ -211,9 +385,12 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_max = midy + he / 2;
 			_ortho_y_min = midy - he / 2;
 		}
+		else
+			special(43, x, y);
+			
 		break;
 
-	case '-': //hace que todo se vea más grande.
+	case '+': //hace que todo se vea más grande.
 
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
@@ -229,6 +406,9 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_max = midy + he / 2;
 			_ortho_y_min = midy - he / 2;
 		}
+		else
+			special(45, x, y);
+			
 		break;
 
 	case 'm':
@@ -348,165 +528,7 @@ void keyboard(unsigned char key, int x, int y)
 	
 	free(fname);
 	glutPostRedisplay();
-}
-
-void new_transformation()
-{
-	int control;
-	elem_matrix *new_mptr, *aux;
-
-	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
-	
-	//printf("NEW OBJECT ADDED\n");
-	
-	control = 1;
-	
-	while(_selected_object->mptr != _selected_object->display)
-	{
-		aux = _selected_object->mptr;
-		_selected_object->mptr = _selected_object->mptr->nextptr;
-		free(aux);
-		
-		//printf("Borro %d\n", control);
-		control++;
-	}
-	
-
-	
-	_selected_object->mptr = new_mptr;
-	new_mptr->nextptr = _selected_object->display;
-	_selected_object->display = new_mptr; //new_mptr
-
-
-}
-
-/**
- * @brief Callback function to control the special keys
- * @param key Key that has been pressed
- * @param x X coordinate of the mouse pointer when the key was pressed
- * @param y Y coordinate of the mouse pointer when the key was pressed
- */
-void special(int k, int x, int y)
-{
-    int isAKey;
-
-    isAKey = 0;
-    
-    if(_selected_object != NULL)
-    {
-
-	glMatrixMode(GL_MODELVIEW);
-	
-	if(!referencia)
-		glLoadMatrixd(_selected_object->display->M);
-	else
-		glLoadIdentity();
-
-
-	switch (mode)
-	{
-	case 0:
-		switch (k)
-        {
-			case GLUT_KEY_UP:
-				glTranslated(0.0, T, 0.0);
-				break;
-			case GLUT_KEY_DOWN:
-				glTranslated(0.0, -T, 0.0);
-				break;
-			case GLUT_KEY_RIGHT:
-				glTranslated(T, 0.0, 0.0);
-				break;
-			case GLUT_KEY_LEFT:
-				glTranslated(-T, 0.0, 0.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glTranslated(0.0, 0.0, T);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glTranslated(0.0, 0.0, -T);
-				break;
-            default:
-                isAKey = 1;
-                break;
-		}
-		break;
-	case 1:
-		switch (k){
-			case GLUT_KEY_UP :
-				glRotated(A, -1.0, 0.0, 0.0);
-				break;
-			case GLUT_KEY_DOWN:
-				glRotated(A, 1.0, 0.0, 0.0);
-				break;
-			case GLUT_KEY_RIGHT :
-				glRotated(A, 0.0, 1.0, 0.0);
-				break;
-			case GLUT_KEY_LEFT :
-				glRotated(A, 0.0, -1.0, 0.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glRotated(A, 0.0, 0.0, 1.0);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glRotated(A, 0.0, 0.0, -1.0);
-				break;
-            default:
-                isAKey = 1;
-                break;
-		}
-		break;
-
-	case 2:
-		switch (k){
-			case GLUT_KEY_UP :
-				glScaled(1.0, US, 1.0);
-				break;
-			case GLUT_KEY_DOWN:
-				glScaled(1.0, DS, 1.0);
-				break;
-			case GLUT_KEY_RIGHT :
-				glScaled(US, 1.0, 1.0);
-				break;
-			case GLUT_KEY_LEFT :
-				glScaled(DS, 1.0, 1.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glScaled(0.0, 0.0, US);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glScaled(0.0, 0.0, DS);
-				break;
-            default:
-                isAKey = 1;
-                break;
-		}
-		break;
-
-	default:
-        	print_enonmode();
-		break;
-	}
-
-	if(referencia)
-	{
-		glMultMatrixd(_selected_object->display->M);
-	}
-    
-    if(!isAKey)
-    {
-	    new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-	    glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
-    }
-	glutPostRedisplay();
-
-    }
-    else
-    {
-        print_enonobject();
-    }
-}
-		
+}		
 
 
 
