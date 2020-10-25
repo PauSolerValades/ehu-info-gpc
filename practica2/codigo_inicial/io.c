@@ -10,110 +10,18 @@ extern GLdouble _ortho_x_min, _ortho_x_max;
 extern GLdouble _ortho_y_min, _ortho_y_max;
 extern GLdouble _ortho_z_min, _ortho_z_max;
 
-extern int mode;	   //0: translación, 1: rotación, 2: escalado.
+extern int mode; //0: translación, 1: rotación, 2: escalado.
 extern int referencia; //0: objeto, 1: mundo
 
-/**
- * @brief This function just prints information about the use
- * of the keys
- */
-void print_help()
-{
-	printf("KbG Irakasgaiaren Praktika. Programa honek 3D objektuak \n");
-	printf("aldatzen eta bistaratzen ditu.  \n\n");
-	printf("\n\n");
-	printf("FUNTZIO NAGUSIAK \n");
-	printf("<?>\t\t Laguntza hau bistaratu \n");
-	printf("<ESC>\t\t Programatik irten \n");
-	printf("<F>\t\t Objektua bat kargatu\n");
-	printf("<TAB>\t\t Kargaturiko objektuen artean bat hautatu\n");
-	printf("<DEL>\t\t Hautatutako objektua ezabatu\n");
-	printf("<CTRL + ->\t Bistaratze-eremua handitu\n");
-	printf("<CTRL + +>\t Bistaratze-eremua txikitu\n");
-	printf("\n\n");
-}
-
-void print_enonmode()
-{
-	printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
-}
-void print_eworld()
-{
-	printf("No hay ninguna referencia seleccionada. Por favor, selecciona una con:\n- L -> Referencia Objeto\n- G -> Referencia Mundo\n");
-}
-
-void print_enonobject()
-{
-	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
-}
-
-/**
-Called in supr, this function frees al the dynamic memory used in a 3d objet:
-	- elem_matrices
-	- vertices_table
-	- face_tables
-*/
-void destructor(object3d *object)
-{
-	int i;
-	elem_matrix *aux;
-
-	/*we free the vertex table*/
-	free(object->vertex_table);
-
-	/* we free every vertex table of all the positions in face_table */
-	for (i = 0; i < object->num_faces; i++)
-	{
-		free(object->face_table[i].vertex_table);
-	}
-	/* we free the face_table */
-	free(object->face_table);
-
-	/* we free the linked list */
-	while (object->mptr != 0)
-	{
-		aux = object->mptr;
-		object->mptr = object->mptr->nextptr;
-		free(aux);
-	}
-	
-	/* finally, we delete the object itself */
-	free(object);
-}
-
-/**
-new_transformation() allocates memory for a new element matrix, adds it to the first element in the linked list matrixes of object3d and deletes all the matrixes that cannot be used again due to redo and undo functions.
-1
-*/
-void new_transformation()
-{
-	int control;
-	elem_matrix *new_mptr, *aux;
-
-	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
-	
-	//printf("NEW OBJECT ADDED\n");
-	
-	control = 1;
-	
-	while(_selected_object->mptr != _selected_object->display)
-	{
-		aux = _selected_object->mptr;
-		_selected_object->mptr = _selected_object->mptr->nextptr;
-		free(aux);
-		
-		//printf("Borro %d\n", control);
-		control++;
-	}
-	
-
-	
-	_selected_object->mptr = new_mptr;
-	new_mptr->nextptr = _selected_object->display;
-	_selected_object->display = new_mptr; //new_mptr
-
-
-}
+/* all the functions declared to improve the order of aperance */
+void print_help();
+void print_enonmode();
+void print_eworld();
+void print_enonobject();
+void destructor(object3d *object);
+void new_transformation();
+void special(int k, int x, int y);
+void keyboard(unsigned char key, int x, int y);
 
 
 /**
@@ -121,6 +29,8 @@ void new_transformation()
  * @param key Key that has been pressed
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
+ * 
+ * Heart of the application, calls gl to apply the scaling, rotating and translating transformations. Multiplies the matrix on the rigth if referencia = 0 and on left otherwise.
  */
 void special(int k, int x, int y)
 {
@@ -250,12 +160,47 @@ void special(int k, int x, int y)
 }
 
 /**
+new_transformation() allocates memory for a new element matrix, adds it to the first element in the linked list matrixes of object3d and deletes all the matrixes that cannot be used again due to redo and undo functions.
+1
+*/
+void new_transformation()
+{
+	int control;
+	elem_matrix *new_mptr, *aux;
+
+	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
+	
+	//printf("NEW OBJECT ADDED\n");
+	
+	control = 1;
+	
+	while(_selected_object->mptr != _selected_object->display)
+	{
+		aux = _selected_object->mptr;
+		_selected_object->mptr = _selected_object->mptr->nextptr;
+		free(aux);
+		
+		//printf("Borro %d\n", control);
+		control++;
+	}
+	
+
+	
+	_selected_object->mptr = new_mptr;
+	new_mptr->nextptr = _selected_object->display;
+	_selected_object->display = new_mptr; //new_mptr
+
+
+}
+
+
+
+/**
  * @brief Callback function to control the basic keys
  * @param key Key that has been pressed
  * @param x X coordinate of the mouse pointer when the key was pressed
  * @param y Y coordinate of the mouse pointer when the key was pressed
  */
-
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -296,7 +241,7 @@ void keyboard(unsigned char key, int x, int y)
 			_first_object = auxiliar_object;
 			_selected_object = _first_object;
 
-			/* DONE: cargar matriz */
+			/* Loading the firss matrix */
 			new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix)); //guardem espai per la matriu identitat
 			new_mptr->nextptr = NULL;//apuntem el seguent punter a 0
 
@@ -336,7 +281,6 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 127: /* <SUPR> */ //borrar objeto
 
-		/* si no hay objeto que borrar tiene que no borrar nada*/
 		/*Erasing an object depends on whether it is the first one or not*/
 		if (_first_object != 0)
 		{
@@ -385,7 +329,7 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_max = midy + he / 2;
 			_ortho_y_min = midy - he / 2;
 		}
-		else
+		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
 			special(43, x, y);
 			
 		break;
@@ -406,7 +350,7 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_max = midy + he / 2;
 			_ortho_y_min = midy - he / 2;
 		}
-		else
+		else /* Analogous of case '-': */
 			special(45, x, y);
 			
 		break;
@@ -432,7 +376,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'g':
 	case 'G': /* Transformaciones ref mundo */
 		referencia = 1;
-		printf("Referencia GLOBAL\n");
+		printf("Referencia MUNDO\n");
 		break;
 
 	case 'l':
@@ -526,9 +470,86 @@ void keyboard(unsigned char key, int x, int y)
 	}
 	/*In case we have do any modification affecting the displaying of the object, we redraw them*/
 	
-	free(fname);
+	free(fname); /* We have to free the memory used in the scanf */
 	glutPostRedisplay();
 }		
+
+/**
+Called in case supr, this function frees al the dynamic memory used in a object3d:
+	- vertex_table
+	- face_tables and all the vertex_table inside it
+	- linked list of elem_matrix
+*/
+void destructor(object3d *object)
+{
+	int i;
+	elem_matrix *aux;
+
+	/*we free the vertex table*/
+	free(object->vertex_table);
+
+	/* we free every vertex table of all the positions in face_table */
+	for (i = 0; i < object->num_faces; i++)
+	{
+		free(object->face_table[i].vertex_table);
+	}
+	/* we free the face_table */
+	free(object->face_table);
+
+	/* we free the linked list */
+	while (object->mptr != 0)
+	{
+		aux = object->mptr;
+		object->mptr = object->mptr->nextptr;
+		free(aux);
+	}
+	
+	/* finally, we delete the object itself */
+	free(object);
+}
+
+
+
+
+/**
+ * @brief This function just prints information about the use
+ * of the keys
+ */
+void print_help()
+{
+	printf("KbG Irakasgaiaren Praktika. Programa honek 3D objektuak \n");
+	printf("aldatzen eta bistaratzen ditu.  \n\n");
+	printf("\n\n");
+	printf("FUNTZIO NAGUSIAK \n");
+	printf("<?>\t\t Laguntza hau bistaratu \n");
+	printf("<ESC>\t\t Programatik irten \n");
+	printf("<F>\t\t Objektua bat kargatu\n");
+	printf("<TAB>\t\t Kargaturiko objektuen artean bat hautatu\n");
+	printf("<DEL>\t\t Hautatutako objektua ezabatu\n");
+	printf("<CTRL + ->\t Bistaratze-eremua handitu\n");
+	printf("<CTRL + +>\t Bistaratze-eremua txikitu\n");
+	printf("<M> \t\t Mode translation\n");
+	printf("<B> \t\t Mode rotation\n");
+	printf("<T> \t\t Mode scaling\n");
+	printf("<L> \t\t Object Reference\n");
+	printf("<G> \t\t Global Reference\n");
+	printf("<+/- in T> \t Scale up/down all the object axis\n\n");
+	
+	printf("Use the UP, DOWN, LEFT, RIGHT, AV_PAG, RE_PAG keys to apply the transformations M, B, T to the object selected respect himself (object reference) or respect to the axis (global reference)\n");
+	printf("\n\n");
+}
+
+/* Called if a transformation has not been selected */
+void print_enonmode()
+{
+	printf("No hay ninguna transformación selecionada. Por favor, seleccione una con:\n- M -> Translación\n- B -> Rotación\n- T -> Escalado\n");
+}
+
+/* Called if an object has not been loaded and the user tries to make a transformation */
+void print_enonobject()
+{
+	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
+}
 
 
 

@@ -102,7 +102,7 @@ void display(void) {
         }
 
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
-        glLoadMatrixd(aux_obj->display->M); //TODO: ULL QUE AIXÒ ESTA CANVIAT
+        glLoadMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
             //dibujas cada estructura, en sus
