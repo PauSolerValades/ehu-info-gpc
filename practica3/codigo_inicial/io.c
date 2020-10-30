@@ -23,6 +23,96 @@ void new_transformation();
 void special(int k, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 
+double dot_product(double v[], double u[], int n)
+{
+    double result = 0.0;
+    for (int i = 0; i < n; i++)
+        result += v[i]*u[i];
+    return result;
+}
+
+//stackoverflow.com/questions/42286219/matrix-inverse-accuracy
+
+void matrix_inv(GLdouble *a,GLdouble *b) // a[16] = Inverse(b[16])
+{
+    GLfloat x,y,z;
+    // transpose of rotation matrix
+    a[ 0]=b[ 0];
+    a[ 5]=b[ 5];
+    a[10]=b[10];
+    x=b[1]; a[1]=b[4]; a[4]=x;
+    x=b[2]; a[2]=b[8]; a[8]=x;
+    x=b[6]; a[6]=b[9]; a[9]=x;
+    // copy projection part
+    a[ 3]=b[ 3];
+    a[ 7]=b[ 7];
+    a[11]=b[11];
+    a[15]=b[15];
+    // convert origin: new_pos = - new_rotation_matrix * old_pos
+    x=(a[ 0]*b[12])+(a[ 4]*b[13])+(a[ 8]*b[14]);
+    y=(a[ 1]*b[12])+(a[ 5]*b[13])+(a[ 9]*b[14]);
+    z=(a[ 2]*b[12])+(a[ 6]*b[13])+(a[10]*b[14]);
+    a[12]=-x;
+    a[13]=-y;
+    a[14]=-z;
+}
+
+
+void inverse()
+{
+	int i;
+	double dot_productX;
+	double dot_productY;
+	double dot_productZ;
+
+	dot_productX = 0.0;
+	dot_productY = 0.0;
+	dot_productZ = 0.0;
+
+	for(i=0; i<=2; i++)
+	{
+		//producto escalar de X y assignación del vector x
+		dot_productX += _selected_object->display->M[i] * _selected_object->display->M[i+12];
+		_selected_object->display->inv_M[i] = _selected_object->display->M[4*i];
+
+		//producto escalar de X y assignación del vector x
+		dot_productY += _selected_object->display->M[i+4] * _selected_object->display->M[i+12];
+		_selected_object->display->inv_M[i+4] = _selected_object->display->M[(4*i)+1];
+
+		//producto escalar de X y assignación del vector x
+		dot_productZ += _selected_object->display->M[i+8] * _selected_object->display->M[i+12];
+		_selected_object->display->inv_M[i+8] = _selected_object->display->M[(4*i)+2];
+
+		printf("Entro\n");
+	}
+/*
+	for(i=0; i<=2; i++)
+	{
+		dot_productY += _selected_object->mptr->M[i+4] * _selected_object->mptr->M[i+12];
+		_selected_object->mptr->inv_M[i+1] = _selected_object->mptr->M[(4*i)+1];
+	}
+
+	for(i=0; i<=2; i++)
+	{
+		dot_productZ += _selected_object->mptr->M[i+8] * _selected_object->mptr->M[i+12];
+		_selected_object->mptr->inv_M[i+2] = _selected_object->mptr->M[(4*i)+2];
+	}
+*/
+	/* posem el producte escalar a la matriu */
+	_selected_object->mptr->inv_M[12] = -dot_productX;
+	_selected_object->mptr->inv_M[13] = -dot_productY;
+	_selected_object->mptr->inv_M[14] = -dot_productZ;
+	_selected_object->mptr->inv_M[15] = 1.0;
+
+	for(i=0; i<16; i++)
+		printf("%f\n",_selected_object->mptr->inv_M[i]);
+
+		if(i%5==0)
+		{
+			printf("\n");
+		}
+
+}
 
 /**
  * @brief Callback function to control the special keys
@@ -184,12 +274,11 @@ void new_transformation()
 		control++;
 	}
 	
-
+	inverse(); //se llama para todo selected object para cada transformación
 	
 	_selected_object->mptr = new_mptr;
 	new_mptr->nextptr = _selected_object->display;
 	_selected_object->display = new_mptr; //new_mptr
-
 
 }
 
@@ -249,12 +338,18 @@ void keyboard(unsigned char key, int x, int y)
 			for (i = 1; i < 15; i++)
 			{
 				new_mptr->M[i] = 0.0;
+				new_mptr->inv_M[i] = 0.0;
 			}
 			//cutríssim pero va
 			new_mptr->M[0] = 1.0;
 			new_mptr->M[5] = 1.0;
 			new_mptr->M[10] = 1.0;
 			new_mptr->M[15] = 1.0;
+
+			new_mptr->inv_M[0] = 1.0;
+			new_mptr->inv_M[5] = 1.0;
+			new_mptr->inv_M[10] = 1.0;
+			new_mptr->inv_M[15] = 1.0;
 
 			//asignamos la matriz a la id.
 			_selected_object->mptr = new_mptr;

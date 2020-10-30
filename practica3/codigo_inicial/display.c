@@ -91,8 +91,13 @@ void display(void) {
     glLoadIdentity();
     draw_axes();
 
+    if(_selected_object != 0)
+        glLoadMatrixd(_selected_object->display->inv_M);
+
     /*Now each of the objects in the list*/
     while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.
+
+        glPushMatrix();
 
         /* Select the color, depending on whether the current object is the selected one or not */
         if (aux_obj == _selected_object){
@@ -102,7 +107,7 @@ void display(void) {
         }
 
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
-        glLoadMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
+        glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
             //dibujas cada estructura, en sus
@@ -116,6 +121,8 @@ void display(void) {
             glEnd();
         }
         aux_obj = aux_obj->next;
+
+        glPopMatrix();
     }
     /*Do the actual drawing*/
     glFlush();

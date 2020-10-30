@@ -5,7 +5,7 @@
 
 /** DEFINITIONS **/
 
-#define KG_WINDOW_TITLE                     "Práctica GPO"
+#define KG_WINDOW_TITLE                     "Practica GPC Pau Soler"
 #define KG_WINDOW_WIDTH                     600
 #define KG_WINDOW_HEIGHT                    400
 #define KG_WINDOW_X                         50
@@ -115,6 +115,7 @@ typedef struct {
 typedef struct elem_matrix
 {
     double M[16]; 			/* Tabla M con 16 elementos */
+    double inv_M[16];       /* Tabla con 16 elementos, es la matriz inversa de M */
     struct elem_matrix *nextptr;	/* puntero a la siguiente matriz*/	
 } elem_matrix;				/* así el compliador reconoce elem_matrix como struct y no se tiene que poner struct elem_matrix cada vex*/
 
@@ -124,12 +125,12 @@ typedef struct elem_matrix
  * pile of 3D objects       *
  ****************************/
 struct object3d{
-    GLint num_vertices;		/* number of vertices in the object*/
+    GLint num_vertices;		    /* number of vertices in the object*/
     vertex *vertex_table;		/* table of vertices */
     GLint num_faces;			/* number of faces in the object */
     face *face_table;			/* table of faces */
-    point3 min;			/* coordinates' lower bounds */
-    point3 max;                   	/* coordinates' bigger bounds */
+    point3 min;			        /* coordinates' lower bounds */
+    point3 max;                 /* coordinates' bigger bounds */
     struct elem_matrix *display;
     struct elem_matrix *mptr;	/* next element in the pile of matrixes */
     struct object3d *next;		/* next element in the pile of objects */
