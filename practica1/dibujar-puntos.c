@@ -136,7 +136,7 @@ void calcular_interseccion(punto *A, punto *B, punto *pin, int h)
 	//if point A and B are aligned, we define to always return the x in the first point
 	else if(x==0)
 	{
-		printf("pin es A \n");
+		//printf("pin es A \n");
 		pin->x = (int) A->x;
 	}
 	else

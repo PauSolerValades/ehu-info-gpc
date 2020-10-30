@@ -330,7 +330,7 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_min = midy - he / 2;
 		}
 		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
-			special(43, x, y);
+			special(45, x, y);
 			
 		break;
 
@@ -351,7 +351,7 @@ void keyboard(unsigned char key, int x, int y)
 			_ortho_y_min = midy - he / 2;
 		}
 		else /* Analogous of case '-': */
-			special(45, x, y);
+			special(43, x, y);
 			
 		break;
 

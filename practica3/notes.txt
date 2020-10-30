@@ -1,0 +1,15 @@
+display()
+{
+	establecer Mprojection
+	MCDB <- la matriz de CSB de la camara
+	MODELVIEW <- MCDB
+	while(obj)
+	{
+		push()
+		glMultMatrix(obj-<M)
+		dibujar poligonos(obj)
+		pasar sig matrix
+	}
+	pop()
+}
+		
