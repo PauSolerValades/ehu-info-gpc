@@ -5,13 +5,16 @@
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
+//extern object3d *_first_camara;
+//extern object3d *_selected_camara;
 
 extern GLdouble _ortho_x_min, _ortho_x_max;
 extern GLdouble _ortho_y_min, _ortho_y_max;
 extern GLdouble _ortho_z_min, _ortho_z_max;
 
-extern int mode; //0: translación, 1: rotación, 2: escalado.
+extern int transformacion; //0: translación, 1: rotación, 2: escalado.
 extern int referencia; //0: objeto, 1: mundo
+extern int camara_interna;
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -104,7 +107,7 @@ void special(int k, int x, int y)
 		glLoadIdentity();
 
 
-	switch (mode)
+	switch (transformacion)
 	{
 	case 0:
 		switch (k)
@@ -417,19 +420,19 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'm':
 	case 'M': /* Activar Translación */
-		mode = 0;
+		transformacion = 0;
 		printf("Translaciones ACTIVADAS\n");
 		break;
 
 	case 'b':
 	case 'B': /* Rotación */
-		mode = 1;
+		transformacion = 1;
 		printf("Rotaciones ACTIVADAS\n");
 		break;
 
 	case 't':
 	case 'T': /* Escalado */
-		mode = 2;
+		transformacion = 2;
 		printf("Escalado ACTIVADO\n");
 		break;
 
@@ -450,9 +453,34 @@ void keyboard(unsigned char key, int x, int y)
 		printf("Objeto\n");
 		break;
 
-	case 'k':
+	case 'c': /* cambia a la siguiente camara */
+		printf("Siguiente camara\n");
+
+		break;
+
+	case 'C': /* Activa/desactiva la camara interna del objeto */
+		printf("CAMBIO A MODO OBJETO\n");
+		referencia = 0; /* No tiene sentido transformar la cámara cuando estás desde la perspectiva del objeto. */
+		
+		if(camara_interna)
+		{
+			printf("Camara No Interna\n");	
+			camara_interna = 0;
+		}
+		else
+		{
+			printf("Camara Interna\n");
+			camara_interna = 1;
+		}
+		break;
+
+	case 'k': /* ACTIVA EL MODO CÁMARA */
 	case 'K': /* Transformaciones camara actual */
-		printf("Funcionalidad no implementada\n");
+		printf("Camara ACTIVADA\n");
+		/* Necessitem dues coses:
+			- Booleà per controlar si usem la camara interna d'un objecte
+			- booleà pel mode camera (carrega la matriu del mode camara que está apuntada con el selected object.)
+		 */
 		break;
 
 	case 'a':
@@ -508,7 +536,7 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		else
 		{
-			printf("No más undos\n");
+			printf("No más undo\n");
 		}
 
 		glutPostRedisplay();

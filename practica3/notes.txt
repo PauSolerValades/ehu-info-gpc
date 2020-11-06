@@ -12,4 +12,15 @@ display()
 	}
 	pop()
 }
-		
+
+
+A ver:
+- Cuando estoy en modo camara necesito poder hacer cambios referencias/mundo? 
+- Necesito un booleano para controlar las opciones del modo camara?
+- Necesito un objeto camara. Qué punyetas tiene que tener?
+
+QUE SE TIENE QUÉ HACER:
+1. Definition del objeto camara. No creo que haga falta ponerlo dentro de un objecto.
+2. Inicializar el objecto camara de normal mirando al origen tal como se enciende el programa ahora (matriz de cambio de base la identidad)
+    2.1 qué valores tiene que tener, como se inicializa bla bla bla.
+3. Camara vs Transformaciones. Cuando modifico la camara no puedo modificar las transformaciones, tener un int de control de lo siguiente.

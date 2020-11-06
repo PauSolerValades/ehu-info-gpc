@@ -18,14 +18,18 @@ object3d * _selected_object = 0;            /*Object currently selected*/
 
 elem_matrix * _actual_matrix = 0;
 
-int mode;
+//int camara o objeto
+int transformacion;
 int referencia;
+
+int camara_interna;
 
 /** GENERAL INITIALIZATION **/
 void initialization (){
 
-    mode = -1; //ninguna por defecro.
+    transformacion = -1; //ninguna por defecto.
     referencia = 0; //por defecto a objeto.
+    camara_interna = 0;
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.

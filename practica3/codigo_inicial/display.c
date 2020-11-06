@@ -13,6 +13,8 @@ extern GLdouble _ortho_z_min,_ortho_z_max;
 extern object3d *_first_object;
 extern object3d *_selected_object;
 
+extern int camara_interna; //0: camara no interna, 1: camara interna
+
 /**
  * @brief Function to draw the axes
  */
@@ -92,8 +94,12 @@ void display(void) {
     draw_axes();
 
     if(_selected_object != 0)
-        glLoadMatrixd(_selected_object->display->inv_M);
-
+    {
+        if(camara_interna) //if camera mode is activated
+            glLoadMatrixd(_selected_object->display->inv_M);
+        else
+            glLoadIdentity(); //Cargar la matriz de la camara actual cuando funcione.
+    }
     /*Now each of the objects in the list*/
     while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.
 
