@@ -171,10 +171,10 @@ void special(int k, int x, int y)
 				glScaled(DS, 1.0, 1.0);
 				break;
 			case GLUT_KEY_PAGE_UP:
-				glScaled(0.0, 0.0, US);
+				glScaled(1.0, 1.0, US);
 				break;
 			case GLUT_KEY_PAGE_DOWN:
-				glScaled(0.0, 0.0, DS);
+				glScaled(1.0, 1.0, DS);
 				break;
 			case 43:
 				glScaled(DS, DS, DS);
@@ -502,55 +502,66 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 25:
+        
+        if(_selected_object != 0)
+        {
+	        if(_selected_object->display != _selected_object->mptr)
+	        {
+		        printf("Rehacer\n");
+		        
+		        elem_matrix *iter;
+		        elem_matrix *ant;
 
-		if(_selected_object->display != _selected_object->mptr)
-		{
-			printf("Rehacer\n");
-			
-			elem_matrix *iter;
-			elem_matrix *ant;
+		        iter = _selected_object->mptr->nextptr;
+		        ant = _selected_object->mptr;
+		        
+            	
+		        while(1)
+		        {
 
-			iter = _selected_object->mptr->nextptr;
-			ant = _selected_object->mptr;
-			
-	    	
-			while(1)
-			{
+			        if(_selected_object->display==iter)
+				        break;
 
-				if(_selected_object->display==iter)
-					break;
-
-				ant = iter;
-				iter = iter->nextptr;
-				
-			}
-			
-			_selected_object->display = ant;
-    		}
-		else
-		{
-			printf("No más redo\n");
-		}
-		glutPostRedisplay();
+			        ant = iter;
+			        iter = iter->nextptr;
+			        
+		        }
+		        
+		        _selected_object->display = ant;
+		        }
+	        else
+	        {
+		        printf("No más redo\n");
+	        }
+	        glutPostRedisplay();
+        }else{
+            printf("Cargue un objecto, por favor\n");        
+        }
 
 		break;
 
 	case 26: /* CONTROL+Z */
 
-		if (_selected_object->display->nextptr != 0)
-		{
-			printf("Deshacer\n");
-				
-			_selected_object->display = _selected_object->display->nextptr;
-		
-		}
-		else
-		{
-			printf("No más undo\n");
-		}
+        if(_selected_object != 0)
+        {
+		    if (_selected_object->display->nextptr != 0)
+		    {
+			    printf("Deshacer\n");
+				    
+			    _selected_object->display = _selected_object->display->nextptr;
+		    
+		    }
+		    else
+		    {
+			    printf("No más undo\n");
+		    }
 
-		glutPostRedisplay();
-
+		    glutPostRedisplay();
+        }
+        else
+        {
+            printf("Cargue un objecto, por favor\n");            
+        }
 		break;
 
     case 114:

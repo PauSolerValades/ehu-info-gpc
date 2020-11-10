@@ -120,10 +120,10 @@ void special(int k, int x, int y)
 				glScaled(DS, 1.0, 1.0);
 				break;
 			case GLUT_KEY_PAGE_UP:
-				glScaled(0.0, 0.0, US);
+				glScaled(1.0, 1.0, US);
 				break;
 			case GLUT_KEY_PAGE_DOWN:
-				glScaled(0.0, 0.0, DS);
+				glScaled(1.0, 1.0, DS);
 				break;
 			case 43:
 				glScaled(DS, DS, DS);
@@ -405,6 +405,8 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 25:
 
+        if(_selected_object != 0)
+        {
 		if(_selected_object->display != _selected_object->mptr)
 		{
 			printf("Rehacer\n");
@@ -435,10 +437,18 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		glutPostRedisplay();
 
+        }
+        else
+        {
+        printf("Cargue un objeto primero\n");
+        }
+
 		break;
 
 	case 26: /* CONTROL+Z */
-
+        
+        if(_selected_object != 0)
+        {
 		if (_selected_object->display->nextptr != 0)
 		{
 			printf("Deshacer\n");
@@ -452,6 +462,11 @@ void keyboard(unsigned char key, int x, int y)
 		}
 
 		glutPostRedisplay();
+        }
+        else
+        {
+        printf("Cargue un objeto primero\n");
+        }
 
 		break;
 
