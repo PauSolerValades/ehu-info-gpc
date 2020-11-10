@@ -119,6 +119,11 @@ typedef struct elem_matrix
     struct elem_matrix *nextptr;	/* puntero a la siguiente matriz*/	
 } elem_matrix;				/* así el compliador reconoce elem_matrix como struct y no se tiene que poner struct elem_matrix cada vex*/
 
+typedef struct camera
+{
+    double M[16];
+    struct camera *nextptr;
+} camera;
 
 /****************************
  * Structure to store a     *

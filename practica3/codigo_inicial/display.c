@@ -13,6 +13,9 @@ extern GLdouble _ortho_z_min,_ortho_z_max;
 extern object3d *_first_object;
 extern object3d *_selected_object;
 
+extern camera * _first_camera;
+extern camera * _selected_camera;
+
 extern int camara_interna; //0: camara no interna, 1: camara interna
 
 /**
@@ -51,6 +54,29 @@ void reshape(int width, int height) {
     /*  Take care, the width and height are integer numbers, but the ratio is a GLdouble so, in order to avoid
      *  rounding the ratio to integer values we need to cast width and height before computing the ratio */
     _window_ratio = (GLdouble) width / (GLdouble) height;
+}
+
+void init_camera(){
+
+    int i;
+    camera *new_camera;
+
+    new_camera = (camera *)malloc(sizeof(camera));
+    new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+    //llenamos la tabla M
+    for (i = 1; i < 15; i++)
+        new_camera->M[i] = 0.0;
+        
+    //cutríssim pero va
+    new_camera->M[0] = 1.0;
+    new_camera->M[5] = 1.0;
+    new_camera->M[10] = 1.0;
+    new_camera->M[15] = 1.0;
+
+    //asignamos la matriz a la id.
+    _selected_camera = new_camera;
+    _first_camera = new_camera;
 }
 
 
@@ -93,12 +119,15 @@ void display(void) {
     glLoadIdentity();
     draw_axes();
 
+    if(_first_camera == 0)
+        init_camera();
+
     if(_selected_object != 0)
     {
         if(camara_interna) //if camera mode is activated
             glLoadMatrixd(_selected_object->display->inv_M);
         else
-            glLoadIdentity(); //Cargar la matriz de la camara actual cuando funcione.
+            glLoadMatrixd(_selected_camera->M); //Cargar la matriz de la camara actual cuando funcione.
     }
     /*Now each of the objects in the list*/
     while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.

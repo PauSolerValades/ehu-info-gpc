@@ -16,9 +16,12 @@ GLdouble _ortho_z_min,_ortho_z_max;         /*Variables for the control of the o
 object3d * _first_object= 0;                /*List of objects*/
 object3d * _selected_object = 0;            /*Object currently selected*/
 
+camera * _first_camera = 0;
+camera * _selected_camera = 0;
+
 elem_matrix * _actual_matrix = 0;
 
-//int camara o objeto
+int mode; //0: objeto, 1: camara, 2: luces cuando toque.
 int transformacion;
 int referencia;
 
@@ -27,6 +30,7 @@ int camara_interna;
 /** GENERAL INITIALIZATION **/
 void initialization (){
 
+    mode = 0; //por defecto a objeto.
     transformacion = -1; //ninguna por defecto.
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;

@@ -5,13 +5,14 @@
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
-//extern object3d *_first_camara;
-//extern object3d *_selected_camara;
+extern camera *_first_camera;
+extern camera *_selected_camera;
 
 extern GLdouble _ortho_x_min, _ortho_x_max;
 extern GLdouble _ortho_y_min, _ortho_y_max;
 extern GLdouble _ortho_z_min, _ortho_z_max;
 
+extern int mode; //0 objeto, 1: camara
 extern int transformacion; //0: translación, 1: rotación, 2: escalado.
 extern int referencia; //0: objeto, 1: mundo
 extern int camara_interna;
@@ -25,16 +26,6 @@ void destructor(object3d *object);
 void new_transformation();
 void special(int k, int x, int y);
 void keyboard(unsigned char key, int x, int y);
-
-double dot_product(double v[], double u[], int n)
-{
-    double result = 0.0;
-    for (int i = 0; i < n; i++)
-        result += v[i]*u[i];
-    return result;
-}
-
-//stackoverflow.com/questions/42286219/matrix-inverse-accuracy
 
 
 void inverse()
@@ -106,6 +97,8 @@ void special(int k, int x, int y)
 	else
 		glLoadIdentity();
 
+	if(mode == 0)
+	{
 
 	switch (transformacion)
 	{
@@ -185,7 +178,6 @@ void special(int k, int x, int y)
 				break;
 			case 43:
 				glScaled(DS, DS, DS);
-				printf("A\n");
 				break;
 			case 45:
 				glScaled(US, US, US);
@@ -199,6 +191,13 @@ void special(int k, int x, int y)
 	default:
         	print_enonmode();
 		break;
+	}
+
+	}
+	else if(mode == 1)
+	{
+		//aquí va el control de cameres.
+		printf("Transformaciones de cameras!");
 	}
 
 	if(referencia)
@@ -423,7 +422,11 @@ void keyboard(unsigned char key, int x, int y)
 		transformacion = 0;
 		printf("Translaciones ACTIVADAS\n");
 		break;
-
+	case 'n':
+	case 'N':
+		printf("Nueva camara\n");
+		//funció que crei una nova camara i assigni els punters correctament
+		break;
 	case 'b':
 	case 'B': /* Rotación */
 		transformacion = 1;
@@ -455,6 +458,13 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'c': /* cambia a la siguiente camara */
 		printf("Siguiente camara\n");
+		if (_first_camera != 0)
+		{
+			_selected_camera = _selected_camera->nextptr;
+			/*The selection is circular, thus if we move out of the list we go back to the first element*/
+			if (_selected_camera == 0)
+				_selected_camera = _first_camera;
+		}
 
 		break;
 
