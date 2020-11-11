@@ -13,10 +13,11 @@ extern GLdouble _ortho_y_min, _ortho_y_max;
 extern GLdouble _ortho_z_min, _ortho_z_max;
 
 extern int mode; //0 objeto, 1: camara
-extern int transformacion; //0: translación, 1: rotación, 2: escalado.
+extern int transformacion; 
+//0: translación, 1: rotación, 2: escalado cuando mode = 0
+//0: ... cuando mode = 1
 extern int referencia; //0: objeto, 1: mundo
 extern int camara_interna; //0: Desactivada, 1: Activada
-extern int modos_camara; //0: analisis, 1: vuelo, 2: volumen visión, 3: rotaciones camara, 4:  translaciones camara, 5: afin, 6 proyectivo
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -471,16 +472,29 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'g':
 	case 'G': /* Transformaciones ref mundo */
-		if(!camara_interna)
-		{
-			referencia = 1;
-			printf("Referencia MUNDO\n");
-		}
-		else
-		{
-			printf("No puedes activar el modo MUNDO cuando la cámara interna de un objeto está activada");
-		}
+
+		if(mode){ //estas en modo camara
+			//queremos la 4a columna de la matriz del _selected_object->display->M
+			int i;
+	
+			for(i =12; i<=15; i++)
+			{
+				_selected_camera->M[i] = _selected_object->display->M[i];
+			}
 		
+			
+		}else{
+
+			if(!camara_interna)
+			{
+				referencia = 1;
+				printf("Referencia MUNDO\n");
+			}
+			else
+			{
+				printf("No puedes activar el modo MUNDO cuando la cámara interna de un objeto está activada");
+			}
+		}	
 		break;
 
 	case 'l':
