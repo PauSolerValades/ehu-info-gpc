@@ -15,7 +15,8 @@ extern GLdouble _ortho_z_min, _ortho_z_max;
 extern int mode; //0 objeto, 1: camara
 extern int transformacion; //0: translación, 1: rotación, 2: escalado.
 extern int referencia; //0: objeto, 1: mundo
-extern int camara_interna;
+extern int camara_interna; //0: Desactivada, 1: Activada
+extern int modos_camara; //0: analisis, 1: vuelo, 2: volumen visión, 3: rotaciones camara, 4:  translaciones camara, 5: afin, 6 proyectivo
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -62,7 +63,7 @@ void inverse()
 		//printf("%d %d %d %d %d %d\n", i, i+4, i+8, (4*i), (4*i)+1, (4*i)+2);
 	}
 
-	/* posem el producte escalar a la matriu */
+	/* posem el producte escalar a la matriu (i inicialitzem les altres per seguretat...) */
 	inv_A[3] = 0.0;
 	inv_A[7] = 0.0;
 	inv_A[11] = 0.0;
@@ -425,8 +426,37 @@ void keyboard(unsigned char key, int x, int y)
 	case 'n':
 	case 'N':
 		printf("Nueva camara\n");
-		//funció que crei una nova camara i assigni els punters correctament
+		
+		//la primera camara siempre está inicializada => el puntero nunca será null
+		if(mode)
+		{
+
+			int i = 0;
+			camera *new_camera;
+
+			new_camera = (camera *)malloc(sizeof(camera));
+			new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+			for (i = 1; i < 15; i++)
+			{
+				new_camera->M[i] = 0.0;
+			}
+
+			new_camera->M[0] = 1.0;
+			new_camera->M[5] = 1.0;
+			new_camera->M[10] = 1.0;
+			new_camera->M[15] = 1.0;
+
+			_selected_camera->nextptr = new_camera;
+			_selected_camera = _selected_camera->nextptr;
+
+		}else
+		{
+			printf("No está en el modo camera, para entrar en el pulse k\n");
+		}
+		
 		break;
+
 	case 'b':
 	case 'B': /* Rotación */
 		transformacion = 1;
@@ -441,8 +471,16 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'g':
 	case 'G': /* Transformaciones ref mundo */
-		referencia = 1;
-		printf("Referencia MUNDO\n");
+		if(!camara_interna)
+		{
+			referencia = 1;
+			printf("Referencia MUNDO\n");
+		}
+		else
+		{
+			printf("No puedes activar el modo MUNDO cuando la cámara interna de un objeto está activada");
+		}
+		
 		break;
 
 	case 'l':
@@ -470,6 +508,7 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'C': /* Activa/desactiva la camara interna del objeto */
 		printf("CAMBIO A MODO OBJETO\n");
+		mode = 0; //volvemos en modo transformación.
 		referencia = 0; /* No tiene sentido transformar la cámara cuando estás desde la perspectiva del objeto. */
 		
 		if(camara_interna)
@@ -491,6 +530,7 @@ void keyboard(unsigned char key, int x, int y)
 			- Booleà per controlar si usem la camara interna d'un objecte
 			- booleà pel mode camera (carrega la matriu del mode camara que está apuntada con el selected object.)
 		 */
+		mode = 1;
 		break;
 
 	case 'a':
@@ -581,6 +621,15 @@ void keyboard(unsigned char key, int x, int y)
 	
 	free(fname); /* We have to free the memory used in the scanf */
 	glutPostRedisplay();
+	/*
+	if(mode)
+	{
+		keyboard_camera(k);
+	}
+	else{
+		keyboard_object(k);
+	}
+	*/
 }		
 
 /**

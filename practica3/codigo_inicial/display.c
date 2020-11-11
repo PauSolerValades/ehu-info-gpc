@@ -58,25 +58,19 @@ void reshape(int width, int height) {
 
 void init_camera(){
 
-    int i;
+    
     camera *new_camera;
 
     new_camera = (camera *)malloc(sizeof(camera));
     new_camera->nextptr = NULL;//apuntem el seguent punter a 0
 
-    //llenamos la tabla M
-    for (i = 1; i < 15; i++)
-        new_camera->M[i] = 0.0;
-        
-    //cutríssim pero va
-    new_camera->M[0] = 1.0;
-    new_camera->M[5] = 1.0;
-    new_camera->M[10] = 1.0;
-    new_camera->M[15] = 1.0;
+    glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
 
     //asignamos la matriz a la id.
     _selected_camera = new_camera;
     _first_camera = new_camera;
+
+    
 }
 
 
@@ -94,6 +88,9 @@ void display(void) {
     /* Define the projection */
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+
+    if(_first_camera == 0)
+        init_camera(); //we load the first camera with the identity
 
     /*When the window is wider than our original projection plane we extend the plane in the X axis*/
     if ((_ortho_x_max - _ortho_x_min) / (_ortho_y_max - _ortho_y_min) < _window_ratio) {
@@ -118,9 +115,6 @@ void display(void) {
     /*First, we draw the axes*/
     glLoadIdentity();
     draw_axes();
-
-    if(_first_camera == 0)
-        init_camera();
 
     if(_selected_object != 0)
     {

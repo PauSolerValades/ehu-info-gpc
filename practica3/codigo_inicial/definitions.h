@@ -123,6 +123,7 @@ typedef struct camera
 {
     double M[16];
     struct camera *nextptr;
+    //guardar el point3 del objeto al que apuntas?
 } camera;
 
 /****************************

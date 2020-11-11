@@ -31,7 +31,7 @@ int camara_interna;
 void initialization (){
 
     mode = 0; //por defecto a objeto.
-    transformacion = -1; //ninguna por defecto.
+    transformacion = 0; //translación por defecto
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;
 
