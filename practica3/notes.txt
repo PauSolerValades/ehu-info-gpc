@@ -11,3 +11,6 @@ QUE SE TIENE QUÉ HACER:
 
 Tanda dos:
 - En el modo camara interna de un objewto debemos poder hacer transformaciones en modo global?
+
+Tanda tres:
+- El modo análisis debe centrarse sobre un objeto que no está dentro de nuestro campo de visión? (es decir, si el objeto está fuera de la pantalla y lo centramos, qué eh?????'!!!!!!!!!!!!!)

@@ -16,8 +16,8 @@ extern GLdouble _ortho_z_min, _ortho_z_max;
 extern int mode; //0 objeto, 1: camara
 extern int transformacion; 
 //0: translación, 1: rotación, 2: escalado cuando mode = 0
-//0: ... cuando mode = 1
-extern int referencia; //0: objeto, 1: mundo
+//0: translacion, 2: rotación, 3: volumen de visión
+extern int referencia; //00: objeto, 01: mundo; 10: análisis, 11: vuelo.
 extern int camara_interna; //0: Desactivada, 1: Activada
 
 /* all the functions declared to improve the order of aperance */
@@ -85,12 +85,74 @@ void inverse()
  * Heart of the application, calls gl to apply the scaling, rotating and translating transformations. Multiplies the matrix on the rigth if referencia = 0 and on left otherwise.
  */
 
-double euclidean_norm(double x, double y, double z) { return sqrt(x*x + y*y + z*z); }
+double euclidean_norm(double x, double y, double z) 
+{ 
+	return sqrt(x*x + y*y + z*z); 
+}
 double cross_product(double *v[3], double *u[3])
 {
 	
 
 
+}
+/* Centers the camera in the object owo. */
+void centrar_camara()
+{
+	int i, centrado_mismo_punto;
+	double module_z, module_x;
+
+	double E[3], P[3], U[3], x_c[3], y_c[3], z_c[3];
+
+	centrado_mismo_punto = 0;
+
+	for(i = 0; i<3; i++){
+		E[i] = _selected_camera->M[12+i];
+		P[i] = _selected_object->display->M[12+i];
+		U[i] = _selected_camera->M[i+4];
+
+		if(E[i]==P[i]){
+			centrado_mismo_punto++;
+		}
+	}
+
+	if(centrado_mismo_punto != 3)
+	{
+		z_c[0] = (-E[0]+P[0]);
+		z_c[1] = (-E[1]+P[1]);
+		z_c[2] = (-E[2]+P[2]);
+
+		module_z = euclidean_norm(z_c[0], z_c[1], z_c[2]);
+		
+		//printf("Modulo z: %f\n", module_z);
+
+		z_c[0] = z_c[0]/module_z;
+		z_c[1] = z_c[1]/module_z;
+		z_c[2] = z_c[2]/module_z;
+	
+
+		//cross product with z_c with u-> camera vector. (y from de camera.)
+		x_c[0] = U[1] * z_c[2] - z_c[1] * U[2];
+		x_c[1] = -(U[0] * z_c[2] - z_c[0] * U[2]);
+		x_c[2] = U[0] * z_c[1] - z_c[0] * U[1];
+
+		module_x = euclidean_norm(x_c[0], x_c[1], x_c[2]);
+
+		x_c[0] = x_c[0]/module_x;
+		x_c[1] = x_c[1]/module_x;
+		x_c[2] = x_c[2]/module_x;
+
+		y_c[0] = z_c[1] * x_c[2] - x_c[1] * z_c[2];
+		y_c[1] = -(z_c[0] * x_c[2] - x_c[0] * z_c[2]);
+		y_c[2] = z_c[0] * x_c[1] - x_c[0] * z_c[1];
+
+		for(i = 0; i<3; i++)
+		{
+			_selected_camera->M[i] = x_c[i];
+			_selected_camera->M[i+4] = y_c[i];
+			_selected_camera->M[i+8] = z_c[i];
+			_selected_camera->M[i+12] = P[i];
+		}
+	}
 }
 
 void special(int k, int x, int y)
@@ -101,129 +163,162 @@ void special(int k, int x, int y)
     
     if(_selected_object != NULL)
     {
-
-	glMatrixMode(GL_MODELVIEW);
-	
-	if(!referencia)
-		glLoadMatrixd(_selected_object->display->M);
-	else
-		glLoadIdentity();
-
-	if(mode == 0)
-	{
-
-	switch (transformacion)
-	{
-	case 0:
-		switch (k)
+		if(mode == 0)
 		{
-			case GLUT_KEY_UP:
-				glTranslated(0.0, T, 0.0);
+
+			glMatrixMode(GL_MODELVIEW);
+			
+			if(!referencia)
+				glLoadMatrixd(_selected_object->display->M);
+			else
+				glLoadIdentity();
+
+
+			switch (transformacion)
+			{
+			case 0:
+				switch (k)
+				{
+					case GLUT_KEY_UP:
+						glTranslated(0.0, T, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glTranslated(0.0, -T, 0.0);
+						break;
+					case GLUT_KEY_RIGHT:
+						glTranslated(T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT:
+						glTranslated(-T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glTranslated(0.0, 0.0, T);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glTranslated(0.0, 0.0, -T);
+						break;
+					default:
+						isAKey = 1;
+						break;
+					}
 				break;
-			case GLUT_KEY_DOWN:
-				glTranslated(0.0, -T, 0.0);
+			case 1:
+				switch (k)
+				{
+					case GLUT_KEY_UP :
+						glRotated(A, -1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glRotated(A, 1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_RIGHT :
+						glRotated(A, 0.0, 1.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT :
+						glRotated(A, 0.0, -1.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glRotated(A, 0.0, 0.0, 1.0);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glRotated(A, 0.0, 0.0, -1.0);
+						break;
+					default:
+						isAKey = 1;
+							break;
+				}
 				break;
-			case GLUT_KEY_RIGHT:
-				glTranslated(T, 0.0, 0.0);
+
+			case 2:
+				switch (k)
+				{
+					case GLUT_KEY_UP :
+						glScaled(1.0, US, 1.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glScaled(1.0, DS, 1.0);
+						break;
+					case GLUT_KEY_RIGHT :
+						glScaled(US, 1.0, 1.0);
+						break;
+					case GLUT_KEY_LEFT :
+						glScaled(DS, 1.0, 1.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glScaled(1.0, 1.0, US);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glScaled(1.0, 1.0, DS);
+						break;
+					case 43:
+						glScaled(DS, DS, DS);
+						break;
+					case 45:
+						glScaled(US, US, US);
+						break;
+					default:
+						isAKey = 1;
+						break;
+						}
 				break;
-			case GLUT_KEY_LEFT:
-				glTranslated(-T, 0.0, 0.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glTranslated(0.0, 0.0, T);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glTranslated(0.0, 0.0, -T);
-				break;
+
 			default:
-				isAKey = 1;
+					print_enonmode();
 				break;
 			}
-		break;
-	case 1:
-		switch (k)
-		{
-			case GLUT_KEY_UP :
-				glRotated(A, -1.0, 0.0, 0.0);
-				break;
-			case GLUT_KEY_DOWN:
-				glRotated(A, 1.0, 0.0, 0.0);
-				break;
-			case GLUT_KEY_RIGHT :
-				glRotated(A, 0.0, 1.0, 0.0);
-				break;
-			case GLUT_KEY_LEFT :
-				glRotated(A, 0.0, -1.0, 0.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glRotated(A, 0.0, 0.0, 1.0);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glRotated(A, 0.0, 0.0, -1.0);
-				break;
-			default:
-				isAKey = 1;
-	        		break;
+
+			if(referencia)
+				glMultMatrixd(_selected_object->display->M);
+
+			if(!isAKey)
+			{
+				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+			}
+			else
+				print_enonobject();
+			
 		}
-		break;
-
-	case 2:
-		switch (k)
+		else if(mode == 1)
 		{
-			case GLUT_KEY_UP :
-				glScaled(1.0, US, 1.0);
-				break;
-			case GLUT_KEY_DOWN:
-				glScaled(1.0, DS, 1.0);
-				break;
-			case GLUT_KEY_RIGHT :
-				glScaled(US, 1.0, 1.0);
-				break;
-			case GLUT_KEY_LEFT :
-				glScaled(DS, 1.0, 1.0);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glScaled(1.0, 1.0, US);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glScaled(1.0, 1.0, DS);
-				break;
-			case 43:
-				glScaled(DS, DS, DS);
-				break;
-			case 45:
-				glScaled(US, US, US);
-				break;
-			default:
-				isAKey = 1;
-				break;
+			glMatrixMode(GL_MODELVIEW);
+			glLoadMatrixd(_selected_camera->M);
+			switch (transformacion)
+			{
+			case 1:
+				switch (k)
+				{
+				case GLUT_KEY_UP :
+					glRotated(A, -1.0, 0.0, 0.0);
+					break;
+				case GLUT_KEY_DOWN:
+					glRotated(A, 1.0, 0.0, 0.0);
+					break;
+				case GLUT_KEY_RIGHT :
+					glRotated(A, 0.0, 1.0, 0.0);
+					break;
+				case GLUT_KEY_LEFT :
+					glRotated(A, 0.0, -1.0, 0.0);
+					break;
+				case GLUT_KEY_PAGE_UP:
+					glRotated(A, 0.0, 0.0, 1.0);
+					break;
+				case GLUT_KEY_PAGE_DOWN:
+					glRotated(A, 0.0, 0.0, -1.0);
+					break;
+				default:
+					isAKey = 1;
+					break;
 				}
-		break;
+				break;
+			}
 
-	default:
-        	print_enonmode();
-		break;
-	}
+			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+		}
 
-	}
-	else if(mode == 1)
-	{
-		//aquí va el control de cameres.
-		printf("Transformaciones de cameras!");
-	}
-
-	if(referencia)
-		glMultMatrixd(_selected_object->display->M);
-    
-	    if(!isAKey)
-	    {
-		    new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-	    }
 		glutPostRedisplay();
+	}
 
-    }
-    else
-        print_enonobject();
+	
 }
 
 /**
@@ -350,6 +445,11 @@ void keyboard(unsigned char key, int x, int y)
 			/*The selection is circular, thus if we move out of the list we go back to the first element*/
 			if (_selected_object == 0)
 				_selected_object = _first_object;
+
+			if(mode && transformacion == 0)
+			{
+				centrar_camara();
+			}
 		}
 		break;
 
@@ -470,8 +570,15 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'b':
 	case 'B': /* Rotación */
-		transformacion = 1;
-		printf("Rotaciones ACTIVADAS\n");
+		if(mode){
+			transformacion = 1;
+			printf("Rotaciones ACTIVADAS\n");
+		}
+		else
+		{
+			transformacion = 3;
+		}
+		
 		break;
 
 	case 't':
@@ -484,38 +591,13 @@ void keyboard(unsigned char key, int x, int y)
 	case 'G': /* Transformaciones ref mundo */
 
 		if(mode){ //estas en modo camara
-			//queremos la 4a columna de la matriz del _selected_object->display->M
-			int i;
-			double module;
-
-			double E[3], P[3];
-
-			for(i = 0; i<3; i++){
-				E[i] = _selected_camera->M[12+i];
-				P[i] = _selected_object->display->M[12+i];
-				printf("%f\n", E[i]);
-			}
-
-			module = euclidean_norm((E[0]-P[0]), (E[1]-P[1]), (E[2]-P[2]));
-
-			//printf("%f\n", module);
-
 			
-			double x_c[3] = {0.0, 1.0, 0.0};
-			double y_c[3] = {1.0, 0.0, 0.0};
-
-			double w[3];
-			w[0] = x_c[1] * y_c[2] - y_c[1] * x_c[2];
-			w[1] = -(x_c[0] * y_c[2] - y_c[0] * x_c[2]);
-			w[2] = x_c[0] * y_c[1] - y_c[0] * x_c[1];
-
-			for(i=0; i<3; i++){
-				printf("%f", w[i]);
-			}
+			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			
+			transformacion = 0;
 
-		
-			
+			centrar_camara();
+
 		}else{
 
 			if(!camara_interna)
@@ -542,13 +624,14 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 'c': /* cambia a la siguiente camara */
-		printf("Siguiente camara\n");
 		if (_first_camera != 0)
 		{
 			_selected_camera = _selected_camera->nextptr;
 			/*The selection is circular, thus if we move out of the list we go back to the first element*/
 			if (_selected_camera == 0)
 				_selected_camera = _first_camera;
+			
+			printf("Siguiente camara\n");
 		}
 
 		break;
@@ -572,12 +655,16 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'k': /* ACTIVA EL MODO CÁMARA */
 	case 'K': /* Transformaciones camara actual */
-		printf("Camara ACTIVADA\n");
-		/* Necessitem dues coses:
-			- Booleà per controlar si usem la camara interna d'un objecte
-			- booleà pel mode camera (carrega la matriu del mode camara que está apuntada con el selected object.)
-		 */
-		mode = 1;
+		if(mode){
+			mode = 0;
+			printf("Camara DESACTIVADA\n");
+		}
+		else
+		{
+			mode = 1;
+			printf("Camara ACTIVADA\n");
+		}
+		
 		break;
 
 	case 'a':

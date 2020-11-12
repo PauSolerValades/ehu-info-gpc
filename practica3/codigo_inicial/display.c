@@ -89,6 +89,10 @@ void display(void) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
+    if(_first_camera == 0)
+        init_camera(); //we load the first camera with the identity
+
+
     /* TODO: inicializar si ortho o frustrum*/
 
     /*When the window is wider than our original projection plane we extend the plane in the X axis*/
@@ -107,9 +111,6 @@ void display(void) {
         /*Definition of the projection*/
         glOrtho(_ortho_x_min, _ortho_x_max, midpt - (he / 2), midpt + (he / 2), _ortho_z_min, _ortho_z_max);
     }
-
-    if(_first_camera == 0)
-        init_camera(); //we load the first camera with the identity
 
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
