@@ -60,6 +60,7 @@
 #define A					10.0
 #define US					1.1
 #define DS					0.9
+#define INIT_CAMERA         1.0
 
 /** STRUCTURES **/
 

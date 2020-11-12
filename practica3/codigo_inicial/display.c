@@ -66,11 +66,11 @@ void init_camera(){
 
     glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
 
+    new_camera->M[14] = INIT_CAMERA;
     //asignamos la matriz a la id.
     _selected_camera = new_camera;
     _first_camera = new_camera;
 
-    
 }
 
 
@@ -89,8 +89,7 @@ void display(void) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    if(_first_camera == 0)
-        init_camera(); //we load the first camera with the identity
+    /* TODO: inicializar si ortho o frustrum*/
 
     /*When the window is wider than our original projection plane we extend the plane in the X axis*/
     if ((_ortho_x_max - _ortho_x_min) / (_ortho_y_max - _ortho_y_min) < _window_ratio) {
@@ -109,6 +108,9 @@ void display(void) {
         glOrtho(_ortho_x_min, _ortho_x_max, midpt - (he / 2), midpt + (he / 2), _ortho_z_min, _ortho_z_max);
     }
 
+    if(_first_camera == 0)
+        init_camera(); //we load the first camera with the identity
+
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
 
@@ -123,6 +125,7 @@ void display(void) {
         else
             glLoadMatrixd(_selected_camera->M); //Cargar la matriz de la camara actual cuando funcione.
     }
+
     /*Now each of the objects in the list*/
     while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.
 

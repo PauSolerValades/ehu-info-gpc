@@ -2,6 +2,7 @@
 #include "load_obj.h"
 #include <GL/glut.h>
 #include <stdio.h>
+#include <math.h>
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
@@ -83,6 +84,15 @@ void inverse()
  * 
  * Heart of the application, calls gl to apply the scaling, rotating and translating transformations. Multiplies the matrix on the rigth if referencia = 0 and on left otherwise.
  */
+
+double euclidean_norm(double x, double y, double z) { return sqrt(x*x + y*y + z*z); }
+double cross_product(double *v[3], double *u[3])
+{
+	
+
+
+}
+
 void special(int k, int x, int y)
 {
     int isAKey;
@@ -476,11 +486,34 @@ void keyboard(unsigned char key, int x, int y)
 		if(mode){ //estas en modo camara
 			//queremos la 4a columna de la matriz del _selected_object->display->M
 			int i;
-	
-			for(i =12; i<=15; i++)
-			{
-				_selected_camera->M[i] = _selected_object->display->M[i];
+			double module;
+
+			double E[3], P[3];
+
+			for(i = 0; i<3; i++){
+				E[i] = _selected_camera->M[12+i];
+				P[i] = _selected_object->display->M[12+i];
+				printf("%f\n", E[i]);
 			}
+
+			module = euclidean_norm((E[0]-P[0]), (E[1]-P[1]), (E[2]-P[2]));
+
+			//printf("%f\n", module);
+
+			
+			double x_c[3] = {0.0, 1.0, 0.0};
+			double y_c[3] = {1.0, 0.0, 0.0};
+
+			double w[3];
+			w[0] = x_c[1] * y_c[2] - y_c[1] * x_c[2];
+			w[1] = -(x_c[0] * y_c[2] - y_c[0] * x_c[2]);
+			w[2] = x_c[0] * y_c[1] - y_c[0] * x_c[1];
+
+			for(i=0; i<3; i++){
+				printf("%f", w[i]);
+			}
+			
+
 		
 			
 		}else{
