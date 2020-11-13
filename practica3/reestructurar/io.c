@@ -219,7 +219,7 @@ void special(int k, int x, int y)
 					default:
 						isAKey = 1;
 						break;
-						}
+					}
 				break;
 
 			default:
