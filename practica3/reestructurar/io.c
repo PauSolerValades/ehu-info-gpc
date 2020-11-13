@@ -28,7 +28,7 @@ void print_enonobject();
 void destructor(object3d *object);
 void new_transformation();
 void inverse();
-void centrar_camara();
+void apuntar_objeto();
 void special(int k, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 double euclidean_norm(double x, double y, double z);
@@ -38,17 +38,18 @@ void keyboard_camera(unsigned char key, int x, int y);
 void print_matrix(double * mptr)
 {
 	int i,j;
+	printf("\n");
 	for(i=0; i<4; i++){
 		for(j=0;j<4;j++){
-			printf("_%.3lf", mptr[i*4+j]);
+			printf("%.3lf\t", mptr[i+j*4]);
 		}
 		printf("\n");
 	}
+	printf("\n");
 }
 
 void keyboard_camera(unsigned char key, int x, int y)
 {
-	printf("ENTRO A KEYBOARD CAMERA\n");
 	switch (key)
 	{
 		case 'n':
@@ -92,7 +93,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			break;
 		
 		case 'm':
-		case 'M': /* Translación */
+		case 'M': /* Translaciprint_maón */
 			transformacion = 0;
 			printf("Translaciones CAMARA ACTIVADAS\n");
 			break;
@@ -107,7 +108,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 		case 'G':	
 			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			transformacion = 0;
-			centrar_camara();
+			apuntar_objeto();
 			
 			print_matrix(_selected_camera->M);
 			break;
@@ -136,6 +137,7 @@ void special(int k, int x, int y)
     {
 		if(mode == 0)
 		{
+			//printf("No fotis que entra aquí...\n");
 
 			glMatrixMode(GL_MODELVIEW);
 			
@@ -248,30 +250,47 @@ void special(int k, int x, int y)
 		else if(mode == 1)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(_selected_camera->M_inv);
+			glLoadMatrixd(_selected_camera->M);
 
-			double x, y, z;
+			int i;
+			double E[3], P[3], x[3], y[3];
 
-			x = _selected_camera->M_inv[0];
-			y = _selected_camera->M_inv[1];
-			z = _selected_camera->M_inv[2];
+			for(i=0; i<3; i++)
+			{
+				E[i] = _selected_camera->M[i+12];
+				P[i] = _selected_object->display->M[i+12];
+				x[i] = _selected_camera->M[i];
+				y[i] = _selected_camera->M[i+4];
+
+				printf("%3lf\n", P[i]);
+			}
+
+			//movemos la camara sobre el objeto
+			glTranslated(-P[0], -P[1], -P[2]);
+
+			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+			
+			printf("matriu traslladada: ");
+			print_matrix(_selected_camera->M);
+
+			glLoadMatrixd(_selected_camera->M);
 
 			switch (transformacion)
 			{
 			case 1:
 				switch (k)
 				{
-				case GLUT_KEY_UP :
-					glRotated(A, x, y, z);
+				case GLUT_KEY_UP:
+					glRotated(A, x[0], x[1], x[2]);
 					break;
 				case GLUT_KEY_DOWN:
-					glRotated(-A, x, y, z);
+					glRotated(-A, x[0], x[1], x[2]);
 					break;
 				case GLUT_KEY_RIGHT :
-					glRotated(A, 0.0, 1.0, 0.0);
+					glRotated(A, y[0], y[1], y[2]);
 					break;
 				case GLUT_KEY_LEFT :
-					glRotated(A, 0.0, -1.0, 0.0);
+					glRotated(-A, y[0], y[1], y[2]);
 					break;
 				case GLUT_KEY_PAGE_UP:
 					glRotated(A, 0.0, 0.0, 1.0);
@@ -286,7 +305,12 @@ void special(int k, int x, int y)
 				break;
 			}
 
-			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M_inv);
+			glTranslated(P[0], P[1], P[2]);
+			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+
+			inverse(_selected_camera->M, _selected_camera->M_inv);
+
+			print_matrix(_selected_camera->M);
 		}
 
 		glutPostRedisplay();
@@ -383,7 +407,7 @@ void keyboard(unsigned char key, int x, int y)
 
 			if(mode && transformacion == 0)
 			{
-				centrar_camara();double euclidean_norm(double x, double y, double z) { return sqrt(x*x + y*y + z*z); }
+				apuntar_objeto();
 
 			}
 		}
@@ -733,7 +757,7 @@ void inverse(double *a, double *inv_A)
 double euclidean_norm(double x, double y, double z) { return sqrt(x*x + y*y + z*z); }
 
 /* Centers the camera in the object owo. */
-void centrar_camara()
+void apuntar_objeto()
 {
 	int i, centrado_mismo_punto;
 	double module_z, module_x;
