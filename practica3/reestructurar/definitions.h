@@ -60,7 +60,7 @@
 #define A					10.0
 #define US					1.1
 #define DS					0.9
-#define INIT_CAMERA         1.0
+#define INIT_CAMERA         5.0
 
 /** STRUCTURES **/
 
@@ -123,6 +123,7 @@ typedef struct elem_matrix
 typedef struct camera
 {
     double M[16];
+    double M_inv[16];
     struct camera *nextptr;
     //guardar el point3 del objeto al que apuntas?
 } camera;

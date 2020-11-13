@@ -35,6 +35,16 @@ double euclidean_norm(double x, double y, double z);
 void keyboard_object(unsigned char key, int x, int y);
 void keyboard_camera(unsigned char key, int x, int y);
 
+void print_matrix(double * mptr)
+{
+	int i,j;
+	for(i=0; i<4; i++){
+		for(j=0;j<4;j++){
+			printf("_%.3lf", mptr[i*4+j]);
+		}
+		printf("\n");
+	}
+}
 
 void keyboard_camera(unsigned char key, int x, int y)
 {
@@ -98,7 +108,8 @@ void keyboard_camera(unsigned char key, int x, int y)
 			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			transformacion = 0;
 			centrar_camara();
-
+			
+			print_matrix(_selected_camera->M);
 			break;
 
 		default:
@@ -237,7 +248,13 @@ void special(int k, int x, int y)
 		else if(mode == 1)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(_selected_camera->M);
+			glLoadMatrixd(_selected_camera->M_inv);
+
+			double x, y, z;
+
+			x = _selected_camera->M_inv[0];
+			y = _selected_camera->M_inv[1];
+			z = _selected_camera->M_inv[2];
 
 			switch (transformacion)
 			{
@@ -245,10 +262,10 @@ void special(int k, int x, int y)
 				switch (k)
 				{
 				case GLUT_KEY_UP :
-					glRotated(A, -1.0, 0.0, 0.0);
+					glRotated(A, x, y, z);
 					break;
 				case GLUT_KEY_DOWN:
-					glRotated(A, 1.0, 0.0, 0.0);
+					glRotated(-A, x, y, z);
 					break;
 				case GLUT_KEY_RIGHT :
 					glRotated(A, 0.0, 1.0, 0.0);
@@ -269,7 +286,7 @@ void special(int k, int x, int y)
 				break;
 			}
 
-			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M_inv);
 		}
 
 		glutPostRedisplay();
@@ -625,7 +642,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			}
 			else
 			{
-				printf("No puedes activar el modo MUNDO cuando la cámara interna de un objeto está activada");
+				printf("No puedes activar la referencia de MUNDO cuando la cámara interna de un objeto está activada");
 			}
 			break;
 		
@@ -670,21 +687,18 @@ void new_transformation()
 
     glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
-	inverse(); //calcula i carrega la matriu inversa (transposada vamos.)
+	inverse(_selected_object->display->M, _selected_object->display->inv_M); //calcula i carrega la matriu inversa (transposada vamos.)
 }
 
-void inverse()
+void inverse(double *a, double *inv_A)
 {
 	int i;
 	double dot_productX;
 	double dot_productY;
 	double dot_productZ;
 
-	double *a;
-	double *inv_A;
-
-	a =_selected_object->display->M;
-	inv_A =_selected_object->display->inv_M;
+	//a =_selected_object->display->M;
+	//inv_A =_selected_object->display->inv_M;
 
 	dot_productX = 0.0;
 	dot_productY = 0.0;
@@ -708,13 +722,11 @@ void inverse()
 	}
 
 	/* posem el producte escalar a la matriu (i inicialitzem les altres per seguretat...) */
-	inv_A[3] = 0.0;
-	inv_A[7] = 0.0;
-	inv_A[11] = 0.0;
+	
 	inv_A[12] = -dot_productX;
 	inv_A[13] = -dot_productY;
 	inv_A[14] = -dot_productZ;
-	inv_A[15] = 1.0;
+	
 
 }
 
@@ -742,9 +754,9 @@ void centrar_camara()
 
 	if(centrado_mismo_punto != 3)
 	{
-		z_c[0] = (-E[0]+P[0]);
-		z_c[1] = (-E[1]+P[1]);
-		z_c[2] = (-E[2]+P[2]);
+		z_c[0] = (-P[0]+E[0]);
+		z_c[1] = (-P[1]+E[1]);
+		z_c[2] = (-P[2]+E[2]);
 
 		module_z = euclidean_norm(z_c[0], z_c[1], z_c[2]);
 		
@@ -775,8 +787,10 @@ void centrar_camara()
 			_selected_camera->M[i] = x_c[i];
 			_selected_camera->M[i+4] = y_c[i];
 			_selected_camera->M[i+8] = z_c[i];
-			_selected_camera->M[i+12] = P[i];
+			_selected_camera->M[i+12] = E[i];
 		}
+
+		inverse(_selected_camera->M, _selected_camera->M_inv);
 	}
 }
 

@@ -65,8 +65,10 @@ void init_camera(){
     new_camera->nextptr = NULL;//apuntem el seguent punter a 0
 
     glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
+    glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
 
     new_camera->M[14] = INIT_CAMERA;
+    new_camera->M_inv[14] = -INIT_CAMERA;
     //asignamos la matriz a la id.
     _selected_camera = new_camera;
     _first_camera = new_camera;
@@ -95,22 +97,7 @@ void display(void) {
 
     /* TODO: inicializar si ortho o frustrum*/
 
-    /*When the window is wider than our original projection plane we extend the plane in the X axis*/
-    if ((_ortho_x_max - _ortho_x_min) / (_ortho_y_max - _ortho_y_min) < _window_ratio) {
-        /* New width */
-        GLdouble wd = (_ortho_y_max - _ortho_y_min) * _window_ratio;
-        /* Midpoint in the X axis */
-        GLdouble midpt = (_ortho_x_min + _ortho_x_max) / 2;
-        /*Definition of the projection*/
-        glOrtho(midpt - (wd / 2), midpt + (wd / 2), _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
-    } else {/* In the opposite situation we extend the Y axis */
-        /* New height */
-        GLdouble he = (_ortho_x_max - _ortho_x_min) / _window_ratio;
-        /* Midpoint in the Y axis */
-        GLdouble midpt = (_ortho_y_min + _ortho_y_max) / 2;
-        /*Definition of the projection*/
-        glOrtho(_ortho_x_min, _ortho_x_max, midpt - (he / 2), midpt + (he / 2), _ortho_z_min, _ortho_z_max);
-    }
+    glFrustum(-0.1, 0.1,-0.1,0.1,0.1,1000.0);
 
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
@@ -124,7 +111,7 @@ void display(void) {
         if(camara_interna) //if camera mode is activated
             glLoadMatrixd(_selected_object->display->inv_M);
         else
-            glLoadMatrixd(_selected_camera->M); //Cargar la matriz de la camara actual cuando funcione.
+            glLoadMatrixd(_selected_camera->M_inv); //Cargar la matriz de la camara actual cuando funcione.
     }
 
     /*Now each of the objects in the list*/
