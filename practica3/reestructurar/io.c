@@ -252,10 +252,10 @@ void special(int k, int x, int y)
 		else if(mode == 1)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
+			glLoadMatrixd(_selected_camera->M);
 
 			int i;
-			double E[3], P[3], x[3], y[3], v[3];
+			double E[3], P[3], x[3], y[3], z[3], v[3];
 
 			for(i=0; i<3; i++)
 			{
@@ -263,6 +263,7 @@ void special(int k, int x, int y)
 				P[i] = _selected_object->display->M[i+12];
 				x[i] = _selected_camera->M[i];
 				y[i] = _selected_camera->M[i+4];
+				z[i] = _selected_camera->M[i+8];
 
 				printf("%3lf\n", P[i]);
 			}
@@ -273,7 +274,7 @@ void special(int k, int x, int y)
 
 			//movemos el origen de la camara sobre el objeto
 			//glTranslated(-v[0], -v[1], -v[2]);
-			glTranslated(-P[0], -P[1], -P[2]);
+			glTranslated(P[0], P[1], P[2]);
 
 			switch (transformacion)
 			{
@@ -307,16 +308,9 @@ void special(int k, int x, int y)
 			}
 			
 			//glTranslated(v[0], v[1], v[2]);
-			glTranslated(P[0], P[1], P[2]);
-
-			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M_inv);
-
-			glMultMatrixd(_selected_camera->M);
+			glTranslated(-P[0], -P[1], -P[2]);
 
 			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
-
-			
-
 
 			inverse(_selected_camera->M, _selected_camera->M_inv);
 
