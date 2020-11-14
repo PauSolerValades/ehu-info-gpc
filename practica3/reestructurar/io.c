@@ -252,7 +252,7 @@ void special(int k, int x, int y)
 		else if(mode == 1)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(_selected_camera->M);
+			glLoadIdentity();
 
 			int i;
 			double E[3], P[3], x[3], y[3], z[3], v[3];
@@ -283,10 +283,10 @@ void special(int k, int x, int y)
 				{
 				//rotamos
 				case GLUT_KEY_UP:
-					glRotated(A, x[0], x[1], x[2]);
+					glRotated(-A, x[0], x[1], x[2]);
 					break;
 				case GLUT_KEY_DOWN:
-					glRotated(-A, x[0], x[1], x[2]);
+					glRotated(A, x[0], x[1], x[2]);
 					break;
 				case GLUT_KEY_RIGHT :
 					glRotated(A, y[0], y[1], y[2]);
@@ -309,7 +309,7 @@ void special(int k, int x, int y)
 			
 			//glTranslated(v[0], v[1], v[2]);
 			glTranslated(-P[0], -P[1], -P[2]);
-
+			glMultMatrixd(_selected_camera->M);
 			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
 
 			inverse(_selected_camera->M, _selected_camera->M_inv);
@@ -821,6 +821,7 @@ void apuntar_objeto()
 			_selected_camera->M[i+12] = E[i];
 		}
 
+		print_matrix(_selected_camera->M);
 		inverse(_selected_camera->M, _selected_camera->M_inv);
 	}
 }
