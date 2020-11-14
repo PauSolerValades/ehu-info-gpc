@@ -32,6 +32,7 @@ void apuntar_objeto();
 void special(int k, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 double euclidean_norm(double x, double y, double z);
+void cross_product(double *u, double *v, double *w);
 void keyboard_object(unsigned char key, int x, int y);
 void keyboard_camera(unsigned char key, int x, int y);
 
@@ -106,6 +107,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 
 		case 'g':
 		case 'G':	
+			printf("Camara Análisi\n");
 			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			transformacion = 0;
 			apuntar_objeto();
@@ -250,10 +252,10 @@ void special(int k, int x, int y)
 		else if(mode == 1)
 		{
 			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(_selected_camera->M);
+			glLoadIdentity();
 
 			int i;
-			double E[3], P[3], x[3], y[3];
+			double E[3], P[3], x[3], y[3], v[3];
 
 			for(i=0; i<3; i++)
 			{
@@ -265,21 +267,20 @@ void special(int k, int x, int y)
 				printf("%3lf\n", P[i]);
 			}
 
-			//movemos la camara sobre el objeto
+			v[0] = P[0] - E[0];
+			v[1] = P[1] - E[1];
+			v[2] = P[2] - E[2];
+
+			//movemos el origen de la camara sobre el objeto
+			//glTranslated(-v[0], -v[1], -v[2]);
 			glTranslated(-P[0], -P[1], -P[2]);
-
-			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
-			
-			printf("matriu traslladada: ");
-			print_matrix(_selected_camera->M);
-
-			glLoadMatrixd(_selected_camera->M);
 
 			switch (transformacion)
 			{
 			case 1:
 				switch (k)
 				{
+				//rotamos
 				case GLUT_KEY_UP:
 					glRotated(A, x[0], x[1], x[2]);
 					break;
@@ -304,13 +305,24 @@ void special(int k, int x, int y)
 				}
 				break;
 			}
-
+			
+			//glTranslated(v[0], v[1], v[2]);
 			glTranslated(P[0], P[1], P[2]);
+
+			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M_inv);
+
+			glMultMatrixd(_selected_camera->M);
+
 			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+
+			
+
 
 			inverse(_selected_camera->M, _selected_camera->M_inv);
 
 			print_matrix(_selected_camera->M);
+
+			print_matrix(_selected_camera->M_inv);
 		}
 
 		glutPostRedisplay();
@@ -778,9 +790,9 @@ void apuntar_objeto()
 
 	if(centrado_mismo_punto != 3)
 	{
-		z_c[0] = (-P[0]+E[0]);
-		z_c[1] = (-P[1]+E[1]);
-		z_c[2] = (-P[2]+E[2]);
+		z_c[0] = (E[0]-P[0]);
+		z_c[1] = (E[1]-P[1]);
+		z_c[2] = (E[2]-P[2]);
 
 		module_z = euclidean_norm(z_c[0], z_c[1], z_c[2]);
 		
@@ -792,10 +804,11 @@ void apuntar_objeto()
 	
 
 		//cross product with z_c with u-> camera vector. (y from de camera.)
+		
 		x_c[0] = U[1] * z_c[2] - z_c[1] * U[2];
 		x_c[1] = -(U[0] * z_c[2] - z_c[0] * U[2]);
 		x_c[2] = U[0] * z_c[1] - z_c[0] * U[1];
-
+		
 		module_x = euclidean_norm(x_c[0], x_c[1], x_c[2]);
 
 		x_c[0] = x_c[0]/module_x;
@@ -809,7 +822,7 @@ void apuntar_objeto()
 		for(i = 0; i<3; i++)
 		{
 			_selected_camera->M[i] = x_c[i];
-			_selected_camera->M[i+4] = y_c[i];
+			_selected_camera->M[4+i] = y_c[i];
 			_selected_camera->M[i+8] = z_c[i];
 			_selected_camera->M[i+12] = E[i];
 		}
@@ -852,6 +865,14 @@ void destructor(object3d *object)
 	
 	/* finally, we delete the object itself */
 	free(object);
+}
+
+
+void cross_product(double *u, double *v, double *w)
+{
+	w[0] = u[1]*v[2]-v[1]*u[2];
+	w[1] = -(u[0]*v[2]-v[0]*u[2]);
+	w[2] = u[0]*v[1]-v[0]*u[1];
 }
 
 
