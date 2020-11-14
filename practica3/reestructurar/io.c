@@ -17,7 +17,7 @@ extern int mode; //0 objeto, 1: camara
 extern int transformacion; 
 //0: translación, 1: rotación, 2: escalado cuando mode = 0
 //0: translacion, 2: rotación, 3: volumen de visión
-extern int referencia; //00: objeto, 01: mundo; 10: análisis, 11: vuelo.
+extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
 
 /* all the functions declared to improve the order of aperance */
@@ -61,24 +61,22 @@ void keyboard_camera(unsigned char key, int x, int y)
 			if(mode)
 			{
 
-				int i = 0;
+				glMatrixMode(GL_PROJECTION);
+    			glLoadIdentity();
 				camera *new_camera;
 
 				new_camera = (camera *)malloc(sizeof(camera));
 				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
 
-				for (i = 1; i < 15; i++)
-				{
-					new_camera->M[i] = 0.0;
-				}
+				glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
+    			glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
 
-				new_camera->M[0] = 1.0;
-				new_camera->M[5] = 1.0;
-				new_camera->M[10] = 1.0;
-				new_camera->M[15] = 1.0;
+    			new_camera->M[14] = INIT_CAMERA;
+    			new_camera->M_inv[14] = -INIT_CAMERA;
 
+				new_camera->type = 0;
 				_selected_camera->nextptr = new_camera;
-				_selected_camera = _selected_camera->nextptr;
+				_selected_camera = new_camera;
 
 			}else
 			{
@@ -110,9 +108,16 @@ void keyboard_camera(unsigned char key, int x, int y)
 			printf("Camara Análisi\n");
 			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			transformacion = 0;
+			_selected_camera->type = 1;
 			apuntar_objeto();
 			
 			print_matrix(_selected_camera->M);
+			break;
+
+		case 'l':
+		case 'L':
+			_selected_camera->type = 0;
+			printf("Camara Modo Vuelo\n");
 			break;
 
 		default:
@@ -137,21 +142,26 @@ void special(int k, int x, int y)
     
     if(_selected_object != NULL)
     {
-		if(mode == 0)
+		if(_selected_camera->type == 0 || !mode)
 		{
 			//printf("No fotis que entra aquí...\n");
-
-			glMatrixMode(GL_MODELVIEW);
 			
-			if(!referencia)
-				glLoadMatrixd(_selected_object->display->M);
-			else
-				glLoadIdentity();
-
-
+			glMatrixMode(GL_MODELVIEW);
+			if(!mode){
+				if(!referencia){
+					printf("Entro1\n");
+					glLoadMatrixd(_selected_object->display->M);
+				}else 
+					glLoadIdentity();
+			}else{
+			printf("Entro2\n");
+				glLoadMatrixd(_selected_camera->M);
+			}
+			print_matrix(_selected_camera->M);
 			switch (transformacion)
 			{
 			case 0:
+				printf("translacion\n");
 				switch (k)
 				{
 					case GLUT_KEY_UP:
@@ -241,21 +251,28 @@ void special(int k, int x, int y)
 				print_enonmode();
 				break;
 			}
-
-			if(referencia)
+			if(referencia && !mode)
 				glMultMatrixd(_selected_object->display->M);
 
-			if(!isAKey)
+			if(!isAKey &&( _selected_camera->type || !mode))
 				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-			
+			if(!_selected_camera->type && mode){
+				glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
+				inverse(_selected_camera->M, _selected_camera->M_inv);
+				print_matrix(_selected_camera->M);
+				printf("Fin\n");
+			}
+			if(_selected_camera->type)
+				apuntar_objeto();
 		}
-		else if(mode == 1)
+		else
 		{
+
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 
 			int i;
-			double E[3], P[3], x[3], y[3], z[3], v[3];
+			double E[3], P[3], x[3], y[3], z[3];
 
 			for(i=0; i<3; i++)
 			{
@@ -267,10 +284,6 @@ void special(int k, int x, int y)
 
 				printf("%3lf\n", P[i]);
 			}
-
-			v[0] = P[0] - E[0];
-			v[1] = P[1] - E[1];
-			v[2] = P[2] - E[2];
 
 			//movemos el origen de la camara sobre el objeto
 			//glTranslated(-v[0], -v[1], -v[2]);
@@ -317,6 +330,7 @@ void special(int k, int x, int y)
 			print_matrix(_selected_camera->M);
 
 			print_matrix(_selected_camera->M_inv);
+			
 		}
 
 		glutPostRedisplay();
@@ -495,12 +509,6 @@ void keyboard(unsigned char key, int x, int y)
 			
 		break;
 
-	case 'l':
-	case 'L': /* Transformaciones ref objetos */
-		referencia = 0;
-		printf("Referencia OBJETO\n");
-		break;
-
 	case 'o':
 	case 'O': /* Sistema referencia objeto */
 		printf("Objeto\n");
@@ -513,7 +521,8 @@ void keyboard(unsigned char key, int x, int y)
 			/*The selection is circular, thus if we move out of the list we go back to the first element*/
 			if (_selected_camera == 0)
 				_selected_camera = _first_camera;
-			
+			if(_selected_camera->type)
+				apuntar_objeto();
 			printf("Siguiente camara\n");
 		}
 
@@ -522,8 +531,9 @@ void keyboard(unsigned char key, int x, int y)
 	case 'C': /* Activa/desactiva la camara interna del objeto */
 		printf("CAMBIO A MODO OBJETO\n");
 		mode = 0; //volvemos en modo transformación.
-		referencia = 0; /* No tiene sentido transformar la cámara cuando estás desde la perspectiva del objeto. */
-		
+		referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
+		print_matrix(_selected_object->display->inv_M);
+		print_matrix(_selected_object->display->M);
 		if(camara_interna)
 		{
 			printf("Camara No Interna\n");	
@@ -663,10 +673,17 @@ void keyboard_object(unsigned char key, int x, int y)
 			printf("Escalado OBJETO ACTIVADO\n");
 			break;
 
+		case 'l':
+		case 'L': /* Transformaciones ref objetos */
+			referencia = 0;
+			printf("Referencia OBJETO\n");
+			break;
+
 		case 'g':
 		case 'G': /* Transformaciones ref mundo */
 			if(!camara_interna)
 			{
+				
 				referencia = 1;
 				printf("Referencia MUNDO\n");
 			}
@@ -720,42 +737,28 @@ void new_transformation()
 	inverse(_selected_object->display->M, _selected_object->display->inv_M); //calcula i carrega la matriu inversa (transposada vamos.)
 }
 
-void inverse(double *a, double *inv_A)
+void inverse(double *b, double *a)
 {
-	int i;
-	double dot_productX;
-	double dot_productY;
-	double dot_productZ;
+	GLdouble x,y,z;
 
-	//a =_selected_object->display->M;
-	//inv_A =_selected_object->display->inv_M;
+    a[0] = b[0];
+    a[5] = b[5];
+    a[10] = b[10];
+    x = b[1];a[1] = b[4]; a[4] = x;
+    x = b[2];a[2] = b[8]; a[8] = x;
+    x = b[6];a[6] = b[9]; a[9] = x;
 
-	dot_productX = 0.0;
-	dot_productY = 0.0;
-	dot_productZ = 0.0;
-
-	for(i=0; i<=2; i++)
-	{
-		//producto escalar de X y assignación del vector x
-		dot_productX += a[i] * a[i+12];
-		inv_A[i] = a[4*i];
-
-		//producto escalar de X y assignación del vector y
-		dot_productY += a[i+4] * a[i+12];
-		inv_A[i+4] = a[(4*i)+1];
-
-		//producto escalar de X y assignación del vector z
-		dot_productZ += a[i+8] * a[i+12];
-		inv_A[i+8] = a[(4*i)+2];
-
-		//printf("%d %d %d %d %d %d\n", i, i+4, i+8, (4*i), (4*i)+1, (4*i)+2);
-	}
-
-	/* posem el producte escalar a la matriu (i inicialitzem les altres per seguretat...) */
-	
-	inv_A[12] = -dot_productX;
-	inv_A[13] = -dot_productY;
-	inv_A[14] = -dot_productZ;
+    a[3] = b[3];
+    a[7] = b[7];
+    a[11] = b[11];
+    a[15] = b[15];
+    
+    x = (a[0]*b[12])+(a[4]*b[13])+(a[8]*b[14]);
+    y = (a[1]*b[12])+(a[5]*b[13])+(a[9]*b[14]);
+    z = (a[2]*b[12])+(a[6]*b[13])+(a[10]*b[14]);
+    a[12] = -x;
+    a[13] = -y;
+    a[14] = -z;
 	
 
 }

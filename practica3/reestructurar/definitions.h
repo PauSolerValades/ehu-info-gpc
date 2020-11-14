@@ -124,6 +124,7 @@ typedef struct camera
 {
     double M[16];
     double M_inv[16];
+    int type;  // 0 = vuelo 1 = analisis  
     struct camera *nextptr;
     //guardar el point3 del objeto al que apuntas?
 } camera;

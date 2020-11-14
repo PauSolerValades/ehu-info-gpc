@@ -72,6 +72,7 @@ void init_camera(){
     //asignamos la matriz a la id.
     _selected_camera = new_camera;
     _first_camera = new_camera;
+    _selected_camera->type = 0;
 
 }
 
@@ -98,7 +99,7 @@ void display(void) {
     /* TODO: inicializar si ortho o frustrum*/
 
     glFrustum(-0.1, 0.1,-0.1,0.1,0.1,1000.0);
-
+    //glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
 
@@ -109,6 +110,7 @@ void display(void) {
     if(_selected_object != 0)
     {
         if(camara_interna) //if camera mode is activated
+        
             glLoadMatrixd(_selected_object->display->inv_M);
         else
             glLoadMatrixd(_selected_camera->M_inv); //Cargar la matriz de la camara actual cuando funcione.
