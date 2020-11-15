@@ -17,3 +17,7 @@ Tanda tres:
 - El modo análisis debe centrarse sobre un objeto que no está dentro de nuestro campo de visión? (es decir, si el objeto está fuera de la pantalla y lo centramos, qué eh?????'!!!!!!!!!!!!!)
 - Usar un switch con transformación para 1: cambiar de modo analisis, vuelo, perspectivas/paralelo y rotar, trasladar y volumen de la camara es una bunea idea o tendríamos que meter otro int?
 - Cuando esté el objeto centrado y lo volvamos a centrar, qué tiene qué pasar?
+
+Tanda cuatro:
+- Que tipo de cambios hay que hacer con la T? Cuantos? Preesctablecidos?
+- Cambio glortho glfrustum general o de cada camara independiente?
