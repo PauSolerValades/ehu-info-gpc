@@ -57,7 +57,6 @@ void reshape(int width, int height) {
 }
 
 void init_camera(){
-
     
     camera *new_camera;
 
@@ -73,7 +72,7 @@ void init_camera(){
     _selected_camera = new_camera;
     _first_camera = new_camera;
     _selected_camera->type = 0;
-
+    
 }
 
 

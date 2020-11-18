@@ -79,9 +79,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 				_selected_camera = new_camera;
 
 			}else
-			{
 				printf("No está en el modo camera, para entrar en el pulse k\n");
-			}
 			
 			break;
 
@@ -124,7 +122,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			printf("%d %c\n", key, x);
 			break;
 
-	}
+	}	
 }
 /**
  * @brief Callback function to control the special keys
@@ -143,25 +141,23 @@ void special(int k, int x, int y)
     if(_selected_object != NULL)
     {
 		if(_selected_camera->type == 0 || !mode)
-		{
-			//printf("No fotis que entra aquí...\n");
-			
+		{			
 			glMatrixMode(GL_MODELVIEW);
+
 			if(!mode){
 				if(!referencia){
-					printf("Entro1\n");
 					glLoadMatrixd(_selected_object->display->M);
 				}else 
 					glLoadIdentity();
-			}else{
-			printf("Entro2\n");
+			}else
 				glLoadMatrixd(_selected_camera->M);
-			}
-			print_matrix(_selected_camera->M);
+			
+
+			//print_matrix(_selected_camera->M);
+
 			switch (transformacion)
 			{
 			case 0:
-				printf("translacion\n");
 				switch (k)
 				{
 					case GLUT_KEY_UP:
@@ -251,20 +247,22 @@ void special(int k, int x, int y)
 				print_enonmode();
 				break;
 			}
+
 			if(referencia && !mode)
 				glMultMatrixd(_selected_object->display->M);
 
 			if(!isAKey &&( _selected_camera->type || !mode))
 				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+
 			if(!_selected_camera->type && mode){
 				glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
 				inverse(_selected_camera->M, _selected_camera->M_inv);
-				print_matrix(_selected_camera->M);
-				printf("Fin\n");
 			}
+			
 			if(_selected_camera->type)
 				apuntar_objeto();
 		}
+
 		else
 		{
 
@@ -272,64 +270,58 @@ void special(int k, int x, int y)
 			glLoadIdentity();
 
 			int i;
-			double E[3], P[3], x[3], y[3], z[3];
+			double z[3], P[3], x[3], y[3];
 
 			for(i=0; i<3; i++)
 			{
-				E[i] = _selected_camera->M[i+12];
 				P[i] = _selected_object->display->M[i+12];
 				x[i] = _selected_camera->M[i];
 				y[i] = _selected_camera->M[i+4];
 				z[i] = _selected_camera->M[i+8];
-
-				printf("%3lf\n", P[i]);
 			}
 
 			//movemos el origen de la camara sobre el objeto
-			//glTranslated(-v[0], -v[1], -v[2]);
 			glTranslated(P[0], P[1], P[2]);
 
-			switch (transformacion)
+			//rotamos el objeto
+			
+			switch (k)
 			{
-			case 1:
-				switch (k)
-				{
-				//rotamos
-				case GLUT_KEY_UP:
-					glRotated(-A, x[0], x[1], x[2]);
-					break;
-				case GLUT_KEY_DOWN:
-					glRotated(A, x[0], x[1], x[2]);
-					break;
-				case GLUT_KEY_RIGHT :
-					glRotated(A, y[0], y[1], y[2]);
-					break;
-				case GLUT_KEY_LEFT :
-					glRotated(-A, y[0], y[1], y[2]);
-					break;
-				case GLUT_KEY_PAGE_UP:
-					glRotated(A, 0.0, 0.0, 1.0);
-					break;
-				case GLUT_KEY_PAGE_DOWN:
-					glRotated(A, 0.0, 0.0, -1.0);
-					break;
-				default:
-					isAKey = 1;
-					break;
-				}
+			case GLUT_KEY_UP:
+				glRotated(-A, x[0], x[1], x[2]);
+				break;
+			case GLUT_KEY_DOWN:
+				glRotated(A, x[0], x[1], x[2]);
+				break;
+			case GLUT_KEY_RIGHT :
+				glRotated(A, y[0], y[1], y[2]);
+				break;
+			case GLUT_KEY_LEFT :
+				glRotated(-A, y[0], y[1], y[2]);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glRotated(A, 0.0, 0.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glRotated(-A, 0.0, 0.0, 1.0);
+				break;
+			case 43:
+				glTranslated(-z[0]*T, -z[1]*T, -z[2]*T);
+				break;
+			case 45:
+				glTranslated(z[0]*T, z[1]*T, z[2]*T);
+				break;
+			default:
+				isAKey = 1;
 				break;
 			}
-			
-			//glTranslated(v[0], v[1], v[2]);
+		
+			//lo devolvemos a la posicion inicial con el vector cambiado
 			glTranslated(-P[0], -P[1], -P[2]);
 			glMultMatrixd(_selected_camera->M);
+
 			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
-
 			inverse(_selected_camera->M, _selected_camera->M_inv);
-
-			print_matrix(_selected_camera->M);
-
-			print_matrix(_selected_camera->M_inv);
 			
 		}
 
@@ -426,10 +418,9 @@ void keyboard(unsigned char key, int x, int y)
 				_selected_object = _first_object;
 
 			if(mode && transformacion == 0)
-			{
 				apuntar_objeto();
 
-			}
+			
 		}
 		break;
 
@@ -646,7 +637,6 @@ void keyboard(unsigned char key, int x, int y)
         break;
 	}
 
-	/*In case we have do any modification affecting the displaying of the object, we redraw them*/
 	free(fname); /* We have to free the memory used in the scanf */
 	glutPostRedisplay();
 }
@@ -730,7 +720,7 @@ void new_transformation()
 
 	_selected_object->mptr = new_mptr;
 	new_mptr->nextptr = _selected_object->display;
-	_selected_object->display = new_mptr; //new_mptr
+	_selected_object->display = new_mptr;
 
     glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
@@ -744,9 +734,9 @@ void inverse(double *b, double *a)
     a[0] = b[0];
     a[5] = b[5];
     a[10] = b[10];
-    x = b[1];a[1] = b[4]; a[4] = x;
-    x = b[2];a[2] = b[8]; a[8] = x;
-    x = b[6];a[6] = b[9]; a[9] = x;
+    x = b[1]; a[1] = b[4]; a[4] = x;
+    x = b[2]; a[2] = b[8]; a[8] = x;
+    x = b[6]; a[6] = b[9]; a[9] = x;
 
     a[3] = b[3];
     a[7] = b[7];
@@ -759,7 +749,6 @@ void inverse(double *b, double *a)
     a[12] = -x;
     a[13] = -y;
     a[14] = -z;
-	
 
 }
 
@@ -824,7 +813,6 @@ void apuntar_objeto()
 			_selected_camera->M[i+12] = E[i];
 		}
 
-		print_matrix(_selected_camera->M);
 		inverse(_selected_camera->M, _selected_camera->M_inv);
 	}
 }
@@ -864,17 +852,6 @@ void destructor(object3d *object)
 	/* finally, we delete the object itself */
 	free(object);
 }
-
-
-void cross_product(double *u, double *v, double *w)
-{
-	w[0] = u[1]*v[2]-v[1]*u[2];
-	w[1] = -(u[0]*v[2]-v[0]*u[2]);
-	w[2] = u[0]*v[1]-v[0]*u[1];
-}
-
-
-
 
 /**
  * @brief This function just prints information about the use

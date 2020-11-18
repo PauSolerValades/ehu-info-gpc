@@ -19,5 +19,5 @@ Tanda tres:
 - Cuando esté el objeto centrado y lo volvamos a centrar, qué tiene qué pasar?
 
 Tanda cuatro:
-- Que tipo de cambios hay que hacer con la T? Cuantos? Preesctablecidos?
-- Cambio glortho glfrustum general o de cada camara independiente?
+- Que tipo de cambios hay que hacer con la T? Cuantos? Preesctablecidos? --> ahora control + i control - cambia el volumen de visión.
+- Cambio glortho glfrustum general o de cada camara independiente? --> cada camara tiene la suya
