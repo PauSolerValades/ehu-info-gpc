@@ -72,6 +72,12 @@ void init_camera(){
     _selected_camera = new_camera;
     _first_camera = new_camera;
     _selected_camera->type = 0;
+    new_camera-> r = 0.1;
+    new_camera-> l = -0.1;
+    new_camera-> t = 0.1;
+    new_camera-> b = -0.1;
+    new_camera-> n = 0.1;
+    new_camera-> f = 1000.0;
     
 }
 
@@ -97,7 +103,7 @@ void display(void) {
 
     /* TODO: inicializar si ortho o frustrum*/
 
-    glFrustum(-0.1, 0.1,-0.1,0.1,0.1,1000.0);
+    glFrustum(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
     //glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);

@@ -73,8 +73,14 @@ void keyboard_camera(unsigned char key, int x, int y)
 
     			new_camera->M[14] = INIT_CAMERA;
     			new_camera->M_inv[14] = -INIT_CAMERA;
-
+				
 				new_camera->type = 0;
+				new_camera-> r = 0.1;
+				new_camera-> l = -0.1;
+				new_camera-> t = 0.1;
+				new_camera-> b = -0.1;
+				new_camera-> n = 0.1;
+				new_camera-> f = 1000.0;
 				_selected_camera->nextptr = new_camera;
 				_selected_camera = new_camera;
 
@@ -463,16 +469,16 @@ void keyboard(unsigned char key, int x, int y)
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
 			/*Increase the projection plane; compute the new dimensions*/
-			wd = (_ortho_x_max - _ortho_x_min) / KG_STEP_ZOOM;
-			he = (_ortho_y_max - _ortho_y_min) / KG_STEP_ZOOM;
+			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
+			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
 			/*In order to avoid moving the center of the plane, we get its coordinates*/
-			midx = (_ortho_x_max + _ortho_x_min) / 2;
-			midy = (_ortho_y_max + _ortho_y_min) / 2;
+			midx = (_selected_camera->r + _selected_camera->l) / 2;
+			midy = (_selected_camera->t + _selected_camera->b) / 2;
 			/*The the new limits are set, keeping the center of the plane*/
-			_ortho_x_max = midx + wd / 2;
-			_ortho_x_min = midx - wd / 2;
-			_ortho_y_max = midy + he / 2;
-			_ortho_y_min = midy - he / 2;
+			_selected_camera->r = midx + wd / 2;
+			_selected_camera->l = midx - wd / 2;
+			_selected_camera->t = midy + he / 2;
+			_selected_camera->b = midy - he / 2;
 		}
 		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
 			special(45, x, y);
@@ -484,16 +490,16 @@ void keyboard(unsigned char key, int x, int y)
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
 			/*Increase the projection plane; compute the new dimensions*/
-			wd = (_ortho_x_max - _ortho_x_min) * KG_STEP_ZOOM;
-			he = (_ortho_y_max - _ortho_y_min) * KG_STEP_ZOOM;
+			wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
+			he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
 			/*In order to avoid moving the center of the plane, we get its coordinates*/
-			midx = (_ortho_x_max + _ortho_x_min) / 2;
-			midy = (_ortho_y_max + _ortho_y_min) / 2;
+			midx = (_selected_camera->r + _selected_camera->l) / 2;
+			midy = (_selected_camera->t + _selected_camera->b) / 2;
 			/*The the new limits are set, keeping the center of the plane*/
-			_ortho_x_max = midx + wd / 2;
-			_ortho_x_min = midx - wd / 2;
-			_ortho_y_max = midy + he / 2;
-			_ortho_y_min = midy - he / 2;
+			_selected_camera->r = midx + wd / 2;
+			_selected_camera->l = midx - wd / 2;
+			_selected_camera->t = midy + he / 2;
+			_selected_camera->b = midy - he / 2;
 		}
 		else /* Analogous of case '-': */
 			special(43, x, y);
