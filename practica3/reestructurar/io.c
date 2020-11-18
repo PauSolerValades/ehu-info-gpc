@@ -73,7 +73,6 @@ void keyboard_camera(unsigned char key, int x, int y)
 
     			new_camera->M[14] = INIT_CAMERA;
     			new_camera->M_inv[14] = -INIT_CAMERA;
-				
 				new_camera->type = 0;
 				new_camera-> r = 0.1;
 				new_camera-> l = -0.1;
