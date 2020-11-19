@@ -21,3 +21,16 @@ Tanda tres:
 Tanda cuatro:
 - Que tipo de cambios hay que hacer con la T? Cuantos? Preesctablecidos? --> ahora control + i control - cambia el volumen de visión.
 - Cambio glortho glfrustum general o de cada camara independiente? --> cada camara tiene la suya
+
+
+1119:
+
+para determinar si el vector normal del polígono es el positivo, sustituymos en el plano p(x,y,z) = Ax+By+Cy+D el punto E de la camara. Si p(E) = 0 dentro, si p(E)>0 -> en el lado de la normal, si p(E) < 0 -> no en el lado de la normal.
+
+Para sacar el vector normal del plano debemos: dos vectores con tres puntos (que tenemos en object3d). Sacamos el vector, lo dividimos por el módulo para tenerlo unitario. Para econtrar la D de la equación de P sustituimos uno de los puntos que tenemos de la cara del objeto.
+
+TENEMOS QUE AÑADIR LA EQUACIÓN DEL PLANO QUE CONTIENE AL POLÍGONO, desde ahí podremos calcular todo lo que hemos mencionado arriba.
+Tenemos que pasar la posicion de la camara al sistema de referencia de cada objeto, con la matriz inversa de la camara interna
+
+TODO: ARREGLAR EL PUTO CÓDGIO (ESTRUCTURA)
+- mirar porque el control + en paralelo no funciona.

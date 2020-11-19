@@ -54,8 +54,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 	switch (key)
 	{
 		case 'n':
-		case 'N':
-			printf("Nueva camara\n");
+			printf("Nueva Camara Proyeccion\n");
 			
 			//la primera camara siempre está inicializada => el puntero nunca será null
 			if(mode)
@@ -73,13 +72,54 @@ void keyboard_camera(unsigned char key, int x, int y)
 
     			new_camera->M[14] = INIT_CAMERA;
     			new_camera->M_inv[14] = -INIT_CAMERA;
+
 				new_camera->type = 0;
+				new_camera->pers = 1;
+
 				new_camera-> r = 0.1;
 				new_camera-> l = -0.1;
 				new_camera-> t = 0.1;
 				new_camera-> b = -0.1;
 				new_camera-> n = 0.1;
 				new_camera-> f = 1000.0;
+
+				_selected_camera->nextptr = new_camera;
+				_selected_camera = new_camera;
+
+			}else
+				printf("No está en el modo camera, para entrar en el pulse k\n");
+			
+			break;
+		case 'N':
+			printf("Nueva Camara Paralela\n");
+			
+			//la primera camara siempre está inicializada => el puntero nunca será null
+			if(mode)
+			{
+
+				glMatrixMode(GL_PROJECTION);
+    			glLoadIdentity();
+				camera *new_camera;
+
+				new_camera = (camera *)malloc(sizeof(camera));
+				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+				glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
+    			glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
+
+    			new_camera->M[14] = INIT_CAMERA;
+    			new_camera->M_inv[14] = -INIT_CAMERA;
+
+				new_camera->type = 0;
+				new_camera->pers = 0;
+
+				new_camera-> r = -5.0;
+				new_camera-> l = 5.0;
+				new_camera-> t = -5.0;
+				new_camera-> b = 5.0;
+				new_camera-> n = 100.0;
+				new_camera-> f = 1000.0;
+
 				_selected_camera->nextptr = new_camera;
 				_selected_camera = new_camera;
 
@@ -114,7 +154,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			_selected_camera->type = 1;
 			apuntar_objeto();
 			
-			print_matrix(_selected_camera->M);
+			//print_matrix(_selected_camera->M);
 			break;
 
 		case 'l':
@@ -140,11 +180,44 @@ void keyboard_camera(unsigned char key, int x, int y)
 void special(int k, int x, int y)
 {
     int isAKey;
+	GLdouble wd,he,midx,midy;
 
     isAKey = 0;
     
     if(_selected_object != NULL)
-    {
+    {	
+		if(mode && transformacion == 2 &&(k == '+' || k == '-')){
+			switch (k){
+				case '+':
+					/*Increase the projection plane; compute the new dimensions*/
+					wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
+					he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
+					/*In order to avoid moving the center of the plane, we get its coordinates*/
+					midx = (_selected_camera->r + _selected_camera->l) / 2;
+					midy = (_selected_camera->t + _selected_camera->b) / 2;
+					/*The the new limits are set, keeping the center of the plane*/
+					_selected_camera->r = midx + wd / 2;
+					_selected_camera->l = midx - wd / 2;
+					_selected_camera->t = midy + he / 2;
+					_selected_camera->b = midy - he / 2;
+					break;
+				case '-':
+					wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
+					he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
+					/*In order to avoid moving the center of the plane, we get its coordinates*/
+					midx = (_selected_camera->r + _selected_camera->l) / 2;
+					midy = (_selected_camera->t + _selected_camera->b) / 2;
+					/*The the new limits are set, keeping the center of the plane*/
+					_selected_camera->r = midx + wd / 2;
+					_selected_camera->l = midx - wd / 2;
+					_selected_camera->t = midy + he / 2;
+					_selected_camera->b = midy - he / 2;
+					break;
+				default:
+					break;
+			}
+		}
+		
 		if(_selected_camera->type == 0 || !mode)
 		{			
 			glMatrixMode(GL_MODELVIEW);
@@ -285,30 +358,38 @@ void special(int k, int x, int y)
 				z[i] = _selected_camera->M[i+8];
 			}
 
-			//movemos el origen de la camara sobre el objeto
-			glTranslated(P[0], P[1], P[2]);
-
-			//rotamos el objeto
 			
 			switch (k)
 			{
 			case GLUT_KEY_UP:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(-A, x[0], x[1], x[2]);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
 			case GLUT_KEY_DOWN:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(A, x[0], x[1], x[2]);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
-			case GLUT_KEY_RIGHT :
+			case GLUT_KEY_RIGHT:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(A, y[0], y[1], y[2]);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
-			case GLUT_KEY_LEFT :
+			case GLUT_KEY_LEFT:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(-A, y[0], y[1], y[2]);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
 			case GLUT_KEY_PAGE_UP:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(A, 0.0, 0.0, 1.0);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
 			case GLUT_KEY_PAGE_DOWN:
+				glTranslated(P[0], P[1], P[2]);
 				glRotated(-A, 0.0, 0.0, 1.0);
+				glTranslated(-P[0], -P[1], -P[2]);
 				break;
 			case 43:
 				glTranslated(-z[0]*T, -z[1]*T, -z[2]*T);
@@ -320,9 +401,7 @@ void special(int k, int x, int y)
 				isAKey = 1;
 				break;
 			}
-		
-			//lo devolvemos a la posicion inicial con el vector cambiado
-			glTranslated(-P[0], -P[1], -P[2]);
+
 			glMultMatrixd(_selected_camera->M);
 
 			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
@@ -407,6 +486,18 @@ void keyboard(unsigned char key, int x, int y)
 			//asignamos la variable global
 			_selected_object->display = new_mptr;
 
+			vertex *Aptr, *Bptr, *Cptr;
+
+			/* Encontrando la ecuación del plano */
+			Aptr = _selected_object->face_table->vertex_table[0];
+			Bptr = _selected_object->face_table->vertex_table[1];
+			Cptr = _selected_object->face_table->vertex_table[2];
+
+			//tenemos que comprobar que va a dar el vector normal positivo.
+
+			//C-A = v1; B-A = v2;
+			//Cptr->coord->x - Aptr->coord;
+
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
 		}
@@ -467,6 +558,7 @@ void keyboard(unsigned char key, int x, int y)
 
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
+			printf("AAAAA\n");
 			/*Increase the projection plane; compute the new dimensions*/
 			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
 			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
@@ -480,7 +572,10 @@ void keyboard(unsigned char key, int x, int y)
 			_selected_camera->b = midy - he / 2;
 		}
 		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
+			
+			printf("bbbbbbb\n");
 			special(45, x, y);
+
 			
 		break;
 
@@ -528,8 +623,6 @@ void keyboard(unsigned char key, int x, int y)
 		printf("CAMBIO A MODO OBJETO\n");
 		mode = 0; //volvemos en modo transformación.
 		referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
-		print_matrix(_selected_object->display->inv_M);
-		print_matrix(_selected_object->display->M);
 		if(camara_interna)
 		{
 			printf("Camara No Interna\n");	

@@ -68,17 +68,19 @@ void init_camera(){
 
     new_camera->M[14] = INIT_CAMERA;
     new_camera->M_inv[14] = -INIT_CAMERA;
-    //asignamos la matriz a la id.
-    _selected_camera = new_camera;
-    _first_camera = new_camera;
-    _selected_camera->type = 0;
     new_camera-> r = 0.1;
     new_camera-> l = -0.1;
     new_camera-> t = 0.1;
     new_camera-> b = -0.1;
     new_camera-> n = 0.1;
     new_camera-> f = 1000.0;
+
+    //asignamos la matriz a la id.
+    _selected_camera = new_camera;
+    _first_camera = new_camera;
     
+    _selected_camera->type = 0; //modo vuelo
+    _selected_camera->pers = 1; //modo paralelo.
 }
 
 
@@ -103,8 +105,17 @@ void display(void) {
 
     /* TODO: inicializar si ortho o frustrum*/
 
-    glFrustum(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
-    //glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
+    if(_selected_camera->pers){
+        //proyección
+        glFrustum(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
+    }
+    else
+    {
+        glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
+    }
+    
+
+   //glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
 
@@ -137,7 +148,13 @@ void display(void) {
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
-            //dibujas cada estructura, en sus
+            /* TODO: comprobar si los polígonos son visibles con la matriz de la camar ainterna
+                - posición de la camara.
+                - le multiplicamos la matriz del cambio del sistema de referencia (camara en sist ref object)
+                - sustituimos el punto en la ecuación del plano de cada polígono. Si es positivo se dibuja, sinó, no.
+             */
+
+
             for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                 v_index = aux_obj->face_table[f].vertex_table[v];
                 glVertex3d(aux_obj->vertex_table[v_index].coord.x,

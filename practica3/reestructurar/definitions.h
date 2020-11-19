@@ -105,6 +105,7 @@ typedef struct {
 typedef struct {
     GLint num_vertices;                 /* number of vertices in the face */
     GLint *vertex_table;                /* table with the index of each vertex */
+    GLdouble ti;                        /* término independiente  */
 } face;
 
 /****************************
@@ -125,10 +126,9 @@ typedef struct camera
     double M[16];
     double M_inv[16];
     int type;  // 0 = vuelo 1 = analisis  
-    int pers;  // 0: paralelo, 1: proyeción
+    int pers;  // 0: paralelo, 1: proyección
     GLdouble l,r,t,b,n,f;
     struct camera *nextptr;
-    //guardar el point3 del objeto al que apuntas?
 } camera;
 
 /****************************
