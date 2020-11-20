@@ -486,7 +486,7 @@ void keyboard(unsigned char key, int x, int y)
 			//asignamos la variable global
 			_selected_object->display = new_mptr;
 
-			vertex Aptr, Bptr, Cptr;
+			vertex a, b, c;
 			int i, ia, ib, ic;
 			double v1[3], v2[3], vn[3];
 
@@ -499,29 +499,32 @@ void keyboard(unsigned char key, int x, int y)
 				ic = _selected_object->face_table[i].vertex_table[2];
 
 				//accedemos a los puntos del i-essimo poligono
-				Aptr = _selected_object->vertex_table[ia];
-				Bptr = _selected_object->vertex_table[ib];
-				Cptr = _selected_object->vertex_table[ic];
+				a = _selected_object->vertex_table[ia];
+				b = _selected_object->vertex_table[ib];
+				c = _selected_object->vertex_table[ic];
 
 				//calculamos los dos vectores
-				v1[0] = Cptr.coord.x - Aptr.coord.x;
-				v1[1] = Cptr.coord.y - Aptr.coord.y;
-				v1[2] = Cptr.coord.z - Aptr.coord.z;
+				v1[0] = c.coord.x - a.coord.x;
+				v1[1] = c.coord.y - a.coord.y;
+				v1[2] = c.coord.z - a.coord.z;
 
-				v2[0] = Bptr.coord.x - Aptr.coord.x;
-				v2[1] = Bptr.coord.y - Aptr.coord.y;
-				v2[2] = Bptr.coord.z - Aptr.coord.z;
+				v2[0] = b.coord.x - a.coord.x;
+				v2[1] = b.coord.y - a.coord.y;
+				v2[2] = b.coord.z - a.coord.z;
 
+				//PROBLEMA AQUÍ
+				//TODO: crec que quan el polígon és horitzontal, el producte vectorial surt de l'altra banda?? preguntar si estan bé sempre fer-los amb AC i AB i no haver-los de cambiar d'oardre
 				_selected_object->face_table[i].vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
-				_selected_object->face_table[i].vn[0] = -(v1[0] * v2[2] - v2[0] * v1[2]);
-				_selected_object->face_table[i].vn[0] = v1[0] * v2[1] - v2[0] * v1[1];
+				_selected_object->face_table[i].vn[1] = -(v1[0] * v2[2] - v2[0] * v1[2]);
+				_selected_object->face_table[i].vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
 
+				//Ax+By+Cz+D=0 => D=-(Ax+By+Cz) 
 				_selected_object->face_table[i].ti = 
-					_selected_object->face_table[i].vn[0]*Aptr.coord.x + 
-					_selected_object->face_table[i].vn[0]*Aptr.coord.y + 
-					_selected_object->face_table[i].vn[0]*Aptr.coord.z;
+					-_selected_object->face_table[i].vn[0]*a.coord.x - 
+					_selected_object->face_table[i].vn[1]*a.coord.y - 
+					_selected_object->face_table[i].vn[2]*a.coord.z;
 
-				printf("%f\n", _selected_object->face_table[i].ti);
+				//printf("%f\n", _selected_object->face_table[i].ti);
 			}
 
 			printf("%s\n", KG_MSSG_FILEREAD);
@@ -849,10 +852,10 @@ void new_transformation()
     glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
 	inverse(_selected_object->display->M, _selected_object->display->inv_M); //calcula i carrega la matriu inversa (transposada vamos.)
-
+	/*
 	glLoadMatrixd(_selected_object->display->inv_M);
 	glRotated(180.0, 0.0, 1.0, 0.0);
-
+	*/
 	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
 
 }

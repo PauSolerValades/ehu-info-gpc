@@ -87,10 +87,13 @@ void init_camera(){
 
 GLint poligono_visible(int f)
 {
+    /*
+    //pel que es veu fer-ho amb Gl toques coses que estaven bé ja i clar, no ho sé fer bé xd
     elem_matrix *aux;
-    aux = (elem_matrix*)malloc(sizeof(camera));
+    aux = (elem_matrix*)malloc(sizeof(elem_matrix));
     aux->nextptr = NULL;
 
+    
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
@@ -100,18 +103,26 @@ GLint poligono_visible(int f)
     glLoadMatrixd(_selected_object->display->inv_M);
     glTranslated(_selected_camera->M[12],_selected_camera->M[13], _selected_camera->M[14]);
     glGetDoublev(GL_MODELVIEW_MATRIX, aux->M);
+    */
 
+    int i;
     double Eo[3], eval;
 
-    Eo[0] = aux->M[12];
-    Eo[1] = aux->M[13];
-    Eo[2] = aux->M[14];
+    for(i=0; i<3; i++)
+    {
+        Eo[i] = _selected_object->display->inv_M[12+i]*_selected_camera->M[12+i];
+    }
 
-    eval = _selected_object->face_table[f].vn[0]*Eo[0]+
-           _selected_object->face_table[f].vn[1]*Eo[1]+
-           _selected_object->face_table[f].vn[2]*Eo[2]+
+    //Ax+By+Cz+D=0
+    eval = _selected_object->face_table[f].vn[0]*Eo[0] +
+           _selected_object->face_table[f].vn[1]*Eo[1] +
+           _selected_object->face_table[f].vn[2]*Eo[2] +
            _selected_object->face_table[f].ti;
+
+    //printf("Eval: %f\n", eval);
     
+    //free(aux);
+
     if(eval < 0)
         return 0;
     else
@@ -159,7 +170,6 @@ void display(void) {
     if(_selected_object != 0)
     {
         if(camara_interna) //if camera mode is activated
-        
             glLoadMatrixd(_selected_object->display->inv_M);
         else
             glLoadMatrixd(_selected_camera->M_inv); //Cargar la matriz de la camara actual cuando funcione.
@@ -181,16 +191,11 @@ void display(void) {
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
             glBegin(GL_POLYGON);
-            /* TODO: comprobar si los polígonos son visibles con la matriz de la camar ainterna
-                - posición de la camara.
-                - le multiplicamos la matriz del cambio del sistema de referencia (camara en sist ref object)
-                - sustituimos el punto en la ecuación del plano de cada polígono. Si es positivo se dibuja, sinó, no.
-             */
+
             dibuja = poligono_visible(f);
             
-            printf("DIBJUA: %d\n", dibuja);
-
-            if(dibuja){
+            if(dibuja)
+            {
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
                     glVertex3d(aux_obj->vertex_table[v_index].coord.x,
