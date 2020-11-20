@@ -3,6 +3,8 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <stdio.h>
+
 /** EXTERNAL VARIABLES **/
 
 extern GLdouble _window_ratio;
@@ -83,15 +85,46 @@ void init_camera(){
     _selected_camera->pers = 1; //modo paralelo.
 }
 
+GLint poligono_visible(int f)
+{
+    elem_matrix *aux;
+    aux = (elem_matrix*)malloc(sizeof(camera));
+    aux->nextptr = NULL;
+
+    glMatrixMode(GL_MODELVIEW);
+
+    glLoadIdentity();
+    glGetDoublev(GL_MODELVIEW_MATRIX, aux->M);
+    glGetDoublev(GL_MODELVIEW_MATRIX, aux->inv_M);
+    
+    glLoadMatrixd(_selected_object->display->inv_M);
+    glTranslated(_selected_camera->M[12],_selected_camera->M[13], _selected_camera->M[14]);
+    glGetDoublev(GL_MODELVIEW_MATRIX, aux->M);
+
+    double Eo[3], eval;
+
+    Eo[0] = aux->M[12];
+    Eo[1] = aux->M[13];
+    Eo[2] = aux->M[14];
+
+    eval = _selected_object->face_table[f].vn[0]*Eo[0]+
+           _selected_object->face_table[f].vn[1]*Eo[1]+
+           _selected_object->face_table[f].vn[2]*Eo[2]+
+           _selected_object->face_table[f].ti;
+    
+    if(eval < 0)
+        return 0;
+    else
+        return 1;
+}
 
 /**
  * @brief Callback display function
  */
 //_first_objectfunción que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
-    GLint v_index, v, f;
+    GLint v_index, v, f, dibuja;
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
-
     /* Clear the screen */
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -153,14 +186,18 @@ void display(void) {
                 - le multiplicamos la matriz del cambio del sistema de referencia (camara en sist ref object)
                 - sustituimos el punto en la ecuación del plano de cada polígono. Si es positivo se dibuja, sinó, no.
              */
+            dibuja = poligono_visible(f);
+            
+            printf("DIBJUA: %d\n", dibuja);
 
+            if(dibuja){
+                for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
+                    v_index = aux_obj->face_table[f].vertex_table[v];
+                    glVertex3d(aux_obj->vertex_table[v_index].coord.x,
+                            aux_obj->vertex_table[v_index].coord.y,
+                            aux_obj->vertex_table[v_index].coord.z);
 
-            for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
-                v_index = aux_obj->face_table[f].vertex_table[v];
-                glVertex3d(aux_obj->vertex_table[v_index].coord.x,
-                        aux_obj->vertex_table[v_index].coord.y,
-                        aux_obj->vertex_table[v_index].coord.z);
-
+                }
             }
             glEnd();
         }

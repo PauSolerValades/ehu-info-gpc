@@ -477,7 +477,7 @@ void keyboard(unsigned char key, int x, int y)
 
 			new_mptr->inv_M[0] = 1.0;
 			new_mptr->inv_M[5] = 1.0;
-			new_mptr->inv_M[10] = 1.0;
+			new_mptr->inv_M[10] = -1.0; //esto es para que se vea palaante la camara interna.
 			new_mptr->inv_M[15] = 1.0;
 
 			//asignamos la matriz a la id.
@@ -486,17 +486,43 @@ void keyboard(unsigned char key, int x, int y)
 			//asignamos la variable global
 			_selected_object->display = new_mptr;
 
-			vertex *Aptr, *Bptr, *Cptr;
+			vertex Aptr, Bptr, Cptr;
+			int i, ia, ib, ic;
+			double v1[3], v2[3], vn[3];
 
 			/* Encontrando la ecuación del plano */
-			Aptr = _selected_object->face_table->vertex_table[0];
-			Bptr = _selected_object->face_table->vertex_table[1];
-			Cptr = _selected_object->face_table->vertex_table[2];
+			for(i = 0; i<_selected_object->num_faces; i++)
+			{
+				//esto son los indices de los vertices del i-essimo poligono en object3d vertex_table
+				ia = _selected_object->face_table[i].vertex_table[0];
+				ib = _selected_object->face_table[i].vertex_table[1];
+				ic = _selected_object->face_table[i].vertex_table[2];
 
-			//tenemos que comprobar que va a dar el vector normal positivo.
+				//accedemos a los puntos del i-essimo poligono
+				Aptr = _selected_object->vertex_table[ia];
+				Bptr = _selected_object->vertex_table[ib];
+				Cptr = _selected_object->vertex_table[ic];
 
-			//C-A = v1; B-A = v2;
-			//Cptr->coord->x - Aptr->coord;
+				//calculamos los dos vectores
+				v1[0] = Cptr.coord.x - Aptr.coord.x;
+				v1[1] = Cptr.coord.y - Aptr.coord.y;
+				v1[2] = Cptr.coord.z - Aptr.coord.z;
+
+				v2[0] = Bptr.coord.x - Aptr.coord.x;
+				v2[1] = Bptr.coord.y - Aptr.coord.y;
+				v2[2] = Bptr.coord.z - Aptr.coord.z;
+
+				_selected_object->face_table[i].vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
+				_selected_object->face_table[i].vn[0] = -(v1[0] * v2[2] - v2[0] * v1[2]);
+				_selected_object->face_table[i].vn[0] = v1[0] * v2[1] - v2[0] * v1[1];
+
+				_selected_object->face_table[i].ti = 
+					_selected_object->face_table[i].vn[0]*Aptr.coord.x + 
+					_selected_object->face_table[i].vn[0]*Aptr.coord.y + 
+					_selected_object->face_table[i].vn[0]*Aptr.coord.z;
+
+				printf("%f\n", _selected_object->face_table[i].ti);
+			}
 
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
@@ -823,6 +849,12 @@ void new_transformation()
     glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
 	inverse(_selected_object->display->M, _selected_object->display->inv_M); //calcula i carrega la matriu inversa (transposada vamos.)
+
+	glLoadMatrixd(_selected_object->display->inv_M);
+	glRotated(180.0, 0.0, 1.0, 0.0);
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
+
 }
 
 void inverse(double *b, double *a)

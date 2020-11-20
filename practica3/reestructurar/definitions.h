@@ -105,6 +105,7 @@ typedef struct {
 typedef struct {
     GLint num_vertices;                 /* number of vertices in the face */
     GLint *vertex_table;                /* table with the index of each vertex */
+    double vn[3];
     GLdouble ti;                        /* término independiente  */
 } face;
 
