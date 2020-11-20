@@ -489,6 +489,7 @@ void keyboard(unsigned char key, int x, int y)
 			_selected_object->display = new_mptr;
 
 			calcular_normal();
+			printf("COÑO\n");
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
 		}

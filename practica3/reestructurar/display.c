@@ -82,7 +82,7 @@ void init_camera(){
     _selected_camera->pers = 1; //modo paralelo.
 }
 
-GLint poligono_visible(int f)
+GLint poligono_visible(GLint f)
 {
     /*
     //pel que es veu fer-ho amb Gl toques coses que estaven bé ja i clar, no ho sé fer bé xd
@@ -120,7 +120,7 @@ GLint poligono_visible(int f)
     
     //free(aux);
 
-    if(eval < 0)
+    if(eval < 0.0)
         return 0;
     else
         return 1;
@@ -172,6 +172,8 @@ void display(void) {
             glLoadMatrixd(_selected_camera->M_inv); //Cargar la matriz de la camara actual cuando funcione.
     }
 
+    int poligonos = 0;
+
     /*Now each of the objects in the list*/
     while (aux_obj != 0) { //dibuja mientras el puntero no apunte a null.
 
@@ -187,12 +189,14 @@ void display(void) {
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
-            glBegin(GL_POLYGON);
 
             dibuja = poligono_visible(f);
             
+            //printf("%d\n",  dibuja);
             if(dibuja)
             {
+                glBegin(GL_POLYGON);
+
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
                     glVertex3d(aux_obj->vertex_table[v_index].coord.x,
@@ -200,9 +204,13 @@ void display(void) {
                             aux_obj->vertex_table[v_index].coord.z);
 
                 }
+                poligonos++;
+                
+                glEnd();
             }
-            glEnd();
         }
+
+        printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
         aux_obj = aux_obj->next;
 
         glPopMatrix();
