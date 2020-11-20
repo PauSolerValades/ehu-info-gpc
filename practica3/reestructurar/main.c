@@ -38,12 +38,7 @@ void initialization (){
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
     //zona tridimensional donde se van a tener que ver en pantalla.
-    _ortho_x_min = KG_ORTHO_X_MIN_INIT;
-    _ortho_x_max = KG_ORTHO_X_MAX_INIT;
-    _ortho_y_min = KG_ORTHO_Y_MIN_INIT;
-    _ortho_y_max = KG_ORTHO_Y_MAX_INIT;
-    _ortho_z_min = KG_ORTHO_Z_MIN_INIT;
-    _ortho_z_max = KG_ORTHO_Z_MAX_INIT;
+    
 
     _window_ratio = (GLdouble) KG_WINDOW_WIDTH / (GLdouble) KG_WINDOW_HEIGHT;
 

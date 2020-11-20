@@ -29,6 +29,7 @@ void destructor(object3d *object);
 void new_transformation();
 void inverse();
 void apuntar_objeto();
+void calcular_normal();
 void special(int k, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 double euclidean_norm(double x, double y, double z);
@@ -113,11 +114,11 @@ void keyboard_camera(unsigned char key, int x, int y)
 				new_camera->type = 0;
 				new_camera->pers = 0;
 
-				new_camera-> r = -5.0;
-				new_camera-> l = 5.0;
-				new_camera-> t = -5.0;
-				new_camera-> b = 5.0;
-				new_camera-> n = 100.0;
+				new_camera-> r = 5.0;
+				new_camera-> l = -5.0;
+				new_camera-> t = 5.0;
+				new_camera-> b = -5.0;
+				new_camera-> n = 0.0;
 				new_camera-> f = 1000.0;
 
 				_selected_camera->nextptr = new_camera;
@@ -408,7 +409,8 @@ void special(int k, int x, int y)
 			inverse(_selected_camera->M, _selected_camera->M_inv);
 			
 		}
-
+		
+		calcular_normal();
 		glutPostRedisplay();
 	}
 }
@@ -486,47 +488,7 @@ void keyboard(unsigned char key, int x, int y)
 			//asignamos la variable global
 			_selected_object->display = new_mptr;
 
-			vertex a, b, c;
-			int i, ia, ib, ic;
-			double v1[3], v2[3], vn[3];
-
-			/* Encontrando la ecuación del plano */
-			for(i = 0; i<_selected_object->num_faces; i++)
-			{
-				//esto son los indices de los vertices del i-essimo poligono en object3d vertex_table
-				ia = _selected_object->face_table[i].vertex_table[0];
-				ib = _selected_object->face_table[i].vertex_table[1];
-				ic = _selected_object->face_table[i].vertex_table[2];
-
-				//accedemos a los puntos del i-essimo poligono
-				a = _selected_object->vertex_table[ia];
-				b = _selected_object->vertex_table[ib];
-				c = _selected_object->vertex_table[ic];
-
-				//calculamos los dos vectores
-				v1[0] = c.coord.x - a.coord.x;
-				v1[1] = c.coord.y - a.coord.y;
-				v1[2] = c.coord.z - a.coord.z;
-
-				v2[0] = b.coord.x - a.coord.x;
-				v2[1] = b.coord.y - a.coord.y;
-				v2[2] = b.coord.z - a.coord.z;
-
-				//PROBLEMA AQUÍ
-				//TODO: crec que quan el polígon és horitzontal, el producte vectorial surt de l'altra banda?? preguntar si estan bé sempre fer-los amb AC i AB i no haver-los de cambiar d'oardre
-				_selected_object->face_table[i].vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
-				_selected_object->face_table[i].vn[1] = -(v1[0] * v2[2] - v2[0] * v1[2]);
-				_selected_object->face_table[i].vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
-
-				//Ax+By+Cz+D=0 => D=-(Ax+By+Cz) 
-				_selected_object->face_table[i].ti = 
-					-_selected_object->face_table[i].vn[0]*a.coord.x - 
-					_selected_object->face_table[i].vn[1]*a.coord.y - 
-					_selected_object->face_table[i].vn[2]*a.coord.z;
-
-				//printf("%f\n", _selected_object->face_table[i].ti);
-			}
-
+			calcular_normal();
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
 		}
@@ -587,7 +549,6 @@ void keyboard(unsigned char key, int x, int y)
 
 		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
 		{
-			printf("AAAAA\n");
 			/*Increase the projection plane; compute the new dimensions*/
 			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
 			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
@@ -602,7 +563,6 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
 			
-			printf("bbbbbbb\n");
 			special(45, x, y);
 
 			
@@ -626,7 +586,6 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		else /* Analogous of case '-': */
 			special(43, x, y);
-			
 		break;
 
 	case 'o':
@@ -681,7 +640,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'a':
 	case 'A': /* Transformaciones luz selecionada */
 		printf("Funcionalidad no implementada\n");
-
+		break;
 	case '?':
 		print_help();
 		break;
@@ -857,6 +816,52 @@ void new_transformation()
 	glRotated(180.0, 0.0, 1.0, 0.0);
 	*/
 	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
+
+}
+
+void calcular_normal()
+{
+	vertex a, b, c;
+	int i, ia, ib, ic;
+	double v1[3], v2[3], vn[3];
+
+	/* Encontrando la ecuación del plano */
+	for(i = 0; i<_selected_object->num_faces; i++)
+	{
+		//esto son los indices de los vertices del i-essimo poligono en object3d vertex_table
+		ia = _selected_object->face_table[i].vertex_table[0];
+		ib = _selected_object->face_table[i].vertex_table[1];
+		ic = _selected_object->face_table[i].vertex_table[2];
+
+		//accedemos a los puntos del i-essimo poligono
+		a = _selected_object->vertex_table[ia];
+		b = _selected_object->vertex_table[ib];
+		c = _selected_object->vertex_table[ic];
+
+		//calculamos los dos vectores
+		v1[0] = c.coord.x - a.coord.x;
+		v1[1] = c.coord.y - a.coord.y;
+		v1[2] = c.coord.z - a.coord.z;
+
+		v2[0] = b.coord.x - a.coord.x;
+		v2[1] = b.coord.y - a.coord.y;
+		v2[2] = b.coord.z - a.coord.z;
+
+		//PROBLEMA AQUÍ
+		//TODO: crec que quan el polígon és horitzontal, el producte vectorial surt de l'altra banda?? preguntar si estan bé sempre fer-los amb AC i AB i no haver-los de cambiar d'oardre
+		_selected_object->face_table[i].vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
+		_selected_object->face_table[i].vn[1] = -(v1[0] * v2[2] - v2[0] * v1[2]);
+		_selected_object->face_table[i].vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
+
+		//Ax+By+Cz+D=0 => D=-(Ax+By+Cz) 
+		_selected_object->face_table[i].ti = 
+			-_selected_object->face_table[i].vn[0]*a.coord.x - 
+			_selected_object->face_table[i].vn[1]*a.coord.y - 
+			_selected_object->face_table[i].vn[2]*a.coord.z;
+
+		//printf("%f\n", _selected_object->face_table[i].ti);
+	}
+
 
 }
 

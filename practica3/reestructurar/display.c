@@ -8,9 +8,6 @@
 /** EXTERNAL VARIABLES **/
 
 extern GLdouble _window_ratio;
-extern GLdouble _ortho_x_min,_ortho_x_max;
-extern GLdouble _ortho_y_min,_ortho_y_max;
-extern GLdouble _ortho_z_min,_ortho_z_max;
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
@@ -155,7 +152,7 @@ void display(void) {
     }
     else
     {
-        glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
+        glOrtho(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
     }
     
 

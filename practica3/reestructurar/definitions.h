@@ -22,12 +22,13 @@
 #define KG_STEP_ZOOM                        0.75
 #define KG_STEP_CAMERA_ANGLE                5.0f
 
-#define KG_ORTHO_X_MIN_INIT                -5
+/*#define KG_ORTHO_X_MIN_INIT               -5
 #define KG_ORTHO_X_MAX_INIT                 5
 #define KG_ORTHO_Y_MIN_INIT                -5
 #define KG_ORTHO_Y_MAX_INIT                 5
 #define KG_ORTHO_Z_MIN_INIT                -100
 #define KG_ORTHO_Z_MAX_INIT                 10000
+*/
 
 #define KG_COL_BACK_R                       0.30f
 #define KG_COL_BACK_G                       0.30f
