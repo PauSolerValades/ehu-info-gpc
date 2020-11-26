@@ -17,6 +17,33 @@ extern camera * _selected_camera;
 
 extern int camara_interna; //0: camara no interna, 1: camara interna
 
+void inversa(double *b, double *a)
+{
+	GLdouble x,y,z;
+
+    a[0] = b[0];
+    a[5] = b[5];
+    a[10] = b[10];
+    x = b[1]; a[1] = b[4]; a[4] = x;
+    x = b[2]; a[2] = b[8]; a[8] = x;
+    x = b[6]; a[6] = b[9]; a[9] = x;
+
+    a[3] = b[3];
+    a[7] = b[7];
+    a[11] = b[11];
+    a[15] = b[15];
+    
+    x = (a[0]*b[12])+(a[4]*b[13])+(a[8]*b[14]);
+    y = (a[1]*b[12])+(a[5]*b[13])+(a[9]*b[14]);
+    z = (a[2]*b[12])+(a[6]*b[13])+(a[10]*b[14]);
+    a[12] = -x;
+    a[13] = -y;
+    a[14] = -z;
+
+}
+
+
+
 /**
  * @brief Function to draw the axes
  */
@@ -82,48 +109,35 @@ void init_camera(){
     _selected_camera->pers = 1; //modo paralelo.
 }
 
-GLint poligono_visible(GLint f)
+GLint poligono_visible(GLint f, double *M, double Av, double Bv, double Cv, double Dv)
 {
-    /*
-    //pel que es veu fer-ho amb Gl toques coses que estaven bé ja i clar, no ho sé fer bé xd
-    elem_matrix *aux;
-    aux = (elem_matrix*)malloc(sizeof(elem_matrix));
-    aux->nextptr = NULL;
-
-    
-    glMatrixMode(GL_MODELVIEW);
-
-    glLoadIdentity();
-    glGetDoublev(GL_MODELVIEW_MATRIX, aux->M);
-    glGetDoublev(GL_MODELVIEW_MATRIX, aux->inv_M);
-    
-    glLoadMatrixd(_selected_object->display->inv_M);
-    glTranslated(_selected_camera->M[12],_selected_camera->M[13], _selected_camera->M[14]);
-    glGetDoublev(GL_MODELVIEW_MATRIX, aux->M);
-    */
 
     int i;
     double Eo[3], eval;
 
-    for(i=0; i<3; i++)
-    {
-        Eo[i] = _selected_object->display->inv_M[12+i]*_selected_camera->M[12+i];
-    }
+    //cambio sistema referencia camara a objeto
+    Eo[0] = M[0]*_selected_camera->M[12] + M[4]*_selected_camera->M[13] + 
+            M[8]*_selected_camera->M[14];
+
+    Eo[1] = M[1]*_selected_camera->M[12] + M[5]*_selected_camera->M[13] + 
+            M[9]*_selected_camera->M[14];
+
+    Eo[2] = M[2]*_selected_camera->M[12] + M[6]*_selected_camera->M[13] + 
+            M[10]*_selected_camera->M[14];
+
 
     //Ax+By+Cz+D=0
-    eval = _selected_object->face_table[f].vn[0]*Eo[0] +
-           _selected_object->face_table[f].vn[1]*Eo[1] +
-           _selected_object->face_table[f].vn[2]*Eo[2] +
-           _selected_object->face_table[f].ti;
+    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
 
     //printf("Eval: %f\n", eval);
     
     //free(aux);
 
-    if(eval < 0.0)
+    if(eval <= 0)
         return 0;
     else
         return 1;
+
 }
 
 /**
@@ -186,11 +200,20 @@ void display(void) {
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
         }
 
+        int primervertice = 0;
+        vertex ve;
+
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
 
-            dibuja = poligono_visible(f);
+            
+            dibuja = poligono_visible(f, 
+                                    &(aux_obj->display->inv_M[0]), 
+                                    aux_obj->face_table[f].vn[0], 
+                                    aux_obj->face_table[f].vn[1], 
+                                    aux_obj->face_table[f].vn[2], 
+                                    aux_obj->face_table[f].ti);
             
             //printf("%d\n",  dibuja);
             if(dibuja)
@@ -204,9 +227,23 @@ void display(void) {
                             aux_obj->vertex_table[v_index].coord.z);
 
                 }
+                
+    
+                
                 poligonos++;
                 
                 glEnd();
+                /*
+                primervertice = aux_obj->face_table[f].vertex_table[0];
+                ve = aux_obj->vertex_table[primervertice];
+                //printf("%f %f %f\n",aux_obj->face_table[f].vn[0], aux_obj->face_table[f].vn[1], aux_obj->face_table[f].vn[2] );
+                glBegin(GL_LINES);
+                    glVertex3d(ve.coord.x, ve.coord.y, ve.coord.z);
+                    glVertex3d(ve.coord.x+aux_obj->face_table[f].vn[0], 
+                               ve.coord.y+aux_obj->face_table[f].vn[1], 
+                               ve.coord.z+aux_obj->face_table[f].vn[2]);
+                glEnd();
+                */
             }
         }
 

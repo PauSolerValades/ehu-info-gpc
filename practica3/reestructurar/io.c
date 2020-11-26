@@ -410,7 +410,7 @@ void special(int k, int x, int y)
 			
 		}
 		
-		calcular_normal();
+		//calcular_normal();
 		glutPostRedisplay();
 	}
 }
@@ -489,7 +489,6 @@ void keyboard(unsigned char key, int x, int y)
 			_selected_object->display = new_mptr;
 
 			calcular_normal();
-			printf("COÑO\n");
 			printf("%s\n", KG_MSSG_FILEREAD);
 			break;
 		}
@@ -816,7 +815,7 @@ void new_transformation()
 	glLoadMatrixd(_selected_object->display->inv_M);
 	glRotated(180.0, 0.0, 1.0, 0.0);
 	*/
-	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
+	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
 
 }
 
@@ -824,7 +823,7 @@ void calcular_normal()
 {
 	vertex a, b, c;
 	int i, ia, ib, ic;
-	double v1[3], v2[3], vn[3];
+	double v1[3], v2[3], vn[3], l;
 
 	/* Encontrando la ecuación del plano */
 	for(i = 0; i<_selected_object->num_faces; i++)
@@ -839,28 +838,34 @@ void calcular_normal()
 		b = _selected_object->vertex_table[ib];
 		c = _selected_object->vertex_table[ic];
 
-		//calculamos los dos vectores
-		v1[0] = c.coord.x - a.coord.x;
-		v1[1] = c.coord.y - a.coord.y;
-		v1[2] = c.coord.z - a.coord.z;
+		printf("%f %f %f\n", a.coord.x, a.coord.y, a.coord.z);
 
-		v2[0] = b.coord.x - a.coord.x;
-		v2[1] = b.coord.y - a.coord.y;
-		v2[2] = b.coord.z - a.coord.z;
+		//calculamos los dos vectores
+		v2[0] = c.coord.x - a.coord.x;
+		v2[1] = c.coord.y - a.coord.y;
+		v2[2] = c.coord.z - a.coord.z;
+
+		v1[0] = b.coord.x - a.coord.x;
+		v1[1] = b.coord.y - a.coord.y;
+		v1[2] = b.coord.z - a.coord.z;
+
+		//producto vectorial entre v1 i
+		vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
+		vn[1] = -v1[0] * v2[2] + v2[0] * v1[2];
+		vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
+
+		l = euclidean_norm(vn[0], vn[1], vn[2]);
 
 		//PROBLEMA AQUÍ
 		//TODO: crec que quan el polígon és horitzontal, el producte vectorial surt de l'altra banda?? preguntar si estan bé sempre fer-los amb AC i AB i no haver-los de cambiar d'oardre
-		_selected_object->face_table[i].vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
-		_selected_object->face_table[i].vn[1] = -(v1[0] * v2[2] - v2[0] * v1[2]);
-		_selected_object->face_table[i].vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
+		_selected_object->face_table[i].vn[0] = vn[0]/l;
+		_selected_object->face_table[i].vn[1] = vn[1]/l;
+		_selected_object->face_table[i].vn[2] = vn[2]/l;
 
 		//Ax+By+Cz+D=0 => D=-(Ax+By+Cz) 
-		_selected_object->face_table[i].ti = 
-			-_selected_object->face_table[i].vn[0]*a.coord.x - 
-			_selected_object->face_table[i].vn[1]*a.coord.y - 
-			_selected_object->face_table[i].vn[2]*a.coord.z;
+		_selected_object->face_table[i].ti = -(vn[0]*a.coord.x + vn[1]*a.coord.y + vn[2]*a.coord.z);
 
-		//printf("%f\n", _selected_object->face_table[i].ti);
+		printf("%fx + %fy + %fz + %f\n",vn[0], vn[1], vn[2], _selected_object->face_table[i].ti);
 	}
 
 
