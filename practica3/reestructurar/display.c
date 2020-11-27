@@ -17,32 +17,20 @@ extern camera * _selected_camera;
 
 extern int camara_interna; //0: camara no interna, 1: camara interna
 
-void inversa(double *b, double *a)
+void dibuja_normales(object3d *aux_obj, GLint f);
+
+void print_matrox(double * mptr)
 {
-	GLdouble x,y,z;
-
-    a[0] = b[0];
-    a[5] = b[5];
-    a[10] = b[10];
-    x = b[1]; a[1] = b[4]; a[4] = x;
-    x = b[2]; a[2] = b[8]; a[8] = x;
-    x = b[6]; a[6] = b[9]; a[9] = x;
-
-    a[3] = b[3];
-    a[7] = b[7];
-    a[11] = b[11];
-    a[15] = b[15];
-    
-    x = (a[0]*b[12])+(a[4]*b[13])+(a[8]*b[14]);
-    y = (a[1]*b[12])+(a[5]*b[13])+(a[9]*b[14]);
-    z = (a[2]*b[12])+(a[6]*b[13])+(a[10]*b[14]);
-    a[12] = -x;
-    a[13] = -y;
-    a[14] = -z;
-
+	int i,j;
+	printf("\n");
+	for(i=0; i<4; i++){
+		for(j=0;j<4;j++){
+			printf("%.3lf\t", mptr[i+j*4]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 }
-
-
 
 /**
  * @brief Function to draw the axes
@@ -116,24 +104,23 @@ GLint poligono_visible(GLint f, double *M, double Av, double Bv, double Cv, doub
     double Eo[3], eval;
 
     //cambio sistema referencia camara a objeto
+
+    print_matrox(M);
+
     Eo[0] = M[0]*_selected_camera->M[12] + M[4]*_selected_camera->M[13] + 
-            M[8]*_selected_camera->M[14];
+            M[8]*_selected_camera->M[14] + M[12];
 
     Eo[1] = M[1]*_selected_camera->M[12] + M[5]*_selected_camera->M[13] + 
-            M[9]*_selected_camera->M[14];
+            M[9]*_selected_camera->M[14] + M[13];
 
     Eo[2] = M[2]*_selected_camera->M[12] + M[6]*_selected_camera->M[13] + 
-            M[10]*_selected_camera->M[14];
+            M[10]*_selected_camera->M[14] + M[14];
 
 
     //Ax+By+Cz+D=0
-    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
+    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv - Dv;
 
-    //printf("Eval: %f\n", eval);
-    
-    //free(aux);
-
-    if(eval <= 0)
+    if(eval <= 0.0)
         return 0;
     else
         return 1;
@@ -200,9 +187,6 @@ void display(void) {
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
         }
 
-        int primervertice = 0;
-        vertex ve;
-
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
@@ -227,24 +211,13 @@ void display(void) {
                             aux_obj->vertex_table[v_index].coord.z);
 
                 }
-                
-    
-                
+            
                 poligonos++;
                 
                 glEnd();
-                /*
-                primervertice = aux_obj->face_table[f].vertex_table[0];
-                ve = aux_obj->vertex_table[primervertice];
-                //printf("%f %f %f\n",aux_obj->face_table[f].vn[0], aux_obj->face_table[f].vn[1], aux_obj->face_table[f].vn[2] );
-                glBegin(GL_LINES);
-                    glVertex3d(ve.coord.x, ve.coord.y, ve.coord.z);
-                    glVertex3d(ve.coord.x+aux_obj->face_table[f].vn[0], 
-                               ve.coord.y+aux_obj->face_table[f].vn[1], 
-                               ve.coord.z+aux_obj->face_table[f].vn[2]);
-                glEnd();
-                */
             }
+
+            //dibuja_normales(aux_obj, f);
         }
 
         printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
@@ -254,4 +227,21 @@ void display(void) {
     }
     /*Do the actual drawing*/
     glFlush();
+}
+
+void dibuja_normales(object3d *aux_obj, GLint f)
+{
+    int primervertice;
+    vertex ve;
+
+    primervertice = aux_obj->face_table[f].vertex_table[0];
+    ve = aux_obj->vertex_table[primervertice];
+    //printf("%f %f %f\n",aux_obj->face_table[f].vn[0], aux_obj->face_table[f].vn[1], aux_obj->face_table[f].vn[2] );
+    glBegin(GL_LINES);
+        glVertex3d(ve.coord.x, ve.coord.y, ve.coord.z);
+        glVertex3d(ve.coord.x+aux_obj->face_table[f].vn[0], 
+                    ve.coord.y+aux_obj->face_table[f].vn[1], 
+                    ve.coord.z+aux_obj->face_table[f].vn[2]);
+    glEnd();
+                
 }
