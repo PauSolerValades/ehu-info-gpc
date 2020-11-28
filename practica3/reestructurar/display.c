@@ -174,7 +174,10 @@ void display(void) {
     if(_selected_object != 0)
     {
         if(camara_interna) //if camera mode is activated
+        {
             glLoadMatrixd(_selected_object->display->inv_M);
+            glRotated(180.0, 0.0, 1.0, 0.0); //rotamos la matriz inversa para que vea EXACTAMENTE lo que ve el objeto. Esta matriz cambiada no se guarda en ningún lugar de la aplicación, solo se usa en display
+        }
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
@@ -197,7 +200,6 @@ void display(void) {
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
 
-            
             dibuja = poligono_visible(f, 
                                     &(aux_obj->display->inv_M[0]), 
                                     aux_obj->face_table[f].vn[0], 
@@ -205,7 +207,6 @@ void display(void) {
                                     aux_obj->face_table[f].vn[2], 
                                     aux_obj->face_table[f].ti);
             
-            //printf("%d\n",  dibuja);
             if(dibuja)
             {
                 glBegin(GL_POLYGON);
