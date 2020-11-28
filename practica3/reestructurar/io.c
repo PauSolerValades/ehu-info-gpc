@@ -27,6 +27,7 @@ void print_eworld();
 void print_enonobject();
 void destructor(object3d *object);
 void new_transformation();
+void new_camera_transformation();
 void inverse();
 void apuntar_objeto();
 void calcular_normal();
@@ -36,384 +37,8 @@ double euclidean_norm(double x, double y, double z);
 void cross_product(double *u, double *v, double *w);
 void keyboard_object(unsigned char key, int x, int y);
 void keyboard_camera(unsigned char key, int x, int y);
-
-void print_matrix(double * mptr)
-{
-	int i,j;
-	printf("\n");
-	for(i=0; i<4; i++){
-		for(j=0;j<4;j++){
-			printf("%.3lf\t", mptr[i+j*4]);
-		}
-		printf("\n");
-	}
-	printf("\n");
-}
-
-void keyboard_camera(unsigned char key, int x, int y)
-{
-	switch (key)
-	{
-		case 'n':
-			printf("Nueva Camara Proyeccion\n");
-			
-			//la primera camara siempre está inicializada => el puntero nunca será null
-			if(mode)
-			{
-
-				glMatrixMode(GL_PROJECTION);
-    			glLoadIdentity();
-				camera *new_camera;
-
-				new_camera = (camera *)malloc(sizeof(camera));
-				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
-
-				glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
-    			glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
-
-    			new_camera->M[14] = INIT_CAMERA;
-    			new_camera->M_inv[14] = -INIT_CAMERA;
-
-				new_camera->type = 0;
-				new_camera->pers = 1;
-
-				new_camera-> r = 0.1;
-				new_camera-> l = -0.1;
-				new_camera-> t = 0.1;
-				new_camera-> b = -0.1;
-				new_camera-> n = 0.1;
-				new_camera-> f = 1000.0;
-
-				_selected_camera->nextptr = new_camera;
-				_selected_camera = new_camera;
-
-			}else
-				printf("No está en el modo camera, para entrar en el pulse k\n");
-			
-			break;
-		case 'N':
-			printf("Nueva Camara Paralela\n");
-			
-			//la primera camara siempre está inicializada => el puntero nunca será null
-			if(mode)
-			{
-
-				glMatrixMode(GL_PROJECTION);
-    			glLoadIdentity();
-				camera *new_camera;
-
-				new_camera = (camera *)malloc(sizeof(camera));
-				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
-
-				glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
-    			glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
-
-    			new_camera->M[14] = INIT_CAMERA;
-    			new_camera->M_inv[14] = -INIT_CAMERA;
-
-				new_camera->type = 0;
-				new_camera->pers = 0;
-
-				new_camera-> r = 5.0;
-				new_camera-> l = -5.0;
-				new_camera-> t = 5.0;
-				new_camera-> b = -5.0;
-				new_camera-> n = 0.0;
-				new_camera-> f = 1000.0;
-
-				_selected_camera->nextptr = new_camera;
-				_selected_camera = new_camera;
-
-			}else
-				printf("No está en el modo camera, para entrar en el pulse k\n");
-			
-			break;
-
-		case 'b':
-		case 'B': /* Rotación */
-			transformacion = 1;
-			printf("Rotaciones CAMARA ACTIVADAS\n");
-			break;
-		
-		case 'm':
-		case 'M': /* Translaciprint_maón */
-			transformacion = 0;
-			printf("Translaciones CAMARA ACTIVADAS\n");
-			break;
-		
-		case 't':
-		case 'T': /* Escalado */
-			transformacion = 2;
-			printf("Escalado CAMARA ACTIVADO\n");
-			break;
-
-		case 'g':
-		case 'G':	
-			printf("Camara Análisi\n");
-			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
-			transformacion = 0;
-			_selected_camera->type = 1;
-			apuntar_objeto();
-			
-			//print_matrix(_selected_camera->M);
-			break;
-
-		case 'l':
-		case 'L':
-			_selected_camera->type = 0;
-			printf("Camara Modo Vuelo\n");
-			break;
-
-		default:
-			printf("%d %c\n", key, x);
-			break;
-
-	}	
-}
-/**
- * @brief Callback function to control the special keys
- * @param key Key that has been pressed
- * @param x X coordinate of the mouse pointer when the key was pressed
- * @param y Y coordinate of the mouse pointer when the key was pressed
- * 
- * Heart of the application, calls gl to apply the scaling, rotating and translating transformations. Multiplies the matrix on the rigth if referencia = 0 and on left otherwise.
- */
-void special(int k, int x, int y)
-{
-    int isAKey;
-	GLdouble wd,he,midx,midy;
-
-    isAKey = 0;
-    
-    if(_selected_object != NULL)
-    {	
-		if(mode && transformacion == 2 &&(k == '+' || k == '-')){
-			switch (k){
-				case '+':
-					/*Increase the projection plane; compute the new dimensions*/
-					wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
-					he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
-					/*In order to avoid moving the center of the plane, we get its coordinates*/
-					midx = (_selected_camera->r + _selected_camera->l) / 2;
-					midy = (_selected_camera->t + _selected_camera->b) / 2;
-					/*The the new limits are set, keeping the center of the plane*/
-					_selected_camera->r = midx + wd / 2;
-					_selected_camera->l = midx - wd / 2;
-					_selected_camera->t = midy + he / 2;
-					_selected_camera->b = midy - he / 2;
-					break;
-				case '-':
-					wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
-					he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
-					/*In order to avoid moving the center of the plane, we get its coordinates*/
-					midx = (_selected_camera->r + _selected_camera->l) / 2;
-					midy = (_selected_camera->t + _selected_camera->b) / 2;
-					/*The the new limits are set, keeping the center of the plane*/
-					_selected_camera->r = midx + wd / 2;
-					_selected_camera->l = midx - wd / 2;
-					_selected_camera->t = midy + he / 2;
-					_selected_camera->b = midy - he / 2;
-					break;
-				default:
-					break;
-			}
-		}
-		
-		if(_selected_camera->type == 0 || !mode)
-		{			
-			glMatrixMode(GL_MODELVIEW);
-
-			if(!mode){
-				if(!referencia){
-					glLoadMatrixd(_selected_object->display->M);
-				}else 
-					glLoadIdentity();
-			}else
-				glLoadMatrixd(_selected_camera->M);
-			
-
-			//print_matrix(_selected_camera->M);
-
-			switch (transformacion)
-			{
-			case 0:
-				switch (k)
-				{
-					case GLUT_KEY_UP:
-						glTranslated(0.0, T, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glTranslated(0.0, -T, 0.0);
-						break;
-					case GLUT_KEY_RIGHT:
-						glTranslated(T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT:
-						glTranslated(-T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glTranslated(0.0, 0.0, T);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glTranslated(0.0, 0.0, -T);
-						break;
-					default:
-						isAKey = 1;
-						break;
-					}
-				break;
-			case 1:
-				switch (k)
-				{
-					case GLUT_KEY_UP :
-						glRotated(A, -1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glRotated(A, 1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_RIGHT :
-						glRotated(A, 0.0, 1.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT :
-						glRotated(A, 0.0, -1.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glRotated(A, 0.0, 0.0, 1.0);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glRotated(A, 0.0, 0.0, -1.0);
-						break;
-					default:
-						isAKey = 1;
-							break;
-				}
-				break;
-
-			case 2:
-				switch (k)
-				{
-					case GLUT_KEY_UP :
-						glScaled(1.0, US, 1.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glScaled(1.0, DS, 1.0);
-						break;
-					case GLUT_KEY_RIGHT :
-						glScaled(US, 1.0, 1.0);
-						break;
-					case GLUT_KEY_LEFT :
-						glScaled(DS, 1.0, 1.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glScaled(1.0, 1.0, US);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glScaled(1.0, 1.0, DS);
-						break;
-					case 43:
-						glScaled(DS, DS, DS);
-						break;
-					case 45:
-						glScaled(US, US, US);
-						break;
-					default:
-						isAKey = 1;
-						break;
-					}
-				break;
-
-			default:
-				print_enonmode();
-				break;
-			}
-
-			if(referencia && !mode)
-				glMultMatrixd(_selected_object->display->M);
-
-			if(!isAKey &&( _selected_camera->type || !mode))
-				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-
-			if(!_selected_camera->type && mode){
-				glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
-				inverse(_selected_camera->M, _selected_camera->M_inv);
-			}
-			
-			if(_selected_camera->type)
-				apuntar_objeto();
-		}
-
-		else
-		{
-
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-
-			int i;
-			double z[3], P[3], x[3], y[3];
-
-			for(i=0; i<3; i++)
-			{
-				P[i] = _selected_object->display->M[i+12];
-				x[i] = _selected_camera->M[i];
-				y[i] = _selected_camera->M[i+4];
-				z[i] = _selected_camera->M[i+8];
-			}
-
-			
-			switch (k)
-			{
-			case GLUT_KEY_UP:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(-A, x[0], x[1], x[2]);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case GLUT_KEY_DOWN:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(A, x[0], x[1], x[2]);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case GLUT_KEY_RIGHT:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(A, y[0], y[1], y[2]);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case GLUT_KEY_LEFT:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(-A, y[0], y[1], y[2]);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case GLUT_KEY_PAGE_UP:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(A, 0.0, 0.0, 1.0);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case GLUT_KEY_PAGE_DOWN:
-				glTranslated(P[0], P[1], P[2]);
-				glRotated(-A, 0.0, 0.0, 1.0);
-				glTranslated(-P[0], -P[1], -P[2]);
-				break;
-			case 43:
-				glTranslated(-z[0]*T, -z[1]*T, -z[2]*T);
-				break;
-			case 45:
-				glTranslated(z[0]*T, z[1]*T, z[2]*T);
-				break;
-			default:
-				isAKey = 1;
-				break;
-			}
-
-			glMultMatrixd(_selected_camera->M);
-
-			glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->M);
-			inverse(_selected_camera->M, _selected_camera->M_inv);
-			
-		}
-		
-		//calcular_normal();
-		glutPostRedisplay();
-	}
-}
+void switch_transformaciones_analisis(int k, int *isAKey);
+void switch_transformaciones(int k, int *isAKey);
 
 /**
  * @brief Callback function to control the basic keys
@@ -430,7 +55,6 @@ void keyboard(unsigned char key, int x, int y)
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
 	int read = 0;
 	object3d *auxiliar_object = 0;
-	GLdouble wd, he, midx, midy;
 
 	switch (key)
 	{
@@ -545,49 +169,6 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-	case '-': //hace que todo se vea mas pequeño
-
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
-		{
-			/*Increase the projection plane; compute the new dimensions*/
-			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
-			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
-			/*In order to avoid moving the center of the plane, we get its coordinates*/
-			midx = (_selected_camera->r + _selected_camera->l) / 2;
-			midy = (_selected_camera->t + _selected_camera->b) / 2;
-			/*The the new limits are set, keeping the center of the plane*/
-			_selected_camera->r = midx + wd / 2;
-			_selected_camera->l = midx - wd / 2;
-			_selected_camera->t = midy + he / 2;
-			_selected_camera->b = midy - he / 2;
-		}
-		else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
-			
-			special(45, x, y);
-
-			
-		break;
-
-	case '+': //hace que todo se vea más grande.
-
-		if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
-		{
-			/*Increase the projection plane; compute the new dimensions*/
-			wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
-			he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
-			/*In order to avoid moving the center of the plane, we get its coordinates*/
-			midx = (_selected_camera->r + _selected_camera->l) / 2;
-			midy = (_selected_camera->t + _selected_camera->b) / 2;
-			/*The the new limits are set, keeping the center of the plane*/
-			_selected_camera->r = midx + wd / 2;
-			_selected_camera->l = midx - wd / 2;
-			_selected_camera->t = midy + he / 2;
-			_selected_camera->b = midy - he / 2;
-		}
-		else /* Analogous of case '-': */
-			special(43, x, y);
-		break;
-
 	case 'o':
 	case 'O': /* Sistema referencia objeto */
 		printf("Objeto\n");
@@ -645,69 +226,6 @@ void keyboard(unsigned char key, int x, int y)
 		print_help();
 		break;
 
-	case 25:
-        
-        if(_selected_object != 0)
-        {
-	        if(_selected_object->display != _selected_object->mptr)
-	        {
-		        printf("Rehacer\n");
-		        
-		        elem_matrix *iter;
-		        elem_matrix *ant;
-
-		        iter = _selected_object->mptr->nextptr;
-		        ant = _selected_object->mptr;
-		        
-            	
-		        while(1)
-		        {
-
-			        if(_selected_object->display==iter)
-				        break;
-
-			        ant = iter;
-			        iter = iter->nextptr;
-			        
-		        }
-		        
-		        _selected_object->display = ant;
-		        }
-	        else
-	        {
-		        printf("No más redo\n");
-	        }
-	        glutPostRedisplay();
-        }else{
-            printf("Cargue un objecto, por favor\n");        
-        }
-
-		break;
-
-	case 26: /* CONTROL+Z */
-
-        if(_selected_object != 0)
-        {
-		    if (_selected_object->display->nextptr != 0)
-		    {
-			    printf("Deshacer\n");
-				    
-			    _selected_object->display = _selected_object->display->nextptr;
-		    
-		    }
-		    else
-		    {
-			    printf("No más undo\n");
-		    }
-
-		    glutPostRedisplay();
-        }
-        else
-        {
-            printf("Cargue un objecto, por favor\n");            
-        }
-		break;
-
 	case 27: /* <ESC> */
 		exit(0);
 		break;
@@ -727,8 +245,14 @@ void keyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
+
+
+
 void keyboard_object(unsigned char key, int x, int y)
 {
+
+	GLdouble wd, he, midx, midy;
+
 	switch (key)
 	{
 		case 'm':
@@ -769,6 +293,111 @@ void keyboard_object(unsigned char key, int x, int y)
 			}
 			break;
 		
+		//cambia los límites de la camara
+		case '-': //hace que todo se vea mas pequeño
+
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
+			{
+				/*Increase the projection plane; compute the new dimensions*/
+				wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
+				he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
+				/*In order to avoid moving the center of the plane, we get its coordinates*/
+				midx = (_selected_camera->r + _selected_camera->l) / 2;
+				midy = (_selected_camera->t + _selected_camera->b) / 2;
+				/*The the new limits are set, keeping the center of the plane*/
+				_selected_camera->r = midx + wd / 2;
+				_selected_camera->l = midx - wd / 2;
+				_selected_camera->t = midy + he / 2;
+				_selected_camera->b = midy - he / 2;
+			}
+			else /* If control wasn't pressed, we have to call the special keys to attend the petition. This maybe isn't the most correct way, but it's very clear, sort and easy to undersand. */
+				special(45, x, y);
+			break;
+
+		case '+': //hace que todo se vea más grande.
+
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
+			{
+				/*Increase the projection plane; compute the new dimensions*/
+				wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
+				he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
+				/*In order to avoid moving the center of the plane, we get its coordinates*/
+				midx = (_selected_camera->r + _selected_camera->l) / 2;
+				midy = (_selected_camera->t + _selected_camera->b) / 2;
+				/*The the new limits are set, keeping the center of the plane*/
+				_selected_camera->r = midx + wd / 2;
+				_selected_camera->l = midx - wd / 2;
+				_selected_camera->t = midy + he / 2;
+				_selected_camera->b = midy - he / 2;
+			}
+			else /* Analogous of case '-': */
+				special(43, x, y);
+			break;
+
+		case 25:
+        
+			if(_selected_object != 0)
+			{
+				if(_selected_object->display != _selected_object->mptr)
+				{
+					printf("Rehacer\n");
+					
+					elem_matrix *iter;
+					elem_matrix *ant;
+
+					iter = _selected_object->mptr->nextptr;
+					ant = _selected_object->mptr;
+					
+					
+					while(1)
+					{
+
+						if(_selected_object->display==iter)
+							break;
+
+						ant = iter;
+						iter = iter->nextptr;
+						
+					}
+					
+					_selected_object->display = ant;
+					}
+				else
+				{
+					printf("No más redo\n");
+				}
+				glutPostRedisplay();
+
+			}else{
+				printf("Cargue un objecto, por favor\n");        
+			}
+
+			break;
+
+		case 26: /* CONTROL+Z */
+
+			if(_selected_object != 0)
+			{
+				if (_selected_object->display->nextptr != 0)
+				{
+					printf("Deshacer\n");
+						
+					_selected_object->display = _selected_object->display->nextptr;
+				
+				}
+				else
+				{
+					printf("No más undo\n");
+				}
+
+				glutPostRedisplay();
+			}
+			else
+			{
+				printf("Cargue un objeto, por favor\n");            
+			}
+			break;
+
 		default:
 			printf("%d %c\n", key, x);
 			break;
@@ -776,6 +405,479 @@ void keyboard_object(unsigned char key, int x, int y)
 }
 
 
+
+
+void keyboard_camera(unsigned char key, int x, int y)
+{
+	GLdouble wd, he, midx, midy;
+
+	switch (key)
+	{
+		case 'n': //crea una nova camara mode projecció
+			printf("Nueva Camara Proyeccion\n");
+			
+			//la primera camara siempre está inicializada => el puntero nunca será null
+			if(mode)
+			{
+
+				glMatrixMode(GL_PROJECTION);
+    			glLoadIdentity();
+				
+				elem_matrix *matrix_camera;
+				camera *new_camera;
+
+				new_camera = (camera *)malloc(sizeof(camera));
+				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+				matrix_camera = (elem_matrix *)malloc(sizeof(elem_matrix));
+				matrix_camera->nextptr = NULL;
+
+				glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->M);
+    			glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->inv_M);
+
+    			matrix_camera->M[14] = INIT_CAMERA;
+    			matrix_camera->inv_M[14] = -INIT_CAMERA;
+
+				new_camera->type = 0;
+				new_camera->pers = 1;
+
+				new_camera-> r = 0.1;
+				new_camera-> l = -0.1;
+				new_camera-> t = 0.1;
+				new_camera-> b = -0.1;
+				new_camera-> n = 0.1;
+				new_camera-> f = 1000.0;
+
+				new_camera->first = matrix_camera;
+				new_camera->actual = matrix_camera;
+
+				_selected_camera->nextptr = new_camera;
+				_selected_camera = new_camera;
+
+			}else
+				printf("No está en el modo camera, para entrar en el pulse k\n");
+			
+			break;
+		case 'N':
+			printf("Nueva Camara Paralela\n");
+			
+			//la primera camara siempre está inicializada => el puntero nunca será null
+			if(mode)
+			{
+
+				glMatrixMode(GL_PROJECTION);
+    			glLoadIdentity();
+
+				elem_matrix *matrix_camera;
+				camera *new_camera;
+
+				new_camera = (camera *)malloc(sizeof(camera));
+				new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+				matrix_camera = (elem_matrix *)malloc(sizeof(elem_matrix));
+				matrix_camera->nextptr = NULL;
+
+				glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->M);
+    			glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->inv_M);
+
+    			matrix_camera->M[14] = INIT_CAMERA;
+    			matrix_camera->inv_M[14] = -INIT_CAMERA;
+
+				new_camera->type = 0;
+				new_camera->pers = 0;
+
+				new_camera-> r = 5.0;
+				new_camera-> l = -5.0;
+				new_camera-> t = 5.0;
+				new_camera-> b = -5.0;
+				new_camera-> n = 0.0;
+				new_camera-> f = 1000.0;
+
+				new_camera->first = matrix_camera;
+				new_camera->actual = matrix_camera;
+
+				_selected_camera->nextptr = new_camera;
+				_selected_camera = new_camera;
+
+			}else
+				printf("No está en el modo camera, para entrar en el pulse k\n");
+			
+			break;
+
+		case 'b':
+		case 'B': /* Rotación */
+			transformacion = 1;
+			printf("Rotaciones CAMARA ACTIVADAS\n");
+			break;
+		
+		case 'm':
+		case 'M': /* Translaciprint_maón */
+			transformacion = 0;
+			printf("Translaciones CAMARA ACTIVADAS\n");
+			break;
+		
+		case 't':
+		case 'T': /* Escalado */
+			transformacion = 2;
+			printf("Escalado CAMARA ACTIVADO\n");
+			break;
+
+		case 'g':
+		case 'G':	
+			printf("Camara Análisi\n");
+			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
+			transformacion = 0;
+			_selected_camera->type = 1;
+			apuntar_objeto();
+			
+			//print_matrix(_selected_camera->M);
+			break;
+
+		case 'l':
+		case 'L':
+			_selected_camera->type = 0;
+			printf("Camara Modo Vuelo\n");
+			break;
+
+		case '+':
+			/*Increase the projection plane; compute the new dimensions*/
+			wd = (_selected_camera->r - _selected_camera->l) * KG_STEP_ZOOM;
+			he = (_selected_camera->t - _selected_camera->b) * KG_STEP_ZOOM;
+			/*In order to avoid moving the center of the plane, we get its coordinates*/
+			midx = (_selected_camera->r + _selected_camera->l) / 2;
+			midy = (_selected_camera->t + _selected_camera->b) / 2;
+			/*The the new limits are set, keeping the center of the plane*/
+			_selected_camera->r = midx + wd / 2;
+			_selected_camera->l = midx - wd / 2;
+			_selected_camera->t = midy + he / 2;
+			_selected_camera->b = midy - he / 2;
+			break;
+
+		case '-':
+			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
+			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
+			/*In order to avoid moving the center of the plane, we get its coordinates*/
+			midx = (_selected_camera->r + _selected_camera->l) / 2;
+			midy = (_selected_camera->t + _selected_camera->b) / 2;
+			/*The the new limits are set, keeping the center of the plane*/
+			_selected_camera->r = midx + wd / 2;
+			_selected_camera->l = midx - wd / 2;
+			_selected_camera->t = midy + he / 2;
+			_selected_camera->b = midy - he / 2;
+			break;
+
+		case 25:
+        
+			if(_selected_camera != 0)
+			{
+				if(_selected_camera->actual != _selected_camera->first)
+				{
+					printf("Rehacer\n");
+					
+					elem_matrix *iter;
+					elem_matrix *ant;
+
+					iter = _selected_camera->first->nextptr;
+					ant = _selected_camera->first;
+					
+					
+					while(1)
+					{
+
+						if(_selected_camera->actual==iter)
+							break;
+
+						ant = iter;
+						iter = iter->nextptr;
+						
+					}
+					
+					_selected_camera->actual = ant;
+					}
+				else
+				{
+					printf("No más redo\n");
+				}
+				glutPostRedisplay();
+
+			}else{
+				printf("Camara, por favor\n");        
+			}
+
+			break;
+
+		case 26: /* CONTROL+Z */
+
+			if(_selected_camera != 0)
+			{
+				if (_selected_camera->actual->nextptr != 0)
+				{
+					printf("Deshacer\n");
+						
+					_selected_camera->actual = _selected_camera->actual->nextptr;
+				
+				}
+				else
+				{
+					printf("No más undo\n");
+				}
+
+				glutPostRedisplay();
+			}
+			else
+			{
+				printf("Camara, por favor\n");            
+			}
+			break;
+
+		default:
+			printf("%d %c\n", key, x);
+			break;
+
+	}	
+}
+
+
+/**
+ * @brief Callback function to control the special keys
+ * @param key Key that has been pressed
+ * @param x X coordinate of the mouse pointer when the key was pressed
+ * @param y Y coordinate of the mouse pointer when the key was pressed
+ * 
+ * Heart of the application, calls gl to apply the scaling, rotating and translating transformations. Multiplies the matrix on the rigth if referencia = 0 and on left otherwise.
+ */
+void special(int k, int x, int y)
+{
+    int isAKey;
+
+    isAKey = 0;
+    
+    if(_selected_object != NULL)
+    {	
+
+		glMatrixMode(GL_MODELVIEW);
+
+		if(mode) //todo modo camara
+		{
+			if(_selected_camera->type == 0)
+			{
+				glLoadMatrixd(_selected_camera->actual->M);
+				switch_transformaciones(k, &isAKey);
+			}
+			else
+			{
+				switch_transformaciones_analisis(k, &isAKey);
+			}
+
+			if(!isAKey)
+			{
+				new_camera_transformation();
+			}
+			
+		}
+		else //todo modo objeto
+		{
+			if(!referencia){
+				glLoadMatrixd(_selected_object->display->M);
+			}
+			else
+			{
+				glLoadIdentity();
+			}
+
+			switch_transformaciones(k, &isAKey); //aquí hi ha el switch on es multiplica tot.
+
+			if(referencia)
+			{
+				glMultMatrixd(_selected_object->display->M);
+			}
+			
+			if(!isAKey)
+			{
+				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+			}
+
+		}
+
+		glutPostRedisplay();
+	}
+}
+
+
+
+void switch_transformaciones_analisis(int k, int *isAKey)
+{
+	int i;
+	double z[3], P[3], x[3], y[3];
+
+	glLoadIdentity();
+
+	for(i=0; i<3; i++)
+	{
+		P[i] = _selected_object->display->M[i+12];
+		x[i] = _selected_camera->actual->M[i];
+		y[i] = _selected_camera->actual->M[i+4];
+		z[i] = _selected_camera->actual->M[i+8];
+	}
+
+	glTranslated(P[0], P[1], P[2]);
+	
+	switch (k)
+	{
+	case GLUT_KEY_UP:
+		glRotated(-A, x[0], x[1], x[2]);
+		break;
+	case GLUT_KEY_DOWN:
+		glRotated(A, x[0], x[1], x[2]);
+		break;
+	case GLUT_KEY_RIGHT:
+		glRotated(A, y[0], y[1], y[2]);
+		break;
+	case GLUT_KEY_LEFT:
+		glRotated(-A, y[0], y[1], y[2]);
+		break;
+	case GLUT_KEY_PAGE_UP:
+		glRotated(A, 0.0, 0.0, 1.0);
+		break;
+	case GLUT_KEY_PAGE_DOWN:
+		glRotated(-A, 0.0, 0.0, 1.0);
+		break;
+	case 43:
+		glTranslated(-z[0]*T, -z[1]*T, -z[2]*T);
+		break;
+	case 45:
+		glTranslated(z[0]*T, z[1]*T, z[2]*T);
+		break;
+	default:
+		*isAKey = 1;
+		break;
+	}
+
+	glTranslated(-P[0], -P[1], -P[2]);
+
+	glMultMatrixd(_selected_camera->actual->M);
+}
+
+
+void switch_transformaciones(int k, int *isAKey)
+{
+	switch (transformacion)
+			{
+			case 0:
+				switch (k)
+				{
+					case GLUT_KEY_UP:
+						glTranslated(0.0, T, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glTranslated(0.0, -T, 0.0);
+						break;
+					case GLUT_KEY_RIGHT:
+						glTranslated(T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT:
+						glTranslated(-T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glTranslated(0.0, 0.0, T);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glTranslated(0.0, 0.0, -T);
+						break;
+					default:
+						*isAKey = 1;
+						break;
+					}
+				break;
+			case 1:
+				switch (k)
+				{
+					case GLUT_KEY_UP :
+						glRotated(A, -1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glRotated(A, 1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_RIGHT :
+						glRotated(A, 0.0, 1.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT :
+						glRotated(A, 0.0, -1.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glRotated(A, 0.0, 0.0, 1.0);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glRotated(A, 0.0, 0.0, -1.0);
+						break;
+					default:
+						*isAKey = 1;
+						break;
+				}
+				break;
+
+			case 2:
+				switch (k)
+				{
+					case GLUT_KEY_UP :
+						glScaled(1.0, US, 1.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glScaled(1.0, DS, 1.0);
+						break;
+					case GLUT_KEY_RIGHT :
+						glScaled(US, 1.0, 1.0);
+						break;
+					case GLUT_KEY_LEFT :
+						glScaled(DS, 1.0, 1.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glScaled(1.0, 1.0, US);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glScaled(1.0, 1.0, DS);
+						break;
+					case 43:
+						glScaled(DS, DS, DS);
+						break;
+					case 45:
+						glScaled(US, US, US);
+						break;
+					default:
+						*isAKey = 1;
+						break;
+					}
+				break;
+
+			default:
+				print_enonmode();
+				break;
+			}
+}
+
+
+
+void new_camera_transformation()
+{
+	elem_matrix *new_mptr, *aux;
+	
+	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
+
+	while(_selected_camera->first != _selected_camera->actual)
+	{
+		aux = _selected_camera->first;
+		_selected_camera->first = _selected_camera->first->nextptr;
+		free(aux);
+	}
+
+	_selected_camera->first = new_mptr;
+	new_mptr->nextptr = _selected_camera->actual;
+	_selected_camera->actual = new_mptr;
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, _selected_camera->actual->M);
+	inverse(_selected_camera->actual->M, _selected_camera->actual->inv_M);
+
+}
 
 
 /**
@@ -788,8 +890,6 @@ void new_transformation()
 	elem_matrix *new_mptr, *aux;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
-	
-	//printf("NEW OBJECT ADDED\n");
 	
 	control = 1;
 	
@@ -811,11 +911,6 @@ void new_transformation()
     glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->M);
 
 	inverse(_selected_object->display->M, _selected_object->display->inv_M); //calcula i carrega la matriu inversa (transposada vamos.)
-	/*
-	glLoadMatrixd(_selected_object->display->inv_M);
-	glRotated(180.0, 0.0, 1.0, 0.0);
-	*/
-	//glGetDoublev(GL_MODELVIEW_MATRIX, _selected_object->display->inv_M);
 
 }
 
@@ -907,9 +1002,9 @@ void apuntar_objeto()
 	centrado_mismo_punto = 0;
 
 	for(i = 0; i<3; i++){
-		E[i] = _selected_camera->M[12+i];
+		E[i] = _selected_camera->actual->M[12+i];
 		P[i] = _selected_object->display->M[12+i];
-		U[i] = _selected_camera->M[i+4];
+		U[i] = _selected_camera->actual->M[i+4];
 
 		if(E[i]==P[i]){
 			centrado_mismo_punto++;
@@ -949,13 +1044,13 @@ void apuntar_objeto()
 
 		for(i = 0; i<3; i++)
 		{
-			_selected_camera->M[i] = x_c[i];
-			_selected_camera->M[4+i] = y_c[i];
-			_selected_camera->M[i+8] = z_c[i];
-			_selected_camera->M[i+12] = E[i];
+			_selected_camera->actual->M[i] = x_c[i];
+			_selected_camera->actual->M[4+i] = y_c[i];
+			_selected_camera->actual->M[i+8] = z_c[i];
+			_selected_camera->actual->M[i+12] = E[i];
 		}
 
-		inverse(_selected_camera->M, _selected_camera->M_inv);
+		inverse(_selected_camera->actual->M, _selected_camera->actual->inv_M);
 	}
 }
 
@@ -1033,6 +1128,19 @@ void print_enonmode()
 void print_enonobject()
 {
 	printf("No se puede atender esta petición: no hay ningún objeto cargado.\nCargue uno con la tecla f, por favor.\n");
+}
+
+void print_matrix(double * mptr)
+{
+	int i,j;
+	printf("\n");
+	for(i=0; i<4; i++){
+		for(j=0;j<4;j++){
+			printf("%.3lf\t", mptr[i+j*4]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 }
 
 

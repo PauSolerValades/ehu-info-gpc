@@ -73,21 +73,29 @@ void reshape(int width, int height) {
 void init_camera(){
     
     camera *new_camera;
+    elem_matrix *matrix_camera;
 
     new_camera = (camera *)malloc(sizeof(camera));
     new_camera->nextptr = NULL;//apuntem el seguent punter a 0
 
-    glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M);
-    glGetDoublev(GL_PROJECTION_MATRIX, new_camera->M_inv);
+    matrix_camera = (elem_matrix *)malloc(sizeof(elem_matrix));
+    matrix_camera->nextptr = NULL;
 
-    new_camera->M[14] = INIT_CAMERA;
-    new_camera->M_inv[14] = -INIT_CAMERA;
+    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->M);
+    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->inv_M);
+
+    matrix_camera->M[14] = INIT_CAMERA;
+    matrix_camera->inv_M[14] = -INIT_CAMERA;
+
     new_camera-> r = 0.1;
     new_camera-> l = -0.1;
     new_camera-> t = 0.1;
     new_camera-> b = -0.1;
     new_camera-> n = 0.1;
     new_camera-> f = 1000.0;
+
+    new_camera->first = matrix_camera;
+    new_camera->actual = matrix_camera;
 
     //asignamos la matriz a la id.
     _selected_camera = new_camera;
@@ -105,16 +113,14 @@ GLint poligono_visible(GLint f, double *M, double Av, double Bv, double Cv, doub
 
     //cambio sistema referencia camara a objeto
 
-    print_matrox(M);
+    Eo[0] = M[0]*_selected_camera->actual->M[12] + M[4]*_selected_camera->actual->M[13] + 
+            M[8]*_selected_camera->actual->M[14] + M[12];
 
-    Eo[0] = M[0]*_selected_camera->M[12] + M[4]*_selected_camera->M[13] + 
-            M[8]*_selected_camera->M[14] + M[12];
+    Eo[1] = M[1]*_selected_camera->actual->M[12] + M[5]*_selected_camera->actual->M[13] + 
+            M[9]*_selected_camera->actual->M[14] + M[13];
 
-    Eo[1] = M[1]*_selected_camera->M[12] + M[5]*_selected_camera->M[13] + 
-            M[9]*_selected_camera->M[14] + M[13];
-
-    Eo[2] = M[2]*_selected_camera->M[12] + M[6]*_selected_camera->M[13] + 
-            M[10]*_selected_camera->M[14] + M[14];
+    Eo[2] = M[2]*_selected_camera->actual->M[12] + M[6]*_selected_camera->actual->M[13] + 
+            M[10]*_selected_camera->actual->M[14] + M[14];
 
 
     //Ax+By+Cz+D=0
@@ -170,7 +176,7 @@ void display(void) {
         if(camara_interna) //if camera mode is activated
             glLoadMatrixd(_selected_object->display->inv_M);
         else
-            glLoadMatrixd(_selected_camera->M_inv); //Cargar la matriz de la camara actual cuando funcione.
+            glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
 
     int poligonos = 0;
@@ -217,10 +223,10 @@ void display(void) {
                 glEnd();
             }
 
-            //dibuja_normales(aux_obj, f);
+            //dibuja_normales(aux_obj, f); //aquesta funció dibuixa les normals de tots els poligons..
         }
 
-        printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
+        //printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
         aux_obj = aux_obj->next;
 
         glPopMatrix();
