@@ -105,7 +105,7 @@ void init_camera(){
     _selected_camera->pers = 1; //modo paralelo.
 }
 
-GLint poligono_visible(GLint f, double *M, double Av, double Bv, double Cv, double Dv)
+GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
 {
 
     int i;
@@ -124,7 +124,7 @@ GLint poligono_visible(GLint f, double *M, double Av, double Bv, double Cv, doub
 
 
     //Ax+By+Cz+D=0
-    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv - Dv;
+    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
 
     if(eval <= 0.0)
         return 0;
@@ -177,6 +177,7 @@ void display(void) {
         {
             glLoadMatrixd(_selected_object->display->inv_M);
             glRotated(180.0, 0.0, 1.0, 0.0); //rotamos la matriz inversa para que vea EXACTAMENTE lo que ve el objeto. Esta matriz cambiada no se guarda en ningún lugar de la aplicación, solo se usa en display
+            print_matrox(_selected_object->display->inv_M);
         }
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
@@ -200,8 +201,7 @@ void display(void) {
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
 
-            dibuja = poligono_visible(f, 
-                                    &(aux_obj->display->inv_M[0]), 
+            dibuja = poligono_visible(&(aux_obj->display->inv_M[0]), 
                                     aux_obj->face_table[f].vn[0], 
                                     aux_obj->face_table[f].vn[1], 
                                     aux_obj->face_table[f].vn[2], 
@@ -227,7 +227,7 @@ void display(void) {
             //dibuja_normales(aux_obj, f); //aquesta funció dibuixa les normals de tots els poligons..
         }
 
-        //printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
+        printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
         aux_obj = aux_obj->next;
 
         glPopMatrix();

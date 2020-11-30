@@ -946,7 +946,7 @@ void calcular_normal()
 
 		//producto vectorial entre v1 i
 		vn[0] = v1[1] * v2[2] - v2[1] * v1[2];
-		vn[1] = -(v1[0] * v2[2]) + v2[0] * v1[2];
+		vn[1] = -(v1[0] * v2[2]) + (v2[0] * v1[2]);
 		vn[2] = v1[0] * v2[1] - v2[0] * v1[1];
 
 		module_vn = euclidean_norm(vn[0], vn[1], vn[2]);
@@ -956,7 +956,9 @@ void calcular_normal()
 		_selected_object->face_table[i].vn[2] = vn[2]/module_vn;
 
 		//Ax+By+Cz+D=0 => D=-(Ax+By+Cz) 
-		_selected_object->face_table[i].ti = -(vn[0]*a.coord.x + vn[1]*a.coord.y + vn[2]*a.coord.z);
+		_selected_object->face_table[i].ti = -(_selected_object->face_table[i].vn[0]*a.coord.x +
+											   _selected_object->face_table[i].vn[1]*a.coord.y + 
+											   _selected_object->face_table[i].vn[2]*a.coord.z);
 
 		//printf("%fx + %fy + %fz + %f\n",vn[0], vn[1], vn[2], _selected_object->face_table[i].ti);
 	}
