@@ -197,13 +197,8 @@ void display(void) {
     {
         if(camara_interna) //if camera mode is activated
         {
-            inverse_without_points(_selected_object->display->M, _selected_object->display->inv_M);
-
-            print_matrox(_selected_object->display->M);
-            print_matrox(_selected_object->display->inv_M);
-            glLoadMatrixd(_selected_object->display->inv_M);
-
-            glRotated(180.0, 0.0, -1.0, 0.0); 
+            glRotated(180.0, 0.0,1.0,0.0); //multiplicando primero por la matriz de rotación, giramos el mundo 180 grados, no el objeto, permitiendo que la matriz inversa siga trasladando todo correctamente.
+            glMultMatrixd(_selected_object->display->inv_M);
         }
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
