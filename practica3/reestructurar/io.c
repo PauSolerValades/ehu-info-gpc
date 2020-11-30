@@ -103,7 +103,7 @@ void keyboard(unsigned char key, int x, int y)
 
 			new_mptr->inv_M[0] = 1.0;
 			new_mptr->inv_M[5] = 1.0;
-			new_mptr->inv_M[10] = 1.0; //ME CAGO EN LA PUTA
+			new_mptr->inv_M[10] = 1.0;
 			new_mptr->inv_M[15] = 1.0;
 
 			//asignamos la matriz a la id.
@@ -128,7 +128,7 @@ void keyboard(unsigned char key, int x, int y)
 			if (_selected_object == 0)
 				_selected_object = _first_object;
 
-			if(mode && transformacion == 0)
+			if(mode && transformacion == 0) //TODO: NO RECORDO QUÈ FA AIXÒ.
 				apuntar_objeto();
 
 			
@@ -190,8 +190,7 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'C': /* Activa/desactiva la camara interna del objeto */
 		printf("CAMBIO A MODO OBJETO\n");
-		mode = 0; //volvemos en modo transformación.
-		referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
+
 		if(camara_interna)
 		{
 			printf("Camara No Interna\n");	
@@ -201,6 +200,8 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			printf("Camara Interna\n");
 			camara_interna = 1;
+			mode = 0; //volvemos en modo transformación.
+			referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
 		}
 		break;
 
@@ -679,6 +680,7 @@ void special(int k, int x, int y)
 		{
 			if(!referencia){
 				glLoadMatrixd(_selected_object->display->M);
+				printf("Tansformacions d'objectes\n");
 			}
 			else
 			{
@@ -762,97 +764,97 @@ void switch_transformaciones_analisis(int k, int *isAKey)
 void switch_transformaciones(int k, int *isAKey)
 {
 	switch (transformacion)
-			{
-			case 0:
-				switch (k)
-				{
-					case GLUT_KEY_UP:
-						glTranslated(0.0, T, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glTranslated(0.0, -T, 0.0);
-						break;
-					case GLUT_KEY_RIGHT:
-						glTranslated(T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT:
-						glTranslated(-T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glTranslated(0.0, 0.0, T);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glTranslated(0.0, 0.0, -T);
-						break;
-					default:
-						*isAKey = 1;
-						break;
-					}
+	{
+	case 0:
+		switch (k)
+		{
+			case GLUT_KEY_UP:
+				glTranslated(0.0, T, 0.0);
 				break;
-			case 1:
-				switch (k)
-				{
-					case GLUT_KEY_UP :
-						glRotated(A, -1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glRotated(A, 1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_RIGHT :
-						glRotated(A, 0.0, 1.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT :
-						glRotated(A, 0.0, -1.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glRotated(A, 0.0, 0.0, 1.0);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glRotated(A, 0.0, 0.0, -1.0);
-						break;
-					default:
-						*isAKey = 1;
-						break;
-				}
+			case GLUT_KEY_DOWN:
+				glTranslated(0.0, -T, 0.0);
 				break;
-
-			case 2:
-				switch (k)
-				{
-					case GLUT_KEY_UP :
-						glScaled(1.0, US, 1.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glScaled(1.0, DS, 1.0);
-						break;
-					case GLUT_KEY_RIGHT :
-						glScaled(US, 1.0, 1.0);
-						break;
-					case GLUT_KEY_LEFT :
-						glScaled(DS, 1.0, 1.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glScaled(1.0, 1.0, US);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glScaled(1.0, 1.0, DS);
-						break;
-					case 43:
-						glScaled(DS, DS, DS);
-						break;
-					case 45:
-						glScaled(US, US, US);
-						break;
-					default:
-						*isAKey = 1;
-						break;
-					}
+			case GLUT_KEY_RIGHT:
+				glTranslated(T, 0.0, 0.0);
 				break;
-
+			case GLUT_KEY_LEFT:
+				glTranslated(-T, 0.0, 0.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glTranslated(0.0, 0.0, T);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glTranslated(0.0, 0.0, -T);
+				break;
 			default:
-				print_enonmode();
+				*isAKey = 1;
 				break;
 			}
+		break;
+	case 1:
+		switch (k)
+		{
+			case GLUT_KEY_UP :
+				glRotated(A, -1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glRotated(A, 1.0, 0.0, 0.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glRotated(A, 0.0, 1.0, 0.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glRotated(A, 0.0, -1.0, 0.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glRotated(A, 0.0, 0.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glRotated(A, 0.0, 0.0, -1.0);
+				break;
+			default:
+				*isAKey = 1;
+				break;
+		}
+		break;
+
+	case 2:
+		switch (k)
+		{
+			case GLUT_KEY_UP :
+				glScaled(1.0, US, 1.0);
+				break;
+			case GLUT_KEY_DOWN:
+				glScaled(1.0, DS, 1.0);
+				break;
+			case GLUT_KEY_RIGHT :
+				glScaled(US, 1.0, 1.0);
+				break;
+			case GLUT_KEY_LEFT :
+				glScaled(DS, 1.0, 1.0);
+				break;
+			case GLUT_KEY_PAGE_UP:
+				glScaled(1.0, 1.0, US);
+				break;
+			case GLUT_KEY_PAGE_DOWN:
+				glScaled(1.0, 1.0, DS);
+				break;
+			case 43:
+				glScaled(DS, DS, DS);
+				break;
+			case 45:
+				glScaled(US, US, US);
+				break;
+			default:
+				*isAKey = 1;
+				break;
+			}
+		break;
+
+	default:
+		print_enonmode();
+		break;
+	}
 }
 
 

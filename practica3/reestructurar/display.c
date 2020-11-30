@@ -70,6 +70,31 @@ void reshape(int width, int height) {
     _window_ratio = (GLdouble) width / (GLdouble) height;
 }
 
+void inverse_without_points(double *b, double *a)
+{
+	GLdouble x,y,z;
+
+    a[0] = b[0];
+    a[5] = b[5];
+    a[10] = b[10];
+    x = b[1]; a[1] = b[4]; a[4] = x;
+    x = b[2]; a[2] = b[8]; a[8] = x;
+    x = b[6]; a[6] = b[9]; a[9] = x;
+
+    a[3] = b[3];
+    a[7] = b[7];
+    a[11] = b[11];
+    a[15] = b[15];
+    
+    x = (a[0]*b[12])+(a[4]*b[13])+(a[8]*b[14]);
+    y = (a[1]*b[12])+(a[5]*b[13])+(a[9]*b[14]);
+    z = (a[2]*b[12])+(a[6]*b[13])+(a[10]*b[14]);
+    a[12] = b[12];
+    a[13] = -b[13];
+    a[14] = b[14];
+
+}
+
 void init_camera(){
     
     camera *new_camera;
@@ -151,10 +176,7 @@ void display(void) {
         init_camera(); //we load the first camera with the identity
 
 
-    /* TODO: inicializar si ortho o frustrum*/
-
     if(_selected_camera->pers){
-        //proyección
         glFrustum(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
     }
     else
@@ -175,9 +197,13 @@ void display(void) {
     {
         if(camara_interna) //if camera mode is activated
         {
-            glLoadMatrixd(_selected_object->display->inv_M);
-            glRotated(180.0, 0.0, 1.0, 0.0); //rotamos la matriz inversa para que vea EXACTAMENTE lo que ve el objeto. Esta matriz cambiada no se guarda en ningún lugar de la aplicación, solo se usa en display
+            inverse_without_points(_selected_object->display->M, _selected_object->display->inv_M);
+
+            print_matrox(_selected_object->display->M);
             print_matrox(_selected_object->display->inv_M);
+            glLoadMatrixd(_selected_object->display->inv_M);
+
+            glRotated(180.0, 0.0, -1.0, 0.0); 
         }
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
@@ -207,7 +233,7 @@ void display(void) {
                                     aux_obj->face_table[f].vn[2], 
                                     aux_obj->face_table[f].ti);
             
-            if(dibuja)
+            if(1)
             {
                 glBegin(GL_POLYGON);
 
@@ -227,7 +253,7 @@ void display(void) {
             //dibuja_normales(aux_obj, f); //aquesta funció dibuixa les normals de tots els poligons..
         }
 
-        printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
+        //printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
         aux_obj = aux_obj->next;
 
         glPopMatrix();
