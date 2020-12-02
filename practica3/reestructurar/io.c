@@ -25,7 +25,8 @@ void print_help();
 void print_enonmode();
 void print_eworld();
 void print_enonobject();
-void destructor(object3d *object);
+void destructor_objeto(object3d *object);
+void destructor_camara(camera *camera);
 void new_transformation();
 void new_camera_transformation();
 void inverse();
@@ -55,6 +56,7 @@ void keyboard(unsigned char key, int x, int y)
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
 	int read = 0;
 	object3d *auxiliar_object = 0;
+	camera *auxiliar_camera = 0;
 
 	switch (key)
 	{
@@ -66,6 +68,7 @@ void keyboard(unsigned char key, int x, int y)
 		/*Allocate memory for the structure and read the file*/
 		auxiliar_object = (object3d *)malloc(sizeof(object3d));
 		read = read_wavefront(fname, auxiliar_object);
+
 		switch (read)
 		{
 		/*Errors in the reading*/
@@ -87,7 +90,7 @@ void keyboard(unsigned char key, int x, int y)
 
 			/* Loading the firss matrix */
 			new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix)); //guardem espai per la matriu identitat
-			new_mptr->nextptr = NULL;//apuntem el seguent punter a 0
+			new_mptr->nextptr = NULL; //apuntem el seguent punter a 0
 
 			//llenamos la tabla M
 			for (i = 1; i < 15; i++)
@@ -135,6 +138,27 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
+	case 8: /* <BACKSPACE> */
+
+		if(_selected_camera != _first_camera)
+		{
+			auxiliar_camera = _first_camera;
+			while (auxiliar_camera->nextptr != _selected_camera)
+				auxiliar_camera = auxiliar_camera->nextptr;
+			/*Now we bypass the element to erase*/
+			auxiliar_camera->nextptr = _selected_camera->nextptr;
+			/* Free all the memory object*/
+			destructor_camara(_selected_camera);
+
+			/*and update the selection*/
+			_selected_camera = auxiliar_camera;
+		}
+		else
+		{
+			printf("No puedes borrar la primera cámara\n");
+		}
+		break;
+
 	case 127: /* <SUPR> */ //borrar objeto
 
 		/*Erasing an object depends on whether it is the first one or not*/
@@ -147,7 +171,7 @@ void keyboard(unsigned char key, int x, int y)
 				_first_object = _first_object->next;
 				/*Once updated the pointer to the first object it is save to free the memory*/
 				/* Free all the memory object */
-				destructor(_selected_object);			
+				destructor_objeto(_selected_object);			
 
 				/*Finally, set the selected to the new first one*/
 				_selected_object = _first_object;
@@ -161,7 +185,7 @@ void keyboard(unsigned char key, int x, int y)
 				/*Now we bypass the element to erase*/
 				auxiliar_object->next = _selected_object->next;
 				/* Free all the memory object*/
-				destructor(_selected_object);
+				destructor_objeto(_selected_object);
 
 				/*and update the selection*/
 				_selected_object = auxiliar_object;
@@ -245,7 +269,6 @@ void keyboard(unsigned char key, int x, int y)
 	free(fname); /* We have to free the memory used in the scanf */
 	glutPostRedisplay();
 }
-
 
 
 
@@ -666,39 +689,26 @@ void special(int k, int x, int y)
 				switch_transformaciones(k, &isAKey);
 			}
 			else
-			{
 				switch_transformaciones_analisis(k, &isAKey);
-			}
 
 			if(!isAKey)
-			{
 				new_camera_transformation();
-			}
 			
 		}
 		else //todo modo objeto
 		{
-			if(!referencia){
+			if(!referencia)
 				glLoadMatrixd(_selected_object->display->M);
-				printf("Tansformacions d'objectes\n");
-			}
 			else
-			{
 				glLoadIdentity();
-			}
 
 			switch_transformaciones(k, &isAKey); //aquí hi ha el switch on es multiplica tot.
 
 			if(referencia)
-			{
 				glMultMatrixd(_selected_object->display->M);
-			}
 			
 			if(!isAKey)
-			{
 				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-			}
-
 		}
 
 		glutPostRedisplay();
@@ -1058,6 +1068,19 @@ void apuntar_objeto()
 	}
 }
 
+void destructor_camara(camera *camera)
+{
+	elem_matrix *aux;
+
+	while(camera->first != 0)
+	{
+		aux = camera->first;
+		camera->first = camera->first->nextptr;
+		free(aux);
+	}
+
+	free(camera);
+}
 
 
 /**
@@ -1066,7 +1089,7 @@ Called in case supr, this function frees al the dynamic memory used in a object3
 	- face_tables and all the vertex_table inside it
 	- linked list of elem_matrix
 */
-void destructor(object3d *object)
+void destructor_objeto(object3d *object)
 {
 	int i;
 	elem_matrix *aux;
