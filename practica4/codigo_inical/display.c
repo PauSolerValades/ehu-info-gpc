@@ -138,38 +138,20 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
 
     //cambio sistema referencia camara a objeto
 
-    if(camara_interna)
-    {
-        /*
-        Eo[0] = M[0] + M[4] + M[8] + M[12];
-        Eo[1] = M[1] + M[5] + M[9] + M[13];
-        Eo[2] = M[2] + M[6] + M[10] + M[14];
-        */
+    Eo[0] = M[0]*_selected_camera->actual->M[12] + M[4]*_selected_camera->actual->M[13] + 
+            M[8]*_selected_camera->actual->M[14] + M[12];
 
-        Eo[0] = -M[12];
-        Eo[1] = -M[13];
-        Eo[2] = -M[14];
+    Eo[1] = M[1]*_selected_camera->actual->M[12] + M[5]*_selected_camera->actual->M[13] + 
+            M[9]*_selected_camera->actual->M[14] + M[13];
 
-    }
-    else
-    {
-        Eo[0] = M[0]*_selected_camera->actual->M[12] + M[4]*_selected_camera->actual->M[13] + 
-                M[8]*_selected_camera->actual->M[14] + M[12];
-
-        Eo[1] = M[1]*_selected_camera->actual->M[12] + M[5]*_selected_camera->actual->M[13] + 
-                M[9]*_selected_camera->actual->M[14] + M[13];
-
-        Eo[2] = M[2]*_selected_camera->actual->M[12] + M[6]*_selected_camera->actual->M[13] + 
-                M[10]*_selected_camera->actual->M[14] + M[14];
-    }
-    
-    
+    Eo[2] = M[2]*_selected_camera->actual->M[12] + M[6]*_selected_camera->actual->M[13] + 
+            M[10]*_selected_camera->actual->M[14] + M[14];
 
 
     //Ax+By+Cz+D=0
     eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
 
-    if(eval < 0.0)
+    if(eval <= 0.0)
         return 0;
     else
         return 1;
@@ -184,7 +166,7 @@ void display(void) {
     GLint v_index, v, f, dibuja;
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     /* Clear the screen */
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
     /* Define the projection */
     glMatrixMode(GL_PROJECTION);
@@ -194,16 +176,11 @@ void display(void) {
         init_camera(); //we load the first camera with the identity
 
 
-    if(_selected_camera->pers){
+    if(_selected_camera->pers)
         glFrustum(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
-    }
     else
-    {
         glOrtho(_selected_camera->l, _selected_camera->r,_selected_camera->b,_selected_camera->t,_selected_camera->n,_selected_camera->f);
-    }
     
-
-   //glOrtho(_ortho_x_min, _ortho_x_max, _ortho_y_min, _ortho_y_max, _ortho_z_min, _ortho_z_max);
     /* Now we start drawing the object */
     glMatrixMode(GL_MODELVIEW);
 
@@ -215,12 +192,14 @@ void display(void) {
     {
         if(camara_interna) //if camera mode is activated
         {
-            glRotated(180.0, 0.0, 1.0, 0.0); //multiplicando primero por la matriz de rotación, giramos el mundo 180 grados, no el objeto, permitiendo que la matriz inversa siga trasladando todo correctamente.
+            glRotated(180.0, 0.0,1.0,0.0); //multiplicando primero por la matriz de rotación, giramos el mundo 180 grados, no el objeto, permitiendo que la matriz inversa siga trasladando todo correctamente.
             glMultMatrixd(_selected_object->display->inv_M);
         }
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
+
+    /* TODO: calcular como le afecta a cada vértice las fuentes de iluminación. */
 
     int poligonos = 0;
 
@@ -230,11 +209,10 @@ void display(void) {
         glPushMatrix();
 
         /* Select the color, depending on whether the current object is the selected one or not */
-        if (aux_obj == _selected_object){
+        if (aux_obj == _selected_object)
             glColor3f(KG_COL_SELECTED_R,KG_COL_SELECTED_G,KG_COL_SELECTED_B);
-        }else{
+        else
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
-        }
 
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
@@ -246,7 +224,7 @@ void display(void) {
                                     aux_obj->face_table[f].vn[2], 
                                     aux_obj->face_table[f].ti);
             
-            if(dibuja)
+            if(1)
             {
                 glBegin(GL_POLYGON);
 
@@ -272,7 +250,7 @@ void display(void) {
         glPopMatrix();
     }
     /*Do the actual drawing*/
-    glFlush();
+    glutSwapBuffers(); //ahora esto en vez de dibujar en la pantalla, cambia los z-buffers para seguir dibujando los objectos correctamente.
 }
 
 void dibuja_normales(object3d *aux_obj, GLint f)
