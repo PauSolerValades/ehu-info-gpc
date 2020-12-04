@@ -146,10 +146,14 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
         Eo[2] = M[2] + M[6] + M[10] + M[14];
         */
 
-        Eo[0] = -M[12];
-        Eo[1] = -M[13];
-        Eo[2] = -M[14];
+        Eo[0] = M[0]*_selected_object->display->M[12] + M[4]*_selected_object->display->M[13] + 
+                M[8]*_selected_object->display->M[14] + M[12];
+        
+        Eo[1] = M[1]*_selected_object->display->M[12] + M[5]*_selected_object->display->M[13] + 
+                M[9]*_selected_object->display->M[14] + M[13];
 
+        Eo[2] = M[2]*_selected_object->display->M[12] + M[6]*_selected_object->display->M[13] + 
+                M[10]*_selected_object->display->M[14] + M[14];
     }
     else
     {
@@ -184,7 +188,8 @@ void display(void) {
     GLint v_index, v, f, dibuja;
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     /* Clear the screen */
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+    
 
     /* Define the projection */
     glMatrixMode(GL_PROJECTION);
@@ -229,13 +234,16 @@ void display(void) {
 
         glPushMatrix();
 
-        /* Select the color, depending on whether the current object is the selected one or not */
+        /* Select the color, depending on whether the current object is the selected one or not 
         if (aux_obj == _selected_object){
             glColor3f(KG_COL_SELECTED_R,KG_COL_SELECTED_G,KG_COL_SELECTED_B);
         }else{
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
         }
-
+        */
+        // Por revisar, asignar con vectores los valores del material  
+       glMaterialf(0.0215,0.1745,0.0215,0.07568,0.61424,0.07568,0.633,0.727811,0.633,0.6);
+    
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
@@ -247,7 +255,7 @@ void display(void) {
                                     aux_obj->face_table[f].ti);
             
             if(dibuja)
-            {
+            {   glNormal3dv(aux_obj->face_table[f].vn);
                 glBegin(GL_POLYGON);
 
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
@@ -272,7 +280,7 @@ void display(void) {
         glPopMatrix();
     }
     /*Do the actual drawing*/
-    glFlush();
+    glutSwapBuffers();
 }
 
 void dibuja_normales(object3d *aux_obj, GLint f)

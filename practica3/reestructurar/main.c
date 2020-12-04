@@ -22,6 +22,7 @@ camera * _selected_camera = 0;
 elem_matrix * _actual_matrix = 0;
 
 int mode; //0: objeto, 1: camara, 2: luces cuando toque.
+int flat_smooth;
 int transformacion;
 int referencia;
 
@@ -34,6 +35,7 @@ void initialization (){
     transformacion = 0; //translación por defecto
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;
+    flat_smooth = 1;
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
@@ -64,6 +66,14 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(KG_WINDOW_X, KG_WINDOW_Y);
     glutCreateWindow(KG_WINDOW_TITLE);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_DEPTH_TEST);
+    glEnable ( GL_LIGHTING );
+
+    if(flat_smooth)
+        glShadeModel(GL_SMOOTH);
+    else
+        glShadeModel(GL_FLAT);
     /* set the callback functions */
     glutDisplayFunc(display); //donde se hace "la foto". el observador que ve
     glutReshapeFunc(reshape);
