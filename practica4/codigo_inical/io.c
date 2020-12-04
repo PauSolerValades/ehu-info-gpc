@@ -55,6 +55,7 @@ void keyboard(unsigned char key, int x, int y)
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
 	int read = 0;
 	object3d *auxiliar_object = 0;
+	object3d *auxiliar_camera = 0;
 
 	switch (key)
 	{

@@ -136,6 +136,8 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
     int i;
     double Eo[3], eval;
 
+    if(camara_interna){
+
     //cambio sistema referencia camara a objeto
 
     Eo[0] = M[0]*_selected_camera->actual->M[12] + M[4]*_selected_camera->actual->M[13] + 
@@ -147,7 +149,11 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
     Eo[2] = M[2]*_selected_camera->actual->M[12] + M[6]*_selected_camera->actual->M[13] + 
             M[10]*_selected_camera->actual->M[14] + M[14];
 
-
+    }else{
+        Eo[0] = 0.0;
+        Eo[1] = 0.0;
+        Eo[2] = 0.0;
+    }
     //Ax+By+Cz+D=0
     eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
 
