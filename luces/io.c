@@ -121,6 +121,10 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
+	case GLUT_KEY_F1:
+		printf("JON PUTO ADICTO AL MOVIL COLLONS\n");
+		break;
+
 	case 9: /* <TAB> */ //cambiar de objeto
 
 		/* Controlar la lista, si és diferente de 0 que apunte al primero.*/
@@ -985,23 +989,22 @@ void calcular_normales()
 		}
 	}
 
+	
 	for(i = 0; i<_selected_object->num_vertices; i++)
 	{
 		double v[3], module;
 
-		v[0] = _selected_object->vertex_table->normal.x;
-		v[1] = _selected_object->vertex_table->normal.y;
-		v[2] = _selected_object->vertex_table->normal.z;
+		v[0] = _selected_object->vertex_table[i].normal.x;
+		v[1] = _selected_object->vertex_table[i].normal.y;
+		v[2] = _selected_object->vertex_table[i].normal.z;
 
 		module = euclidean_norm(v[0], v[1], v[2]);
 
-		_selected_object->vertex_table->normal.x = v[0]/module;
-		_selected_object->vertex_table->normal.y = v[1]/module;
-		_selected_object->vertex_table->normal.z = v[2]/module;
+		_selected_object->vertex_table[i].normal.x = v[0]/module;
+		_selected_object->vertex_table[i].normal.y = v[1]/module;
+		_selected_object->vertex_table[i].normal.z = v[2]/module;
 
 	}
-
-
 }
 
 void inverse(double *b, double *a)
