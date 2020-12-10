@@ -983,22 +983,22 @@ void calcular_normales()
 			_selected_object->vertex_table[indice].normal.y += vn[1];
 			_selected_object->vertex_table[indice].normal.z += vn[2];
 		}
+	}
 
-		for(i = 0; i<_selected_object->num_vertices; i++)
-		{
-			double v[3], module;
+	for(i = 0; i<_selected_object->num_vertices; i++)
+	{
+		double v[3], module;
 
-			v[0] = _selected_object->vertex_table->normal.x;
-			v[1] = _selected_object->vertex_table->normal.y;
-			v[2] = _selected_object->vertex_table->normal.z;
+		v[0] = _selected_object->vertex_table->normal.x;
+		v[1] = _selected_object->vertex_table->normal.y;
+		v[2] = _selected_object->vertex_table->normal.z;
 
-			module = euclidean_norm(v[0], v[1], v[2]);
+		module = euclidean_norm(v[0], v[1], v[2]);
 
-			_selected_object->vertex_table->normal.x = v[0]/module;
-			_selected_object->vertex_table->normal.y = v[1]/module;
-			_selected_object->vertex_table->normal.z = v[2]/module;
+		_selected_object->vertex_table->normal.x = v[0]/module;
+		_selected_object->vertex_table->normal.y = v[1]/module;
+		_selected_object->vertex_table->normal.z = v[2]/module;
 
-		}
 	}
 
 
