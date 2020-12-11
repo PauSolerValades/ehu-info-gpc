@@ -19,6 +19,8 @@ extern int transformacion;
 //0: translacion, 2: rotación, 3: volumen de visión
 extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
+extern int iluminacion; //0: desactivada, 1: activada
+extern int flat_smooth; //0: flat, 1: smooth
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -40,6 +42,7 @@ void keyboard_object(unsigned char key, int x, int y);
 void keyboard_camera(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
+void funcion_transformacion(int k);
 
 /**
  * @brief Callback function to control the basic keys
@@ -367,7 +370,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			{
 				if(_selected_object->display != _selected_object->mptr)
 				{
-					printf("Rehacer\n");
+					printf("Rehacer CAMARA\n");
 					
 					elem_matrix *iter;
 					elem_matrix *ant;
@@ -407,7 +410,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			{
 				if (_selected_object->display->nextptr != 0)
 				{
-					printf("Deshacer\n");
+					printf("Deshacer CAMARA\n");
 						
 					_selected_object->display = _selected_object->display->nextptr;
 				
@@ -426,7 +429,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			break;
 
 		default:
-			printf("%d %c\n", key, x);
+			printf("%d %c\n", key, key);
 			break;
 	}
 }
@@ -599,7 +602,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			{
 				if(_selected_camera->actual != _selected_camera->first)
 				{
-					printf("Rehacer\n");
+					printf("Rehacer CAMARA\n");
 					
 					elem_matrix *iter;
 					elem_matrix *ant;
@@ -639,7 +642,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			{
 				if (_selected_camera->actual->nextptr != 0)
 				{
-					printf("Deshacer\n");
+					printf("Deshacer CAMARA\n");
 						
 					_selected_camera->actual = _selected_camera->actual->nextptr;
 				
@@ -658,7 +661,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			break;
 
 		default:
-			printf("%d %c\n", key, x);
+			printf("%d %c\n", key, key);
 			break;
 
 	}	
@@ -675,7 +678,82 @@ void keyboard_camera(unsigned char key, int x, int y)
  */
 void special(int k, int x, int y)
 {
-    int isAKey;
+    switch (k)
+	{
+	case GLUT_KEY_F1:
+		/* code */
+		break;
+	case GLUT_KEY_F2:
+		break;
+
+	case GLUT_KEY_F3:
+		/* code */
+		break;
+	
+	case GLUT_KEY_F4:
+		/* code */
+		break;
+	
+	case GLUT_KEY_F5:
+		/* code */
+		break;
+
+	case GLUT_KEY_F6:
+		/* code */
+		break;
+
+	case GLUT_KEY_F7:
+		/* code */
+		break;
+
+	case GLUT_KEY_F8:
+		/* code */
+		break;
+
+	case GLUT_KEY_F9:
+		if(iluminacion)
+		{
+			printf("Iluminacion Desactivada\n");
+			iluminacion = 0;
+		}
+		else
+		{
+			printf("Iluminacion Activada\n");
+			iluminacion = 1;
+		}
+		break;
+
+	case GLUT_KEY_F10:
+		/* code */
+		break;
+
+	case GLUT_KEY_F11:
+		/* Code */
+		break;
+
+	case GLUT_KEY_F12:
+		if(flat_smooth)
+		{
+			printf("Luces en Flat\n");
+			flat_smooth = 0;
+		}
+		else
+		{
+			printf("Luces en Smooth\n");
+			flat_smooth = 1;
+		}
+		break;
+	
+	default:
+		funcion_transformacion(k);
+		//printf("%d %c\n", k, k);
+		break;
+	}
+}
+
+void funcion_transformacion(int k)
+{
+	int isAKey;
 
     isAKey = 0;
     
@@ -717,7 +795,6 @@ void special(int k, int x, int y)
 		glutPostRedisplay();
 	}
 }
-
 
 
 void switch_transformaciones_analisis(int k, int *isAKey)
@@ -936,6 +1013,15 @@ void calcular_normales()
 	int i, j, ia, ib, ic, indice;
 	double v1[3], v2[3], vn[3], module_vn;
 
+	/* Inicializamos las variables del vector normal porsi */
+
+	for(i=0; i<_selected_object->num_vertices; i++)
+	{
+		_selected_object->vertex_table[i].normal[0] = 0.0;
+		_selected_object->vertex_table[i].normal[1] = 0.0;
+		_selected_object->vertex_table[i].normal[2] = 0.0;
+	}
+
 	/* Encontrando la ecuación del plano */
 	for(i = 0; i<_selected_object->num_faces; i++)
 	{
@@ -980,29 +1066,28 @@ void calcular_normales()
 
 		//printf("%fx + %fy + %fz + %f\n",vn[0], vn[1], vn[2], _selected_object->face_table[i].ti);
 
-		for(j = 0; j<_selected_object->face_table->num_vertices; j++)
+		for(j = 0; j<_selected_object->face_table[i].num_vertices; j++) //porque es menos uno?
 		{
 			indice = _selected_object->face_table[i].vertex_table[j];
-			_selected_object->vertex_table[indice].normal.x += vn[0];
-			_selected_object->vertex_table[indice].normal.y += vn[1];
-			_selected_object->vertex_table[indice].normal.z += vn[2];
+			_selected_object->vertex_table[indice].normal[0] += vn[0];
+			_selected_object->vertex_table[indice].normal[1] += vn[1];
+			_selected_object->vertex_table[indice].normal[2] += vn[2];
 		}
 	}
-
 	
 	for(i = 0; i<_selected_object->num_vertices; i++)
 	{
 		double v[3], module;
 
-		v[0] = _selected_object->vertex_table[i].normal.x;
-		v[1] = _selected_object->vertex_table[i].normal.y;
-		v[2] = _selected_object->vertex_table[i].normal.z;
+		v[0] = _selected_object->vertex_table[i].normal[0];
+		v[1] = _selected_object->vertex_table[i].normal[1];
+		v[2] = _selected_object->vertex_table[i].normal[2];
 
 		module = euclidean_norm(v[0], v[1], v[2]);
 
-		_selected_object->vertex_table[i].normal.x = v[0]/module;
-		_selected_object->vertex_table[i].normal.y = v[1]/module;
-		_selected_object->vertex_table[i].normal.z = v[2]/module;
+		_selected_object->vertex_table[i].normal[0] = v[0]/module;
+		_selected_object->vertex_table[i].normal[1] = v[1]/module;
+		_selected_object->vertex_table[i].normal[2] = v[2]/module;
 
 	}
 }

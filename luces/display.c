@@ -16,6 +16,7 @@ extern camera * _first_camera;
 extern camera * _selected_camera;
 
 extern int camara_interna; //0: camara no interna, 1: camara interna
+extern int flat_smooth; //0: flat, 1: smooth
 
 void dibuja_normales(object3d *aux_obj, GLint f);
 
@@ -227,11 +228,18 @@ void display(void) {
                                     aux_obj->face_table[f].ti);
             
             if(dibuja)
-            {   glNormal3dv(aux_obj->face_table[f].vn);
+            {   
+                if(!flat_smooth) //si en flat, tenemos en cuenta los vectores del plano
+                    glNormal3dv(aux_obj->face_table[f].vn);
+                
                 glBegin(GL_POLYGON);
 
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
+                    
+                    if(flat_smooth) //sino, tenemos en cuenta los de los vértices.
+                        glNormal3dv(aux_obj->vertex_table[v_index].normal);
+                    
                     glVertex3d(aux_obj->vertex_table[v_index].coord.x,
                             aux_obj->vertex_table[v_index].coord.y,
                             aux_obj->vertex_table[v_index].coord.z);

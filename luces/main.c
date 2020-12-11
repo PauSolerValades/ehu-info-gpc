@@ -22,11 +22,14 @@ camera * _selected_camera = 0;
 elem_matrix * _actual_matrix = 0;
 
 int mode; //0: objeto, 1: camara, 2: luces cuando toque.
-int flat_smooth;
+
 int transformacion;
 int referencia;
 
 int camara_interna;
+
+int iluminacion; //0: desactivada, 1: activada
+int flat_smooth; //0: flat, 1: smooth
 
 /** GENERAL INITIALIZATION **/
 void initialization (){
@@ -35,7 +38,8 @@ void initialization (){
     transformacion = 0; //translación por defecto
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;
-    flat_smooth = 1;
+    iluminacion = 1;
+    flat_smooth = 1; //0: flat, 1: smooth
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
@@ -48,7 +52,6 @@ void initialization (){
     glClearColor(KG_COL_BACK_R, KG_COL_BACK_G, KG_COL_BACK_B, KG_COL_BACK_A);
 
     /*Definition of the method to draw the objects*/
-    //dibujamos plígonos mediante líneas, nada de rellenarlos.
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
