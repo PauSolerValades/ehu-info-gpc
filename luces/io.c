@@ -124,9 +124,6 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-	case GLUT_KEY_F1:
-		printf("JON PUTO ADICTO AL MOVIL COLLONS\n");
-		break;
 
 	case 9: /* <TAB> */ //cambiar de objeto
 
@@ -715,11 +712,13 @@ void special(int k, int x, int y)
 		{
 			printf("Iluminacion Desactivada\n");
 			iluminacion = 0;
+			glDisable(GL_LIGHT1);
 		}
 		else
 		{
 			printf("Iluminacion Activada\n");
 			iluminacion = 1;
+			glEnable(GL_LIGHT1);
 		}
 		break;
 
@@ -749,6 +748,7 @@ void special(int k, int x, int y)
 		//printf("%d %c\n", k, k);
 		break;
 	}
+	glutPostRedisplay();
 }
 
 void funcion_transformacion(int k)

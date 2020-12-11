@@ -18,6 +18,8 @@ extern camera * _selected_camera;
 extern int camara_interna; //0: camara no interna, 1: camara interna
 extern int flat_smooth; //0: flat, 1: smooth
 
+
+
 void dibuja_normales(object3d *aux_obj, GLint f);
 
 void print_matrox(double * mptr)
@@ -163,6 +165,9 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
 //_first_objectfunción que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
     GLint v_index, v, f, dibuja;
+    GLfloat vectorPos[4] = {5,5,0,1}; 
+    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
+    GLfloat vectorMaterial[4] = {0.8,0.8,0.8,1};
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     
     /* Clear the screen */
@@ -188,6 +193,10 @@ void display(void) {
     /*First, we draw the axes*/
     glLoadIdentity();
     draw_axes();
+    glLightfv(GL_LIGHT1,GL_POSITION,vectorPos);
+    glLightfv(GL_LIGHT1,GL_DIFFUSE,vectorDif);
+    
+
 
     if(_selected_object != 0)
     {
@@ -199,6 +208,9 @@ void display(void) {
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
+
+    
+    
 
     int poligonos = 0;
 
@@ -216,7 +228,7 @@ void display(void) {
         
         // Por revisar, asignar con vectores los valores del material  
         
-    
+        
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
@@ -226,7 +238,6 @@ void display(void) {
                                     aux_obj->face_table[f].vn[1], 
                                     aux_obj->face_table[f].vn[2], 
                                     aux_obj->face_table[f].ti);
-            
             if(dibuja)
             {   
                 if(!flat_smooth) //si en flat, tenemos en cuenta los vectores del plano
@@ -236,7 +247,7 @@ void display(void) {
 
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
-                    
+                    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,vectorMaterial);
                     if(flat_smooth) //sino, tenemos en cuenta los de los vértices.
                         glNormal3dv(aux_obj->vertex_table[v_index].normal);
                     
