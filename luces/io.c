@@ -58,6 +58,7 @@ void keyboard(unsigned char key, int x, int y)
 
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
 	int read = 0;
+	int mname = 0;
 	object3d *auxiliar_object = 0;
 	camera *auxiliar_camera = 0;
 
@@ -69,9 +70,19 @@ void keyboard(unsigned char key, int x, int y)
 		printf("%s", KG_MSSG_SELECT_FILE);
 		scanf("%s", fname);
 		/*Allocate memory for the structure and read the file*/
+		printf("\nQue material deseas asignarle al objeto?:\n\n");
+		printf("1 - Oro\n");
+		printf("2 - Rubí\n");
+		printf("3 - Esmeralda\n");
+		printf("4 - Esmeralda\n");
+		printf("5 - Esmeralda\n");
+		printf("6 - Aleatorio\n");
+		scanf("%d", &mname);
+
+		
 		auxiliar_object = (object3d *)malloc(sizeof(object3d));
 		read = read_wavefront(fname, auxiliar_object);
-
+	
 		switch (read)
 		{
 		/*Errors in the reading*/
@@ -86,6 +97,25 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		/*Read OK*/
 		case 0:
+			switch (mname)
+			{
+			case 1:
+					auxiliar_object->vectorMaterial[0] = 0.75164;
+					auxiliar_object->vectorMaterial[1] = 0.60648;
+					auxiliar_object->vectorMaterial[2] = 0.22648;
+					auxiliar_object->shine = 0,4;
+				break;
+			case 2:
+					auxiliar_object->vectorMaterial[0] = 0.61424;
+					auxiliar_object->vectorMaterial[1] = 0.04136;
+					auxiliar_object->vectorMaterial[2] = 0.04136;
+					auxiliar_object->shine = 0,6;
+				break;
+			default:
+				printf("0");
+				break;
+			}
+
 			/*Insert the new object in the list*/
 			auxiliar_object->next = _first_object;
 			_first_object = auxiliar_object;
@@ -120,6 +150,7 @@ void keyboard(unsigned char key, int x, int y)
 
 			calcular_normales();
 			printf("%s\n", KG_MSSG_FILEREAD);
+
 			break;
 		}
 		break;
@@ -678,8 +709,19 @@ void special(int k, int x, int y)
     switch (k)
 	{
 	case GLUT_KEY_F1:
-		/* code */
-		break;
+		if(iluminacion)
+		{
+			printf("Iluminacion 1 Desactivada\n");
+			iluminacion = 0;
+			glDisable(GL_LIGHT1);
+		}
+		else
+		{
+			printf("Iluminacion 1 Activada\n");
+			iluminacion = 1;
+			glEnable(GL_LIGHT1);
+		}
+		break;k;
 	case GLUT_KEY_F2:
 		break;
 
@@ -712,13 +754,13 @@ void special(int k, int x, int y)
 		{
 			printf("Iluminacion Desactivada\n");
 			iluminacion = 0;
-			glDisable(GL_LIGHT1);
+			glDisable(GL_LIGHTING);
 		}
 		else
 		{
 			printf("Iluminacion Activada\n");
 			iluminacion = 1;
-			glEnable(GL_LIGHT1);
+			glEnable(GL_LIGHTING);
 		}
 		break;
 

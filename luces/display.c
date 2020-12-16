@@ -167,7 +167,7 @@ void display(void) {
     GLint v_index, v, f, dibuja;
     GLfloat vectorPos[4] = {5,5,0,1}; 
     GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
-    GLfloat vectorMaterial[4] = {0.8,0.8,0.8,1};
+    GLfloat vectorMaterial[3] = {0.75164,0.60648,0.22648};
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     
     /* Clear the screen */
@@ -247,7 +247,8 @@ void display(void) {
 
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
-                    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,vectorMaterial);
+                    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,aux_obj->vectorMaterial);
+                    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.4);
                     if(flat_smooth) //sino, tenemos en cuenta los de los vértices.
                         glNormal3dv(aux_obj->vertex_table[v_index].normal);
                     

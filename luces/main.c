@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST); //activa el zbuffer.
     glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT1);
 
     if(!flat_smooth)
         glShadeModel(GL_SMOOTH);

@@ -34,3 +34,13 @@ Tenemos que pasar la posicion de la camara al sistema de referencia de cada obje
 
 TODO: ARREGLAR EL PUTO CÓDGIO (ESTRUCTURA)
 - mirar porque el control + en paralelo no funciona.
+
+-LUCES:
+
+TODO:
+-Pensar como cambiar el estado de las luces por separado. (variables u linked list)
+
+-Pensar como cambiar entre distintos ids de luces(idea de utilizar un array en caso de no haber una funcion especifica)
+
+-Pensar/preguntar como podemos colocar el foco en la punta del objeto
+

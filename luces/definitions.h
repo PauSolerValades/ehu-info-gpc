@@ -148,6 +148,8 @@ struct object3d{
     struct elem_matrix *display;
     struct elem_matrix *mptr;	/* next element in the pile of matrixes */
     struct object3d *next;		/* next element in the pile of objects */
+    GLfloat vectorMaterial[3];
+    GLfloat shine;
 };
 
 typedef struct object3d object3d;
