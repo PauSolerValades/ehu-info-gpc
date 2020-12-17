@@ -165,8 +165,7 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
 //_first_objectfunción que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
     GLint v_index, v, f, dibuja;
-    GLfloat vectorPos[4] = {5,5,0,1}; 
-    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
+
     GLfloat vectorMaterial[3] = {0.75164,0.60648,0.22648};
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     
@@ -193,10 +192,6 @@ void display(void) {
     /*First, we draw the axes*/
     glLoadIdentity();
     draw_axes();
-    glLightfv(GL_LIGHT1,GL_POSITION,vectorPos);
-    glLightfv(GL_LIGHT1,GL_DIFFUSE,vectorDif);
-    
-
 
     if(_selected_object != 0)
     {
@@ -209,8 +204,16 @@ void display(void) {
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
 
-    
-    
+
+    /* Parametrizamos las luces */
+
+    /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */
+
+    GLfloat vectorPos[4] = {5,5,0,1}; 
+    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
+    //un sol
+    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, vectorDif);
 
     int poligonos = 0;
 
@@ -247,7 +250,7 @@ void display(void) {
 
                 for (v = 0; v < aux_obj->face_table[f].num_vertices; v++) {
                     v_index = aux_obj->face_table[f].vertex_table[v];
-                    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,aux_obj->vectorMaterial);
+                    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE, aux_obj->vectorMaterial);
                     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.4);
                     if(flat_smooth) //sino, tenemos en cuenta los de los vértices.
                         glNormal3dv(aux_obj->vertex_table[v_index].normal);

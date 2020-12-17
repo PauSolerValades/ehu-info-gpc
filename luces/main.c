@@ -21,25 +21,36 @@ camera * _selected_camera = 0;
 
 elem_matrix * _actual_matrix = 0;
 
-int mode; //0: objeto, 1: camara, 2: luces cuando toque.
+int mode; //0: objeto, 1: camara, 2: luz
 
 int transformacion;
 int referencia;
 
 int camara_interna;
 
-int iluminacion; //0: desactivada, 1: activada
+int fill_polygons; //controla si se pintan los polígonos o no
+
+int iluminacion[8];
 int flat_smooth; //0: flat, 1: smooth
 
 /** GENERAL INITIALIZATION **/
 void initialization (){
 
+    int i = 0;
+
+    fill_polygons = 1;
     mode = 0; //por defecto a objeto.
     transformacion = 0; //translación por defecto
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;
-    iluminacion = 1;
     flat_smooth = 1; //0: flat, 1: smooth
+
+    for(i=0; i<9; i++)
+    {
+        iluminacion[i] = 0;
+    }
+
+    iluminacion[0] = 1;
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
@@ -72,7 +83,17 @@ int main(int argc, char** argv) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST); //activa el zbuffer.
     glEnable(GL_LIGHTING);
+
+    //deja las luces activadas
+    glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
+    glEnable(GL_LIGHT3);
+    glEnable(GL_LIGHT4);
+    glEnable(GL_LIGHT5);
+    glEnable(GL_LIGHT6);
+    glEnable(GL_LIGHT7);
+
 
     if(!flat_smooth)
         glShadeModel(GL_SMOOTH);

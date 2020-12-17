@@ -13,14 +13,16 @@ extern GLdouble _ortho_x_min, _ortho_x_max;
 extern GLdouble _ortho_y_min, _ortho_y_max;
 extern GLdouble _ortho_z_min, _ortho_z_max;
 
-extern int mode; //0 objeto, 1: camara
+extern int mode; //0 objeto, 1: camara, 2: luz
 extern int transformacion; 
 //0: translación, 1: rotación, 2: escalado cuando mode = 0
 //0: translacion, 2: rotación, 3: volumen de visión
 extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
-extern int iluminacion; //0: desactivada, 1: activada
+extern int iluminacion[8]; //0: desactivada, 1: activada
 extern int flat_smooth; //0: flat, 1: smooth
+
+extern int fill_polygons;
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -229,7 +231,15 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'o':
 	case 'O': /* Sistema referencia objeto */
-		printf("Objeto\n");
+		if(mode != 0)
+		{
+			printf("TRANSFORMACIONES DE OBJETOS\n");
+			mode = 0;
+		}
+		else
+		{
+			printf("Ya estás en modo objeto...\n");
+		}
 		break;
 
 	case 'c': /* cambia a la siguiente camara */
@@ -265,21 +275,35 @@ void keyboard(unsigned char key, int x, int y)
 
 	case 'k': /* ACTIVA EL MODO CÁMARA */
 	case 'K': /* Transformaciones camara actual */
-		if(mode){
-			mode = 0;
-			printf("TRANSFORMACIONES DE OBJETOS\n");
-		}
-		else
+		if(mode != 1)
 		{
 			mode = 1;
 			printf("TRANSFORMACIONES DE CAMARAS\n");
 		}
+		else
+		{
+			printf("Ya estas en modo camara...\n");
+		}
+		
 		
 		break;
 
 	case 'a':
 	case 'A': /* Transformaciones luz selecionada */
-		printf("Funcionalidad no implementada\n");
+		if(mode != 2)
+		{
+			printf("TRANSFORMACIONES DE LUCES\n");
+			mode = 2;
+		}
+		else
+		{
+			printf("Ya estás en modo luces...\n");
+		}
+
+	case '1':
+		printf("el 1\n");
+		break;
+		
 		break;
 	case '?':
 		print_help();
@@ -709,17 +733,17 @@ void special(int k, int x, int y)
     switch (k)
 	{
 	case GLUT_KEY_F1:
-		if(iluminacion)
+		if(iluminacion[0] == 1)
 		{
 			printf("Iluminacion 1 Desactivada\n");
-			iluminacion = 0;
-			glDisable(GL_LIGHT1);
+			iluminacion[0] = 0;
+			glDisable(GL_LIGHT0);
 		}
 		else
 		{
 			printf("Iluminacion 1 Activada\n");
-			iluminacion = 1;
-			glEnable(GL_LIGHT1);
+			iluminacion[0] = 1;
+			glEnable(GL_LIGHT0);
 		}
 		break;k;
 	case GLUT_KEY_F2:
@@ -750,18 +774,22 @@ void special(int k, int x, int y)
 		break;
 
 	case GLUT_KEY_F9:
-		if(iluminacion)
+		/* TODO: este activa de filler a alambres (como estaba ante) */
+
+		/* TODO: esto no funciona ya nos lo miramos. */
+		if(fill_polygons) //pinto polígonos
 		{
-			printf("Iluminacion Desactivada\n");
-			iluminacion = 0;
-			glDisable(GL_LIGHTING);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			fill_polygons = 0;
 		}
-		else
+		else //ahora en lineas
 		{
-			printf("Iluminacion Activada\n");
-			iluminacion = 1;
-			glEnable(GL_LIGHTING);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+			fill_polygons = 1;
 		}
+		
+		glutPostRedisplay();
+
 		break;
 
 	case GLUT_KEY_F10:
