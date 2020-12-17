@@ -300,11 +300,45 @@ void keyboard(unsigned char key, int x, int y)
 			printf("Ya estás en modo luces...\n");
 		}
 
+	case '0':
+		break;
+
 	case '1':
 		printf("el 1\n");
 		break;
-		
+
+	case '2':
+		printf("el 1\n");
 		break;
+
+	case '3':
+		printf("el 1\n");
+		break;
+
+	case '4':
+		printf("el 1\n");
+		break;
+
+	case '5':
+		printf("el 1\n");
+		break;
+
+	case '6':
+		printf("el 1\n");
+		break;
+
+	case '7':
+		printf("el 1\n");
+		break;
+
+	case '8':
+		printf("el 1\n");
+		break;
+	
+	case '9':
+		printf("el 1\n");
+		break;
+
 	case '?':
 		print_help();
 		break;
@@ -733,7 +767,7 @@ void special(int k, int x, int y)
     switch (k)
 	{
 	case GLUT_KEY_F1:
-		if(iluminacion[0] == 1)
+		if(iluminacion[0])
 		{
 			printf("Iluminacion 1 Desactivada\n");
 			iluminacion[0] = 0;
@@ -747,36 +781,111 @@ void special(int k, int x, int y)
 		}
 		break;k;
 	case GLUT_KEY_F2:
+		if(iluminacion[1])
+		{
+			printf("Luz 2 Desactivada\n");
+			iluminacion[1] = 0;
+			glDisable(GL_LIGHT1);
+		}
+		else
+		{
+			printf("Luz 2 Activada\n");
+			iluminacion[1] = 1;
+			glEnable(GL_LIGHT1);
+		}
 		break;
 
 	case GLUT_KEY_F3:
-		/* code */
+		if(iluminacion[2])
+		{
+			printf("Iluminacion 3 Desactivada\n");
+			iluminacion[2] = 0;
+			glDisable(GL_LIGHT2);
+		}
+		else
+		{
+			printf("Iluminacion 3 Activada\n");
+			iluminacion[2] = 1;
+			glEnable(GL_LIGHT2);
+		}
 		break;
 	
 	case GLUT_KEY_F4:
-		/* code */
+		if(iluminacion[3])
+		{
+			printf("Iluminacion 4 Desactivada\n");
+			iluminacion[3] = 0;
+			glDisable(GL_LIGHT3);
+		}
+		else
+		{
+			printf("Iluminacion 4 Activada\n");
+			iluminacion[3] = 1;
+			glEnable(GL_LIGHT3);
+		}
 		break;
 	
 	case GLUT_KEY_F5:
-		/* code */
+		if(iluminacion[4])
+		{
+			printf("Iluminacion 5 Desactivada\n");
+			iluminacion[4] = 0;
+			glDisable(GL_LIGHT4);
+		}
+		else
+		{
+			printf("Iluminacion 5 Activada\n");
+			iluminacion[4] = 1;
+			glEnable(GL_LIGHT4);
+		}
 		break;
 
 	case GLUT_KEY_F6:
-		/* code */
+		if(iluminacion[5])
+		{
+			printf("Iluminacion 6 Desactivada\n");
+			iluminacion[5] = 0;
+			glDisable(GL_LIGHT5);
+		}
+		else
+		{
+			printf("Iluminacion 6 Activada\n");
+			iluminacion[5] = 1;
+			glEnable(GL_LIGHT5);
+		}
 		break;
 
 	case GLUT_KEY_F7:
-		/* code */
+		if(iluminacion[6])
+		{
+			printf("Iluminacion 7 Desactivada\n");
+			iluminacion[6] = 0;
+			glDisable(GL_LIGHT6);
+		}
+		else
+		{
+			printf("Iluminacion 7 Activada\n");
+			iluminacion[6] = 1;
+			glEnable(GL_LIGHT6);
+		}
 		break;
 
 	case GLUT_KEY_F8:
-		/* code */
+		if(iluminacion[7])
+		{
+			printf("Iluminacion 1 Desactivada\n");
+			iluminacion[7] = 0;
+			glDisable(GL_LIGHT7);
+		}
+		else
+		{
+			printf("Iluminacion 7 Activada\n");
+			iluminacion[7] = 1;
+			glEnable(GL_LIGHT7);
+		}
 		break;
 
-	case GLUT_KEY_F9:
-		/* TODO: este activa de filler a alambres (como estaba ante) */
-
-		/* TODO: esto no funciona ya nos lo miramos. */
+	case GLUT_KEY_F9: /* cambia de rejilla a polígonos pintados. */
 		if(fill_polygons) //pinto polígonos
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -784,20 +893,12 @@ void special(int k, int x, int y)
 		}
 		else //ahora en lineas
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			fill_polygons = 1;
 		}
 		
 		glutPostRedisplay();
 
-		break;
-
-	case GLUT_KEY_F10:
-		/* code */
-		break;
-
-	case GLUT_KEY_F11:
-		/* Code */
 		break;
 
 	case GLUT_KEY_F12:

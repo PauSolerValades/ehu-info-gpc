@@ -2,7 +2,6 @@
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #include <stdio.h>
 
 /** EXTERNAL VARIABLES **/
@@ -18,21 +17,17 @@ extern camera * _selected_camera;
 extern int camara_interna; //0: camara no interna, 1: camara interna
 extern int flat_smooth; //0: flat, 1: smooth
 
-
-
 void dibuja_normales(object3d *aux_obj, GLint f);
+void init_luces();
 
-void print_matrox(double * mptr)
+void init_luces()
 {
-	int i,j;
-	printf("\n");
-	for(i=0; i<4; i++){
-		for(j=0;j<4;j++){
-			printf("%.3lf\t", mptr[i+j*4]);
-		}
-		printf("\n");
-	}
-	printf("\n");
+    GLfloat vectorPos[4] = {5,5,0,1}; 
+    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
+    
+    //un sol
+    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, vectorDif);
 }
 
 /**
@@ -71,31 +66,6 @@ void reshape(int width, int height) {
     /*  Take care, the width and height are integer numbers, but the ratio is a GLdouble so, in order to avoid
      *  rounding the ratio to integer values we need to cast width and height before computing the ratio */
     _window_ratio = (GLdouble) width / (GLdouble) height;
-}
-
-void inverse_without_points(double *b, double *a)
-{
-	GLdouble x,y,z;
-
-    a[0] = b[0];
-    a[5] = b[5];
-    a[10] = b[10];
-    x = b[1]; a[1] = b[4]; a[4] = x;
-    x = b[2]; a[2] = b[8]; a[8] = x;
-    x = b[6]; a[6] = b[9]; a[9] = x;
-
-    a[3] = b[3];
-    a[7] = b[7];
-    a[11] = b[11];
-    a[15] = b[15];
-    
-    x = (a[0]*b[12])+(a[4]*b[13])+(a[8]*b[14]);
-    y = (a[1]*b[12])+(a[5]*b[13])+(a[9]*b[14]);
-    z = (a[2]*b[12])+(a[6]*b[13])+(a[10]*b[14]);
-    a[12] = b[12];
-    a[13] = -b[13];
-    a[14] = b[14];
-
 }
 
 void init_camera(){
@@ -206,14 +176,8 @@ void display(void) {
 
 
     /* Parametrizamos las luces */
-
     /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */
-
-    GLfloat vectorPos[4] = {5,5,0,1}; 
-    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
-    //un sol
-    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, vectorDif);
+    init_luces();
 
     int poligonos = 0;
 
