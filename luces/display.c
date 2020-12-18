@@ -60,23 +60,63 @@ void reshape(int width, int height) {
 
 void init_luces()
 {
-    GLfloat vectorPos[4] = {5,5,0,1}; 
-    GLfloat rgba[4] = {0.8,0.8,0.8,1};
+
+    //TODO: pasarle el vector normalizado
+
+    GLfloat posiSol[4] = {5,5,0,0}; 
+    GLfloat rgba[4] = {0.8,0.8,0.8,1.0};
     
     //un sol
     //glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
     glLightfv(GL_LIGHT0, GL_SPECULAR, rgba); //Joseba dice queesta siempre con el mismo valro que la otra
-    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
-    
-    //este es el foco que apunta siempre al objeto
-    GLfloat posicion2[4] ={0,0,0,1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
-    GLfloat vector2[4] = {0,0,-1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
-    GLfloat rgba2[4] = {0.8,0.8,0.8,1}; //cambio para hacer otro push
+    glLightfv(GL_LIGHT0, GL_POSITION, posiSol); //aquí tocar el vector para que el sol no se mueva con la cámara
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
 
-    glLightfv(GL_LIGHT1, GL_POSITION, posicion2);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba2);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, rgba2);
-    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, vector2);
+
+
+    GLfloat posiBomb[4] = {-2,7,0,1};
+
+    //una bombilla
+    glLightfv(GL_LIGHT1,GL_SPECULAR,rgba);
+    glLightfv(GL_LIGHT1,GL_POSITION,posiBomb);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba);
+
+
+    //TODO: pasarle al foco el vector del objeto para que se coloque en su lugar
+    //este es el foco que apunta siempre al objeto
+    GLfloat posicion2[4] ={0,-5,0,1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
+    GLfloat vector[4] = {0,0,-1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
+
+    glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, rgba);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
+
+    glLightfv(GL_LIGHT3, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT3, GL_POSITION, posiSol);
+    glLightfv(GL_LIGHT3, GL_DIFFUSE, rgba);
+
+
+    glLightfv(GL_LIGHT4, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT4, GL_POSITION, posiSol);
+    glLightfv(GL_LIGHT4, GL_DIFFUSE, rgba);
+
+
+    glLightfv(GL_LIGHT5, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT5, GL_POSITION, posiSol);
+    glLightfv(GL_LIGHT5, GL_DIFFUSE, rgba);
+
+
+    glLightfv(GL_LIGHT6, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT6, GL_POSITION, posiSol);
+    glLightfv(GL_LIGHT6, GL_DIFFUSE, rgba);
+
+
+    glLightfv(GL_LIGHT7, GL_SPECULAR, rgba);
+    glLightfv(GL_LIGHT7, GL_POSITION, posiSol);
+    glLightfv(GL_LIGHT7, GL_DIFFUSE, rgba);
+
+
 }
 
 void init_camera(){

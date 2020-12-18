@@ -72,14 +72,6 @@ void keyboard(unsigned char key, int x, int y)
 		printf("%s", KG_MSSG_SELECT_FILE);
 		scanf("%s", fname);
 		/*Allocate memory for the structure and read the file*/
-		printf("\nQue material deseas asignarle al objeto?:\n\n");
-		printf("1 - Oro\n");
-		printf("2 - Rubí\n");
-		printf("3 - Esmeralda\n");
-		printf("4 - Esmeralda\n");
-		printf("5 - Esmeralda\n");
-		printf("6 - Aleatorio\n");
-		scanf("%d", &mname);
 
 		
 		auxiliar_object = (object3d *)malloc(sizeof(object3d));
@@ -99,24 +91,11 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		/*Read OK*/
 		case 0:
-			switch (mname)
-			{
-			case 1:
-					auxiliar_object->vectorMaterial[0] = 0.75164;
-					auxiliar_object->vectorMaterial[1] = 0.60648;
-					auxiliar_object->vectorMaterial[2] = 0.22648;
-					auxiliar_object->shine = 0,4;
-				break;
-			case 2:
-					auxiliar_object->vectorMaterial[0] = 0.61424;
-					auxiliar_object->vectorMaterial[1] = 0.04136;
-					auxiliar_object->vectorMaterial[2] = 0.04136;
-					auxiliar_object->shine = 0,6;
-				break;
-			default:
-				printf("0");
-				break;
-			}
+
+			auxiliar_object->vectorMaterial[0] = 0.75164;
+			auxiliar_object->vectorMaterial[1] = 0.60648;
+			auxiliar_object->vectorMaterial[2] = 0.22648;
+			auxiliar_object->shine = 0,4;
 
 			/*Insert the new object in the list*/
 			auxiliar_object->next = _first_object;
@@ -789,6 +768,7 @@ void keyboard_camera(unsigned char key, int x, int y)
  */
 void special(int k, int x, int y)
 {
+	int mname = 0;
     switch (k)
 	{
 	case GLUT_KEY_F1:
@@ -884,12 +864,12 @@ void special(int k, int x, int y)
 	case GLUT_KEY_F8:
 		if(glIsEnabled(GL_LIGHT7))
 		{
-			printf("Luz 1 Desactivada\n");
+			printf("Luz 8 Desactivada\n");
 			glDisable(GL_LIGHT7);
 		}
 		else
 		{
-			printf("Luz 7 Activada\n");
+			printf("Luz 8 Activada\n");
 			glEnable(GL_LIGHT7);
 		}
 		break;
@@ -923,6 +903,47 @@ void special(int k, int x, int y)
 		}
 		break;
 	
+	case GLUT_KEY_INSERT:
+		
+
+		printf("\nQue material deseas asignarle al objeto?:\n\n");
+		printf("1 - Oro\n");
+		printf("2 - Rubí\n");
+		printf("3 - Zafiro\n");
+		printf("4 - Aleatorio\n\n");
+		scanf("%d", &mname);
+		switch (mname)
+			{
+			case 1:
+					_selected_object->vectorMaterial[0] = 0.75164;
+					_selected_object->vectorMaterial[1] = 0.60648;
+					_selected_object->vectorMaterial[2] = 0.22648;
+					_selected_object->shine = 0,4;
+					printf("\nMaterial cambiado satisfactoriamente\n");
+				break;
+			case 2:
+					_selected_object->vectorMaterial[0] = 0.61424;
+					_selected_object->vectorMaterial[1] = 0.04136;
+					_selected_object->vectorMaterial[2] = 0.04136;
+					_selected_object->shine = 0,6;
+					printf("\nMaterial cambiado satisfactoriamente\n");
+				break;
+			case 3:
+					_selected_object->vectorMaterial[0] = 0.25;
+					_selected_object->vectorMaterial[1] = 0.20725;
+					_selected_object->vectorMaterial[2] = 0.922;
+					_selected_object->shine = 11.264;
+					printf("\nMaterial cambiado satisfactoriamente\n");
+				break;
+				
+			default:
+				printf("\nNo has seleccionado una opción válida\n");
+				break;
+			}
+			
+
+		break;
+
 	default:
 		funcion_transformacion(k);
 		//printf("%d %c\n", k, k);
