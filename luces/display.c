@@ -20,16 +20,6 @@ extern int flat_smooth; //0: flat, 1: smooth
 void dibuja_normales(object3d *aux_obj, GLint f);
 void init_luces();
 
-void init_luces()
-{
-    GLfloat vectorPos[4] = {5,5,0,1}; 
-    GLfloat vectorDif[4] = {0.8,0.8,0.8,1};
-    
-    //un sol
-    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, vectorDif);
-}
-
 /**
  * @brief Function to draw the axes
  */
@@ -66,6 +56,27 @@ void reshape(int width, int height) {
     /*  Take care, the width and height are integer numbers, but the ratio is a GLdouble so, in order to avoid
      *  rounding the ratio to integer values we need to cast width and height before computing the ratio */
     _window_ratio = (GLdouble) width / (GLdouble) height;
+}
+
+void init_luces()
+{
+    GLfloat vectorPos[4] = {5,5,0,1}; 
+    GLfloat rgba[4] = {0.8,0.8,0.8,1};
+    
+    //un sol
+    //glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, rgba); //Joseba dice queesta siempre con el mismo valro que la otra
+    glLightfv(GL_LIGHT0, GL_POSITION, vectorPos); //aquí tocar el vector para que el sol no se mueva con la cámara
+    
+    //este es el foco que apunta siempre al objeto
+    GLfloat posicion2[4] ={0,0,0,1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
+    GLfloat vector2[4] = {0,0,-1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
+    GLfloat rgba2[4] = {0.8,0.8,0.8,1};
+
+    glLightfv(GL_LIGHT1, GL_POSITION, posicion2);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba2);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, rgba2);
+    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, vector2);
 }
 
 void init_camera(){

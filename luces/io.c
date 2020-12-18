@@ -19,7 +19,7 @@ extern int transformacion;
 //0: translacion, 2: rotación, 3: volumen de visión
 extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
-extern int iluminacion[8]; //0: desactivada, 1: activada
+extern int iluminacion[8]; //uno para cada luz
 extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
@@ -45,7 +45,7 @@ void keyboard_camera(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
-
+void resetIluminacion();
 /**
  * @brief Callback function to control the basic keys
  * @param key Key that has been pressed
@@ -301,42 +301,67 @@ void keyboard(unsigned char key, int x, int y)
 		}
 
 	case '0':
+		
+		/* Preguntar por un int i qué diga a qué camara quiero modificar?*/
+
 		break;
 
 	case '1':
-		printf("el 1\n");
+		
+		resetIluminacion();
+		printf("Luz 1 selecionada.\n");
+		iluminacion[0] = 1;
+
 		break;
 
 	case '2':
-		printf("el 1\n");
-		break;
+		
+		resetIluminacion();
+		printf("Luz 2 selecionada.\n");
+		iluminacion[1] = 1;
+
+ 		break;
 
 	case '3':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 3 selecionada.\n");
+		iluminacion[2] = 1;
+
 		break;
 
 	case '4':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 4 selecionada.\n");
+		iluminacion[3] = 1;
+
 		break;
 
 	case '5':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 5 selecionada.\n");
+		iluminacion[4] = 1;
+
 		break;
 
 	case '6':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 6 selecionada.\n");
+		iluminacion[5] = 1;
+
 		break;
 
 	case '7':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 7 selecionada.\n");
+		iluminacion[6] = 1;
+
 		break;
 
 	case '8':
-		printf("el 1\n");
-		break;
-	
-	case '9':
-		printf("el 1\n");
+		resetIluminacion();
+		printf("Luz 8 selecionada.\n");
+		iluminacion[7] = 1;
+
 		break;
 
 	case '?':
@@ -767,120 +792,104 @@ void special(int k, int x, int y)
     switch (k)
 	{
 	case GLUT_KEY_F1:
-		if(iluminacion[0])
+		if(glIsEnabled(GL_LIGHT0))
 		{
-			printf("Iluminacion 1 Desactivada\n");
-			iluminacion[0] = 0;
+			printf("Luz 1 Desactivada\n");
 			glDisable(GL_LIGHT0);
 		}
 		else
 		{
-			printf("Iluminacion 1 Activada\n");
-			iluminacion[0] = 1;
+			printf("Luz 1 Activada\n");
 			glEnable(GL_LIGHT0);
 		}
 		break;k;
 	case GLUT_KEY_F2:
-		if(iluminacion[1])
+		if(glIsEnabled(GL_LIGHT1))
 		{
 			printf("Luz 2 Desactivada\n");
-			iluminacion[1] = 0;
 			glDisable(GL_LIGHT1);
 		}
 		else
 		{
 			printf("Luz 2 Activada\n");
-			iluminacion[1] = 1;
 			glEnable(GL_LIGHT1);
 		}
 		break;
 
 	case GLUT_KEY_F3:
-		if(iluminacion[2])
+		if(glIsEnabled(GL_LIGHT2))
 		{
-			printf("Iluminacion 3 Desactivada\n");
-			iluminacion[2] = 0;
+			printf("Luz 3 Desactivada\n");
 			glDisable(GL_LIGHT2);
 		}
 		else
 		{
-			printf("Iluminacion 3 Activada\n");
-			iluminacion[2] = 1;
+			printf("Luz 3 Activada\n");
 			glEnable(GL_LIGHT2);
 		}
 		break;
 	
 	case GLUT_KEY_F4:
-		if(iluminacion[3])
+		if(glIsEnabled(GL_LIGHT3))
 		{
-			printf("Iluminacion 4 Desactivada\n");
-			iluminacion[3] = 0;
+			printf("Luz 4 Desactivada\n");
 			glDisable(GL_LIGHT3);
 		}
 		else
 		{
-			printf("Iluminacion 4 Activada\n");
-			iluminacion[3] = 1;
+			printf("Luz 4 Activada\n");
 			glEnable(GL_LIGHT3);
 		}
 		break;
 	
 	case GLUT_KEY_F5:
-		if(iluminacion[4])
+		if(glIsEnabled(GL_LIGHT4))
 		{
-			printf("Iluminacion 5 Desactivada\n");
-			iluminacion[4] = 0;
+			printf("Luz 5 Desactivada\n");
 			glDisable(GL_LIGHT4);
 		}
 		else
 		{
-			printf("Iluminacion 5 Activada\n");
-			iluminacion[4] = 1;
+			printf("Luz 5 Activada\n");
 			glEnable(GL_LIGHT4);
 		}
 		break;
 
 	case GLUT_KEY_F6:
-		if(iluminacion[5])
+		if(glIsEnabled(GL_LIGHT5))
 		{
-			printf("Iluminacion 6 Desactivada\n");
-			iluminacion[5] = 0;
+			printf("Luz 6 Desactivada\n");
 			glDisable(GL_LIGHT5);
 		}
 		else
 		{
-			printf("Iluminacion 6 Activada\n");
-			iluminacion[5] = 1;
+			printf("Luz 6 Activada\n");
 			glEnable(GL_LIGHT5);
 		}
 		break;
 
 	case GLUT_KEY_F7:
-		if(iluminacion[6])
+		if(glIsEnabled(GL_LIGHT6))
 		{
-			printf("Iluminacion 7 Desactivada\n");
-			iluminacion[6] = 0;
+			printf("Luz 7 Desactivada\n");
 			glDisable(GL_LIGHT6);
 		}
 		else
 		{
-			printf("Iluminacion 7 Activada\n");
-			iluminacion[6] = 1;
+			printf("Luz 7 Activada\n");
 			glEnable(GL_LIGHT6);
 		}
 		break;
 
 	case GLUT_KEY_F8:
-		if(iluminacion[7])
+		if(glIsEnabled(GL_LIGHT7))
 		{
-			printf("Iluminacion 1 Desactivada\n");
-			iluminacion[7] = 0;
+			printf("Luz 1 Desactivada\n");
 			glDisable(GL_LIGHT7);
 		}
 		else
 		{
-			printf("Iluminacion 7 Activada\n");
-			iluminacion[7] = 1;
+			printf("Luz 7 Activada\n");
 			glEnable(GL_LIGHT7);
 		}
 		break;
@@ -1453,6 +1462,16 @@ void print_matrix(double * mptr)
 		printf("\n");
 	}
 	printf("\n");
+}
+
+void resetIluminacion()
+{
+	int i;
+
+	for(i = 0; i<9; i++)
+	{
+		iluminacion[i] = 0;
+	}
 }
 
 
