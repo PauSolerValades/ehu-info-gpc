@@ -71,7 +71,7 @@ void init_luces()
     //este es el foco que apunta siempre al objeto
     GLfloat posicion2[4] ={0,0,0,1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
     GLfloat vector2[4] = {0,0,-1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
-    GLfloat rgba2[4] = {0.8,0.8,0.8,1};
+    GLfloat rgba2[4] = {0.8,0.8,0.8,1}; //cambio para hacer otro push
 
     glLightfv(GL_LIGHT1, GL_POSITION, posicion2);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba2);
