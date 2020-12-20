@@ -208,6 +208,15 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
+	case 0 :
+			if(iluminacion[0] == 0 && iluminacion[1] == 0 && iluminacion[2] == 0){
+
+			}else
+			{
+				printf("Las tres primeras luces no se pueden modificar\n");
+			}
+			
+
 	case 'o':
 	case 'O': /* Sistema referencia objeto */
 		if(mode != 0)

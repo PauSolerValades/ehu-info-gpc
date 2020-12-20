@@ -31,6 +31,7 @@ int camara_interna;
 int fill_polygons; //controla si se pintan los polígonos o no
 
 int iluminacion[8];
+int modoIluminacion[8];//0 sol,1 bombilla, 2 foco
 int flat_smooth; //0: flat, 1: smooth
 
 /** GENERAL INITIALIZATION **/
@@ -48,6 +49,7 @@ void initialization (){
     for(i=0; i<9; i++)
     {
         iluminacion[i] = 0;
+        modoIluminacion[i] = 0;
     }
 
     iluminacion[0] = 1;
