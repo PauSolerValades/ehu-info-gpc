@@ -20,6 +20,7 @@ extern int transformacion;
 extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
 extern int iluminacion[8]; //uno para cada luz
+extern int modoIluminacion[8]; //0 sol 1 bombilla 2 foco
 extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
@@ -42,6 +43,7 @@ double euclidean_norm(double x, double y, double z);
 void cross_product(double *u, double *v, double *w);
 void keyboard_object(unsigned char key, int x, int y);
 void keyboard_camera(unsigned char key, int x, int y);
+void keyboard_luces(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
@@ -208,13 +210,28 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-	case 0 :
+	case '0':
 			if(iluminacion[0] == 0 && iluminacion[1] == 0 && iluminacion[2] == 0){
+				for(int i = 0; i < 9;i++){
+					if(iluminacion[i] == 1){
+						if(modoIluminacion[i] == 0){
+							modoIluminacion[i] == 1;
+							printf("Modo bombilla\n");
+						}else if(modoIluminacion[i] == 1){
+							modoIluminacion[i] == 2;
+							printf("Modo foco\n");
+						}else{
+							modoIluminacion[i] == 0;
+							printf("Modo sol\n");
+						}	
 
+					}
+				}
 			}else
 			{
 				printf("Las tres primeras luces no se pueden modificar\n");
 			}
+			break;
 			
 
 	case 'o':
@@ -282,17 +299,15 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			printf("TRANSFORMACIONES DE LUCES\n");
 			mode = 2;
+			
+	
 		}
 		else
 		{
 			printf("Ya estás en modo luces...\n");
 		}
-
-	case '0':
-		
-		/* Preguntar por un int i qué diga a qué camara quiero modificar?*/
-
 		break;
+
 
 	case '1':
 		
@@ -365,9 +380,11 @@ void keyboard(unsigned char key, int x, int y)
 		
 		if(mode)
 			keyboard_camera(key, x, y);
-		else
+		else if (mode)
 			keyboard_object(key, x, y);
-		
+		else
+			keyboard_luces(key,x,y);
+
         break;
 	}
 
@@ -375,6 +392,99 @@ void keyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
+
+void keyboard_luces(unsigned char key, int x,int y)
+{
+	switch (key)
+	{
+		case 'm':
+		case 'M': /* Translación */
+			transformacion = 0;
+			printf("Translaciones ACTIVADAS\n");
+			break;
+		
+		case 'b':
+		case 'B': /* Rotación */
+			transformacion = 1;
+			printf("Rotaciones OBJECTO ACTIVADAS\n");
+			break;
+		case '+':
+			for(int i = 0; i < 9;i++){
+				if(iluminacion[i] == 1){
+					if(modoIluminacion[i] == 2){
+
+					}	
+
+				}else{
+					printf("No se puede modificar un sol o bombilla\n");
+				}
+			}
+			break;
+		
+		case '-':
+			for(int i = 0; i < 9;i++){
+				if(iluminacion[i] == 1){
+					if(modoIluminacion[i] == 2){
+
+					}	
+
+				}else{
+					printf("No se puede modificar un sol o bombilla\n");
+				}
+			}
+		switch (transformacion)
+		{
+			case 0:
+				switch (key)
+				{
+					case GLUT_KEY_UP:
+						glTranslated(0.0, T, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glTranslated(0.0, -T, 0.0);
+						break;
+					case GLUT_KEY_RIGHT:
+						glTranslated(T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT:
+						glTranslated(-T, 0.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glTranslated(0.0, 0.0, T);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glTranslated(0.0, 0.0, -T);
+						break;
+					}
+				break;
+			case 1:
+				switch (key)
+				{
+					case GLUT_KEY_UP :
+						glRotated(A, -1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_DOWN:
+						glRotated(A, 1.0, 0.0, 0.0);
+						break;
+					case GLUT_KEY_RIGHT :
+						glRotated(A, 0.0, 1.0, 0.0);
+						break;
+					case GLUT_KEY_LEFT :
+						glRotated(A, 0.0, -1.0, 0.0);
+						break;
+					case GLUT_KEY_PAGE_UP:
+						glRotated(A, 0.0, 0.0, 1.0);
+						break;
+					case GLUT_KEY_PAGE_DOWN:
+						glRotated(A, 0.0, 0.0, -1.0);
+						break;
+				}
+				break;
+			}	
+			break;
+	}
+
+}
 
 
 void keyboard_object(unsigned char key, int x, int y)
@@ -682,7 +792,7 @@ void keyboard_camera(unsigned char key, int x, int y)
 			_selected_camera->b = midy - he / 2;
 			break;
 
-		case '-':
+		case '-':	
 			wd = (_selected_camera->r - _selected_camera->l) / KG_STEP_ZOOM;
 			he = (_selected_camera->t - _selected_camera->b) / KG_STEP_ZOOM;
 			/*In order to avoid moving the center of the plane, we get its coordinates*/
