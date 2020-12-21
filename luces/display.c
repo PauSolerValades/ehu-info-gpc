@@ -67,8 +67,8 @@ void init_luces()
 
     GLfloat posiSol[4] = {5,5,0,0}; 
     GLfloat rgba[4] = {0.8,0.8,0.8,1.0};
+    
     //un sol
-    //glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
     glLightfv(GL_LIGHT0, GL_SPECULAR, rgba); //Joseba dice queesta siempre con el mismo valro que la otra
     glLightfv(GL_LIGHT0, GL_POSITION, posiSol); //aquí tocar el vector para que el sol no se mueva con la cámara
     glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
@@ -88,24 +88,26 @@ void init_luces()
 
    
     //GLfloat posicion2[4] ={_selected_object->display->inv_M[12],_selected_object->display->inv_M[13],_selected_object->display->inv_M[14f],1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
-    GLfloat vector[4] = {0,0,1,-1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
-    GLfloat posicion2[4] = {0,0,-1,-1};
+    GLfloat vector[4] = {0,0,1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
+    GLfloat posicion2[4] = {0,0,-1,1};
     const GLfloat angulo = 60.0;
 
     if(_selected_object != NULL){
         posicion2[0] = _selected_object->display->inv_M[12];
         posicion2[1] = _selected_object->display->inv_M[13];
         posicion2[2] = _selected_object->display->inv_M[14];
+
+        vector[0] = _selected_object->display->inv_M[8];
+        vector[1] = _selected_object->display->inv_M[9];
+        vector[2] = _selected_object->display->inv_M[10];
         glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
+        glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
     }
 
-    
-
-    glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
     glLightfv(GL_LIGHT2, GL_DIFFUSE, rgba);
     glLightfv(GL_LIGHT2, GL_SPECULAR, rgba);
     glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
-    glLightfv(GL_LIGHT2,GL_SPOT_CUTOFF,&angulo);
+    glLightfv(GL_LIGHT2, GL_SPOT_CUTOFF,&angulo);
     modoIluminacion[2] = 2;
     
     glLightfv(GL_LIGHT3, GL_SPECULAR, rgba);
@@ -244,7 +246,9 @@ void display(void) {
 
     /* Parametrizamos las luces */
     /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */
-    init_luces();
+
+    //if(modoIluminacion[2] == 0)
+        init_luces();
 
     int poligonos = 0;
 

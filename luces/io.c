@@ -24,6 +24,7 @@ extern int modoIluminacion[8]; //0 sol 1 bombilla 2 foco
 extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
+extern GLfloat diffuse[8][4];
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -63,6 +64,8 @@ void keyboard(unsigned char key, int x, int y)
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
 	int read = 0;
 	int mname = 0;
+	int luz_actual, typeLight;
+
 	object3d *auxiliar_object = 0;
 	camera *auxiliar_camera = 0;
 
@@ -211,25 +214,74 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case '0':
-			if(iluminacion[0] == 0 && iluminacion[1] == 0 && iluminacion[2] == 0){
-				for(int i = 0; i < 9;i++){
-					if(iluminacion[i] == 1){
-						if(modoIluminacion[i] == 0){
-							modoIluminacion[i] == 1;
-							printf("Modo bombilla\n");
-						}else if(modoIluminacion[i] == 1){
-							modoIluminacion[i] == 2;
-							printf("Modo foco\n");
-						}else{
-							modoIluminacion[i] == 0;
-							printf("Modo sol\n");
-						}	
 
+			luz_actual = 0;
+
+			for(i=3; i<9; i++)
+			{
+				if(iluminacion[i] == 1)
+				{
+					luz_actual = i; //nos da el índice de la luz correspondiente.
+					break;
+				}
+			}
+
+			printf("%d, %d\n",  luz_actual, modoIluminacion[luz_actual]);
+
+			if(luz_actual == 0)
+				printf("Las tres primeras luces no se pueden modificar\n");
+
+			else
+			{
+				//array diffuse 
+				//array position 0:sol, 1: focombilla
+				//array cutoff 0-90 foco 180 si bombilla
+
+				typeLight = (modoIluminacion[luz_actual] +1) % 3;
+
+				printf("%d\n", modoIluminacion[luz_actual]);
+
+				if(modoIluminacion[luz_actual] == 1){		
+					printf("Modo bombilla? [y/n]\n");
+				}else if(modoIluminacion[luz_actual] == 2){					
+					printf("Modo foco? [y/n]\n");
+				}else{
+					printf("Modo sol? [y/n]\n");
+				}	
+
+				scanf("%s",fname);
+
+				printf("%s\n", fname);
+
+				if(!strcmp(fname,"y"))
+				{	
+					printf("He entrau \n");
+					switch (typeLight)
+					{
+					case 0: //sol
+						printf("Valor Red Difuse: \n");
+						scanf("%f\n", &diffuse[luz_actual][0]);
+						scanf("Valor Green Difuse: %f\n", &diffuse[luz_actual][1]);
+						scanf("Valor Blue Difuse: %f\n", &diffuse[luz_actual][2]);
+						scanf("Valor Aplha: %f\n", &diffuse[luz_actual][3]);
+						printf("Valores cambiados correctamente\n");
+						break;
+					
+					case 1:
+						break;
+
+					case 2:
+						break;
+					default:
+						break;
 					}
 				}
-			}else
-			{
-				printf("Las tres primeras luces no se pueden modificar\n");
+				else
+				{
+					printf("Se deja como estaba");
+				}
+				
+			
 			}
 			break;
 			
@@ -299,8 +351,7 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			printf("TRANSFORMACIONES DE LUCES\n");
 			mode = 2;
-			
-	
+
 		}
 		else
 		{
@@ -378,9 +429,9 @@ void keyboard(unsigned char key, int x, int y)
 	default:
 		/* In default we call the other two functions. If the program has reached this line a key with two functionalities has been pressed */
 		
-		if(mode)
+		if(mode == 1)
 			keyboard_camera(key, x, y);
-		else if (mode)
+		else if (mode == 0)
 			keyboard_object(key, x, y);
 		else
 			keyboard_luces(key,x,y);
