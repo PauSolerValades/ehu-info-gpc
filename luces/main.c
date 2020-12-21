@@ -33,6 +33,7 @@ int fill_polygons; //controla si se pintan los polígonos o no
 int iluminacion[8];
 int modoIluminacion[8]; //0 sol,1 bombilla, 2 foco
 int flat_smooth; //0: flat, 1: smooth
+int angulo[8];
 GLfloat diffuse[8][4];
 
 /** GENERAL INITIALIZATION **/
@@ -51,6 +52,7 @@ void initialization (){
     {
         iluminacion[i] = 0;
         modoIluminacion[i] = 0;
+        angulo[i] = 0;
         
         for(j = 0; j<4; j++)
         {

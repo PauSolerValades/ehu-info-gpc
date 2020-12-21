@@ -17,6 +17,7 @@ extern camera * _selected_camera;
 extern int camara_interna; //0: camara no interna, 1: camara interna
 extern int flat_smooth; //0: flat, 1: smooth
 
+extern int angulo[8];
 extern int modoIluminacion[8];
 
 void dibuja_normales(object3d *aux_obj, GLint f);
@@ -91,6 +92,7 @@ void init_luces()
     GLfloat vector[4] = {0,0,1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
     GLfloat posicion2[4] = {0,0,-1,1};
     const GLfloat angulo = 60.0;
+    angulo[2] = 60;
 
     if(_selected_object != NULL){
         posicion2[0] = _selected_object->display->inv_M[12];

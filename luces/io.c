@@ -25,6 +25,7 @@ extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
 extern GLfloat diffuse[8][4];
+extern int angulo[8];
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -250,27 +251,51 @@ void keyboard(unsigned char key, int x, int y)
 				}	
 
 				scanf("%s",fname);
-
 				printf("%s\n", fname);
 
 				if(!strcmp(fname,"y"))
 				{	
 					printf("He entrau \n");
-					switch (typeLight)
+					switch (modoIluminacion[luz_actual])
 					{
 					case 0: //sol
-						printf("Valor Red Difuse: \n");
+						printf("Valor Red Difuse (0-1): \n");
 						scanf("%f\n", &diffuse[luz_actual][0]);
-						scanf("Valor Green Difuse: %f\n", &diffuse[luz_actual][1]);
-						scanf("Valor Blue Difuse: %f\n", &diffuse[luz_actual][2]);
-						scanf("Valor Aplha: %f\n", &diffuse[luz_actual][3]);
+						printf("Valor Green Difuse (0-1): \n");
+						scanf("%f\n",&diffuse[luz_actual][1]);
+						printf("Valor Blue Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][2]);
+						printf("Valor Alpha (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][3]);
 						printf("Valores cambiados correctamente\n");
 						break;
 					
 					case 1:
+						printf("Valor Red Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][0]);
+						printf("Valor Green Difuse (0-1): \n");
+						scanf("%f\n",&diffuse[luz_actual][1]);
+						printf("Valor Blue Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][2]);
+						printf("Valor Alpha (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][3]);
+						printf("Valores cambiados correctamente\n");
 						break;
 
 					case 2:
+						printf("Valor Red Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][0]);
+						printf("Valor Green Difuse (0-1): \n");
+						scanf("%f\n",&diffuse[luz_actual][1]);
+						printf("Valor Blue Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][2]);
+						printf("Valor Alpha (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][3]);
+						printf("Valor Red Difuse (0-1): \n");
+						scanf("%f\n", &diffuse[luz_actual][0]);
+						printf("Valor angulo camara (0-90): \n");
+						scanf("%f\n",);
+						printf("Valores cambiados correctamente\n");
 						break;
 					default:
 						break;
