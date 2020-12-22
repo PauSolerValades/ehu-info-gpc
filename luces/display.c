@@ -172,7 +172,7 @@ void init_camera(){
     _selected_camera->type = 0; //modo vuelo
     _selected_camera->pers = 1; //modo paralelo.
 
-    //mode = 0; //esto esque sinó revienta todo el programa por algun moticvo
+    mode = 0; //esto esque sinó revienta todo el programa por algun moticvo
 }
 
 GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)

@@ -456,15 +456,12 @@ void keyboard(unsigned char key, int x, int y)
 		
 		if(mode == 0)
 			keyboard_object(key, x, y);
+		else if(mode == 1)
+			keyboard_camera(key, x, y);
+		else if(mode == 2)
+				keyboard_luces(key, x, y);
 		else
-		{
-			if(mode == 1)
-				keyboard_camera(key, x, y);
-
-			else
-				keyboard_luces(key,x,y);
-		}
-		
+			printf("Mode en keayboard %d\n", mode);
 		
         break;
 	}
@@ -660,7 +657,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			{
 				if(_selected_object->display != _selected_object->mptr)
 				{
-					printf("Rehacer CAMARA\n");
+					printf("Rehacer OBJETO\n");
 					
 					elem_matrix *iter;
 					elem_matrix *ant;
@@ -700,7 +697,7 @@ void keyboard_object(unsigned char key, int x, int y)
 			{
 				if (_selected_object->display->nextptr != 0)
 				{
-					printf("Deshacer CAMARA\n");
+					printf("Deshacer OBJETO\n");
 						
 					_selected_object->display = _selected_object->display->nextptr;
 				
