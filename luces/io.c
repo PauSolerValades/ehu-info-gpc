@@ -243,7 +243,7 @@ void keyboard(unsigned char key, int x, int y)
 				yesno = malloc(sizeof(char));
 				counter = 0;
 				
-				while(1)
+				while(_selected_object != 0)
 				{
 					modoIluminacion[luz_actual] = (modoIluminacion[luz_actual] +1) % 3;
 					counter++;
@@ -266,7 +266,7 @@ void keyboard(unsigned char key, int x, int y)
 						{
 						case 0: //sol
 							printf("Introduce los valores red green blue alpha separados por espacios: \n");
-							scanf(" %f %f %f %f", &(diffuse[luz_actual][0]), &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
+							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
 							printf("Valores cambiados correctamente\n");
 							break;
 						
@@ -304,7 +304,6 @@ void keyboard(unsigned char key, int x, int y)
 							}
 						}
 					}
-				
 				}
 			}
 			

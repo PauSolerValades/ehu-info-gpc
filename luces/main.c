@@ -105,7 +105,6 @@ int main(int argc, char** argv) {
     glEnable(GL_LIGHT7);
 
     printf("Modo en main: %d\n", mode);
-    printf("FLatsmpooth: %d\n", flat_smooth);
 
     if(!flat_smooth)
         glShadeModel(GL_SMOOTH);
@@ -119,7 +118,7 @@ int main(int argc, char** argv) {
     glutSpecialFunc(special); //gestor teclas especiales
 
     /* this initialization has to be AFTER the creation of the window */
-    initialization();
+    initialization();    
 
     /* start the main loop */
     glutMainLoop();
