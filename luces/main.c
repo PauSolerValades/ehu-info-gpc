@@ -30,13 +30,10 @@ int camara_interna;
 
 int fill_polygons; //controla si se pintan los polígonos o no
 
-int iluminacion[8];
-int modoIluminacion[8]; //0 sol,1 bombilla, 2 foco
+int selected_light;
 int flat_smooth; //0: flat, 1: smooth
 light* luces[8];
 
-GLfloat angulo[8];
-GLfloat diffuse[8][4];
 
 /** GENERAL INITIALIZATION **/
 void initialization (){
@@ -50,19 +47,7 @@ void initialization (){
     camara_interna = 0;
     flat_smooth = 1; //0: flat, 1: smooth
 
-    for(i=0; i<9; i++)
-    {
-        iluminacion[i] = 0;
-        modoIluminacion[i] = 0;
-        angulo[i] = 0.0;
-        
-        for(j = 0; j<4; j++)
-        {
-            diffuse[i][j] = 1.0;
-        }
-    }
-
-    iluminacion[0] = 1;
+    selected_light = 0; //0 no es una light, pero hasta que no esten cargadas no se pone a 1
 
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
@@ -105,8 +90,6 @@ int main(int argc, char** argv) {
     glEnable(GL_LIGHT5);
     glEnable(GL_LIGHT6);
     glEnable(GL_LIGHT7);
-
-    printf("Modo en main: %d\n", mode);
 
     if(!flat_smooth)
         glShadeModel(GL_SMOOTH);

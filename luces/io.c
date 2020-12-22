@@ -20,14 +20,11 @@ extern int transformacion;
 //0: translacion, 2: rotación, 3: volumen de visión
 extern int referencia; //00: objeto, 01: mundo;
 extern int camara_interna; //0: Desactivada, 1: Activada
-extern int iluminacion[8]; //uno para cada luz
-extern int modoIluminacion[8]; //0 sol 1 bombilla 2 foco
 extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
-extern GLfloat diffuse[8][4];
-extern GLfloat angulo[8];
 
+extern int selected_light; //uno para cada luz
 extern light* luces[8];
 
 /* all the functions declared to improve the order of aperance */
@@ -52,7 +49,6 @@ void keyboard_luces(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
-void resetIluminacion();
 /**
  * @brief Callback function to control the basic keys
  * @param key Key that has been pressed
@@ -220,99 +216,99 @@ void keyboard(unsigned char key, int x, int y)
 
 	case '0':
 
-			luz_actual = 0;
-
-			for(i=3; i<9; i++)
+		if(selected_light <= 3)
+		{
+			printf("Las tres primeras luces son inmodificables\n");
+		}
+		else
+		{
+			yesno = malloc(sizeof(char));
+			counter = 0;
+			
+			luz_actual = selected_light-1;
+			while(_selected_object != 0)
 			{
-				if(iluminacion[i] == 1)
-				{
-					luz_actual = i; //nos da el índice de la luz correspondiente.
-					break;
-				}
-			}
+				luces[luz_actual]->type = (luces[luz_actual]->type + 1) % 3;
+				counter++;
 
-			printf("%d, %d\n",  luz_actual, modoIluminacion[luz_actual]);
+				if(luces[luz_actual]->type == 1){		
+					printf("Modo bombilla? [y/n]\n");
+				}else if(luces[luz_actual]->type == 2){					
+					printf("Modo foco? [y/n]\n");
+				}else{
+					printf("Modo sol? [y/n]\n");
+				}	
 
-			if(luz_actual == 0)
-				printf("Las tres primeras luces no se pueden modificar\n");
+				scanf("%s",yesno);
 
-			else
-			{
-				//array diffuse 
-				//array position 0:sol, 1: focombilla
-				//array cutoff 0-90 foco 180 si bombilla
 
-				yesno = malloc(sizeof(char));
-				counter = 0;
-				
-				while(_selected_object != 0)
-				{
-					modoIluminacion[luz_actual] = (modoIluminacion[luz_actual] +1) % 3;
-					counter++;
+				if(!strcmp(yesno,"y"))
+				{	
+					switch (luces[luz_actual]->type)
+					{
+					case 0: //sol
+						printf("Introduce las coordenadas x y z separados por espacios:\n");
+						scanf(" %f %f %f", &luces[luz_actual]->position[0], &luces[luz_actual]->position[1], &luces[luz_actual]->position[2]);
+						printf("Introduce los valores entre [0,1] red green blue alpha separados por espacios: \n");
+						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
+						luces[luz_actual]->position[4] = 0.0;
+						printf("Valores cambiados correctamente\n");
+						break;
+					
+					case 1: //bombilla
+						printf("Introduce las coordenadas x y z separados por espacios:\n");
+						scanf(" %f %f %f", &luces[luz_actual]->position[0], &luces[luz_actual]->position[1], &luces[luz_actual]->position[2]);
+						printf("Introduce las coordenadas del punto al que mirará la bombilla:\n");
+						scanf(" %f %f %f", &luces[luz_actual]->direction[0], &luces[luz_actual]->direction[1], &luces[luz_actual]->direction[2]);
+						printf("Introduce los valores red green blue alpha separados por espacios: \n");
+						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
+						luces[luz_actual]->position[4] = 1.0;
+						printf("Valores cambiados correctamente\n");
+						break;
 
-					printf("%d\n", modoIluminacion[luz_actual]);
+					case 2: //foco
+						printf("Introduce las coordenadas x y z separados por espacios:\n");
+						scanf(" %f %f %f", &luces[luz_actual]->position[0], &luces[luz_actual]->position[1], &luces[luz_actual]->position[2]);
+						printf("Introduce las coordenadas del punto al que mirará el foco:\n");
+						scanf(" %f %f %f", &luces[luz_actual]->direction[0], &luces[luz_actual]->direction[1], &luces[luz_actual]->direction[2]);
+						printf("Introduce el angulo de amplitud del foco:\n");
+						scanf(" %f", &luces[luz_actual]->angulo);
+						printf("Introduce los valores red green blue alpha separados por espacios: \n");
+						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
+						luces[luz_actual]->position[4] = 1.0;
+						printf("Valores cambiados correctamente\n");
+						break;
 
-					if(modoIluminacion[luz_actual] == 1){		
-						printf("Modo bombilla? [y/n]\n");
-					}else if(modoIluminacion[luz_actual] == 2){					
-						printf("Modo foco? [y/n]\n");
-					}else{
-						printf("Modo sol? [y/n]\n");
-					}	
-
-					scanf("%s",yesno);
-				
-					if(!strcmp(yesno,"y"))
-					{	
-						switch (modoIluminacion[luz_actual])
-						{
-						case 0: //sol
-							printf("Introduce los valores red green blue alpha separados por espacios: \n");
-							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
-							printf("Valores cambiados correctamente\n");
-							break;
-						
-						case 1:
-							printf("Introduce los valores red green blue alpha separados por espacios: \n");
-							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
-							printf("Valores cambiados correctamente\n");
-							break;
-
-						case 2:
-							printf("Introduce los valores red green blue alpha separados por espacios: \n");
-							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
-							printf("Valores cambiados correctamente\n");
-							break;
-						default:
-							break;
-						}
-
+					default:
+						printf("Ha habido un error en la assignación del type\n");
 						break;
 					}
-					else
-					{
-						if(counter == 3)
-						{	
-							printf("Quieres dejar la luz como estaba? [y/n]\n");
-							scanf(" %s", yesno);
-							if(!strcmp("y", yesno))
-							{
-								printf("De acuerdo\n");
-								break;
-							}
-							else
-							{
-								counter = 0;
-							}
+
+					break;
+				}
+				else
+				{
+					if(counter == 3)
+					{	
+						printf("Quieres dejar la luz como estaba? [y/n]\n");
+						scanf(" %s", yesno);
+						if(!strcmp("y", yesno))
+						{
+							printf("De acuerdo\n");
+							break;
+						}
+						else
+						{
+							counter = 0;
 						}
 					}
 				}
 			}
-			
-			free(yesno);
 
-			print_help();
-			break;
+			free(yesno);
+		}
+
+		break;
 			
 
 	case 'o':
@@ -388,61 +384,43 @@ void keyboard(unsigned char key, int x, int y)
 
 
 	case '1':
-		
-		resetIluminacion();
-		printf("Luz 1 selecionada.\n");
-		iluminacion[0] = 1;
-
+		printf("Luz 1 selecionada\n");
+		selected_light = 1;
 		break;
 
 	case '2':
-		
-		resetIluminacion();
-		printf("Luz 2 selecionada.\n");
-		iluminacion[1] = 1;
-
+		printf("Luz 2 selecionada\n");
+		selected_light = 2;
  		break;
 
 	case '3':
-		resetIluminacion();
-		printf("Luz 3 selecionada.\n");
-		iluminacion[2] = 1;
-
+		printf("Luz 3 selecionada\n");
+		selected_light = 3;
 		break;
 
 	case '4':
-		resetIluminacion();
-		printf("Luz 4 selecionada.\n");
-		iluminacion[3] = 1;
-
+		printf("Luz 4 selecionada\n");
+		selected_light = 4;
 		break;
 
 	case '5':
-		resetIluminacion();
-		printf("Luz 5 selecionada.\n");
-		iluminacion[4] = 1;
-
+		printf("Luz 5 selecionada\n");
+		selected_light = 5;
 		break;
 
 	case '6':
-		resetIluminacion();
-		printf("Luz 6 selecionada.\n");
-		iluminacion[5] = 1;
-
+		printf("Luz 6 selecionada\n");
+		selected_light = 6;
 		break;
 
 	case '7':
-		resetIluminacion();
-		printf("Luz 7 selecionada.\n");
-		iluminacion[6] = 1;
-
+		printf("Luz 7 selecionada\n");
+		selected_light = 7;
 		break;
 
 	case '8':
-		resetIluminacion();
-		printf("Luz 8 selecionada.\n");
-		iluminacion[7] = 1;
-
+		printf("Luz 8 selecionada\n");
+		selected_light = 8;
 		break;
 
 	case '?':
@@ -490,29 +468,21 @@ void keyboard_luces(unsigned char key, int x,int y)
 			break;
 
 		case '+':
-			for(int i = 0; i < 9;i++){
-				if(iluminacion[i] == 1){
-					if(modoIluminacion[i] == 2){
-						//TODO: HACER
-					}	
-
-				}else{
-					printf("No se puede modificar un sol o bombilla\n");
-				}
+			if(luces[(selected_light-1)]->type == 2){
+				//TODO: FALTA FER-HO
+			}else{
+				printf("Sólo se pueden modificar los focos\n");
 			}
+
 			break;
 		
 		case '-':
-			for(int i = 0; i < 9;i++){
-				if(iluminacion[i] == 1){
-					if(modoIluminacion[i] == 2){
-						//TODO: HACER
-					}	
-
-				}else{
-					printf("No se puede modificar un sol o bombilla\n");
-				}
+			if(luces[(selected_light-1)]->type == 2){
+				//TODO: FALTA FER-HO
+			}else{
+				printf("Sólo se pueden modificar los focos\n");
 			}
+
 			break;
 		
 		default:
@@ -626,13 +596,11 @@ void keyboard_object(unsigned char key, int x, int y)
 					
 					while(1)
 					{
-
 						if(_selected_object->display==iter)
 							break;
 
 						ant = iter;
 						iter = iter->nextptr;
-						
 					}
 					
 					_selected_object->display = ant;
@@ -1137,6 +1105,7 @@ void funcion_transformacion(int k)
 				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 
 			break;
+
 		case 1:
 
 			if(_selected_camera->type == 0)
@@ -1153,6 +1122,11 @@ void funcion_transformacion(int k)
 
 		case 2:
 
+			//TODO: hacer las cosas que se tienen que modificar uwu, solo las transformaciones
+			if(luces[selected_light-1]->type == 2)
+			{
+
+			}
 			break;
 
 		default:
@@ -1681,17 +1655,6 @@ void print_matrix(double * mptr)
 	}
 	printf("\n");
 }
-
-void resetIluminacion()
-{
-	int i;
-
-	for(i = 0; i<9; i++)
-	{
-		iluminacion[i] = 0;
-	}
-}
-
 
 
 

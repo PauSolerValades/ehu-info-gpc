@@ -19,8 +19,7 @@ extern int flat_smooth; //0: flat, 1: smooth
 
 extern int mode;
 
-extern GLfloat angulo[8];
-extern int modoIluminacion[8];
+extern int selected_light;
 extern light* luces[8];
 void dibuja_normales(object3d *aux_obj, GLint f);
 void init_luces();
@@ -105,10 +104,43 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
     glLightfv((*luz)->type, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
     glLightfv((*luz)->type, GL_DIFFUSE, RGBA);
 
-    if(type !=0)
+    if(type != 0)
     {
         glLightfv((*luz)->type, GL_SPOT_CUTOFF, &luces[i]->angulo);
         glLightfv((*luz)->type, GL_SPOT_DIRECTION, luces[i]->direction);
+    }
+}
+
+void actualizar_luces()
+{
+    int i;
+
+    if(_selected_object != NULL)
+    {
+        for(i = 0; i<3; i++)
+        {
+            luces[2]->position[i] = _selected_object->display->M[12+i];
+            luces[2]->direction[i] = _selected_object->display->M[8+i];
+        }
+
+        luces[2]->position[4] = 1.0;
+        luces[2]->direction[4] = 1.0;
+
+        GLfloat puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], 1.0};
+        GLfloat vector[4] = {_selected_object->display->M[8], _selected_object->display->M[9],_selected_object->display->M[10], 1.0};
+    }
+
+    for(i = 0; i<8; i++)
+    {   
+        glLightfv(luces[i]->light, GL_POSITION, luces[i]->position);
+        glLightfv(luces[i]->light, GL_DIFFUSE, luces[i]->RGBA);
+        glLightfv(luces[i]->light, GL_SPECULAR, luces[i]->RGBA);
+
+        if(luces[i]->type != 0)
+        {
+            glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo);
+            glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
+        }
     }
 }
 
@@ -122,82 +154,35 @@ void init_luces()
     GLfloat RGBA1[4] = {0.8,0.8,0.8,1.0};
 
     init_luz(GL_LIGHT0, &luz1, &mluz1, position1, direction1, RGBA1, 0.0, 0);
-
     luces[0] = luz1;
-    modoIluminacion[0] = 0;
     
     GLfloat position2[4] = {-2,7,0,1};
 
     init_luz(GL_LIGHT1, &luz2, &mluz2, position2, direction1, RGBA1, 0.0, 1);
-    luces[0] = luz2;
-    modoIluminacion[1] = 1;
+    luces[1] = luz2;
+
+    GLfloat puntoObjeto[4] = {0,0,5,1};
+    GLfloat vector[4] = {0,0,1,1};
     
-    modoIluminacion[2] = 2;
+    init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0, 2);    
+    luces[2] = luz3;
 
-}
+    init_luz(GL_LIGHT3, &luz4, &mluz4, position2, direction1, RGBA1, 0.0, 0);
+    luces[3] = luz4;
 
-void init_luces_old()
-{
-    
-    GLfloat posiBomb[4] = {-2,7,0,1};
+    init_luz(GL_LIGHT4, &luz5, &mluz5, position2, direction1, RGBA1, 0.0, 0);
+    luces[4] = luz5;
 
-    //una bombilla
-    glLightfv(GL_LIGHT1,GL_SPECULAR,rgba);
-    glLightfv(GL_LIGHT1,GL_POSITION,posiBomb);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba);
-    modoIluminacion[1] = 1;
-   
-    //GLfloat posicion2[4] ={_selected_object->display->inv_M[12],_selected_object->display->inv_M[13],_selected_object->display->inv_M[14f],1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
-    GLfloat vector[4] = {0,0,1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
-    GLfloat posicion2[4] = {0,0,-1,1};
-    const GLfloat anguloa = 60.0;
-    angulo[2] = 60;
+    init_luz(GL_LIGHT5, &luz6, &mluz6, position2, direction1, RGBA1, 0.0, 0);
+    luces[5] = luz6;
 
-    if(_selected_object != NULL){
-        posicion2[0] = _selected_object->display->M[12];
-        posicion2[1] = _selected_object->display->M[13];
-        posicion2[2] = _selected_object->display->M[14];
+    init_luz(GL_LIGHT6, &luz7, &mluz7, position2, direction1, RGBA1, 0.0, 0);
+    luces[6] = luz7;
 
-        
-        vector[0] = _selected_object->display->M[8];
-        vector[1] = _selected_object->display->M[9];
-        vector[2] = _selected_object->display->M[10];
+    init_luz(GL_LIGHT7, &luz8, &mluz8, position2, direction1, RGBA1, 0.0, 0);
+    luces[7] = luz8;
 
-
-        glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
-        glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
-    }
-
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, rgba);
-    glLightfv(GL_LIGHT2, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
-    glLightfv(GL_LIGHT2, GL_SPOT_CUTOFF,&anguloa);
-    modoIluminacion[2] = 2;
-    
-    glLightfv(GL_LIGHT3, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT3, GL_POSITION, posiSol);
-    glLightfv(GL_LIGHT3, GL_DIFFUSE, rgba);
-    modoIluminacion[3] = 0;
-
-    glLightfv(GL_LIGHT4, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT4, GL_POSITION, posiSol);
-    glLightfv(GL_LIGHT4, GL_DIFFUSE, rgba);
-    modoIluminacion[4] = 0;
-
-    glLightfv(GL_LIGHT5, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT5, GL_POSITION, posiSol);
-    glLightfv(GL_LIGHT5, GL_DIFFUSE, rgba);
-    modoIluminacion[5] = 0;
-
-    glLightfv(GL_LIGHT6, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT6, GL_POSITION, posiSol);
-    glLightfv(GL_LIGHT6, GL_DIFFUSE, rgba);
-    modoIluminacion[6] = 0;
-
-    glLightfv(GL_LIGHT7, GL_SPECULAR, rgba);
-    glLightfv(GL_LIGHT7, GL_POSITION, posiSol);
-    glLightfv(GL_LIGHT7, GL_DIFFUSE, rgba);
-    modoIluminacion[7] = 0;
+    selected_light = 1;
 
 }
 
@@ -309,30 +294,11 @@ void display(void) {
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
 
-
     /* Parametrizamos las luces */
-    if(modoIluminacion[2] == 0){
+    if(selected_light == 0)
         init_luces();
-    }
     else
-    {
-        printf("He entrau\n");
-        luces[0]->position[0] = -5;
-
-        for(i = 0; i<1; i++)
-        {   
-            printf("No exploto!\n");
-            glLightfv(luces[i]->light, GL_POSITION, luces[i]->position);
-            glLightfv(luces[i]->light, GL_DIFFUSE, luces[i]->RGBA);
-            glLightfv(luces[i]->light, GL_SPECULAR, luces[i]->RGBA);
-
-            if(luces[i]->type != 0)
-            {
-                glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo);
-                glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
-            }
-        }
-    }
+        actualizar_luces();
     
 
     int poligonos = 0;
