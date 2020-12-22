@@ -17,6 +17,8 @@ extern camera * _selected_camera;
 extern int camara_interna; //0: camara no interna, 1: camara interna
 extern int flat_smooth; //0: flat, 1: smooth
 
+extern int mode;
+
 extern int angulo[8];
 extern int modoIluminacion[8];
 
@@ -82,26 +84,23 @@ void init_luces()
     glLightfv(GL_LIGHT1,GL_POSITION,posiBomb);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, rgba);
     modoIluminacion[1] = 1;
-    
-
-    //TODO: pasarle al foco el vector del objeto para que se coloque en su lugar
-    //este es el foco que apunta siempre al objeto
-
    
     //GLfloat posicion2[4] ={_selected_object->display->inv_M[12],_selected_object->display->inv_M[13],_selected_object->display->inv_M[14f],1}; //como estamos en el sistema de referencia de la camara, la posicion 0,0,0 siempre mirará la cámara.
     GLfloat vector[4] = {0,0,1,1}; //de la misma manera, en la referencia de la camara el 0,0,-1 mira siempre dónde la camara
     GLfloat posicion2[4] = {0,0,-1,1};
-    const GLfloat angulo = 60.0;
+    const GLfloat anguloa = 60.0;
     angulo[2] = 60;
 
     if(_selected_object != NULL){
-        posicion2[0] = _selected_object->display->inv_M[12];
-        posicion2[1] = _selected_object->display->inv_M[13];
-        posicion2[2] = _selected_object->display->inv_M[14];
+        posicion2[0] = _selected_object->display->M[12];
+        posicion2[1] = _selected_object->display->M[13];
+        posicion2[2] = _selected_object->display->M[14];
 
-        vector[0] = _selected_object->display->inv_M[8];
-        vector[1] = _selected_object->display->inv_M[9];
-        vector[2] = _selected_object->display->inv_M[10];
+        
+        vector[0] = _selected_object->display->M[8];
+        vector[1] = _selected_object->display->M[9];
+        vector[2] = _selected_object->display->M[10];
+
         glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
         glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
     }
@@ -109,7 +108,7 @@ void init_luces()
     glLightfv(GL_LIGHT2, GL_DIFFUSE, rgba);
     glLightfv(GL_LIGHT2, GL_SPECULAR, rgba);
     glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
-    glLightfv(GL_LIGHT2, GL_SPOT_CUTOFF,&angulo);
+    glLightfv(GL_LIGHT2, GL_SPOT_CUTOFF,&anguloa);
     modoIluminacion[2] = 2;
     
     glLightfv(GL_LIGHT3, GL_SPECULAR, rgba);
@@ -172,6 +171,8 @@ void init_camera(){
     
     _selected_camera->type = 0; //modo vuelo
     _selected_camera->pers = 1; //modo paralelo.
+
+    //mode = 0; //esto esque sinó revienta todo el programa por algun moticvo
 }
 
 GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
@@ -245,6 +246,7 @@ void display(void) {
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
 
+    printf("Modo en display: %d\n", mode);
 
     /* Parametrizamos las luces */
     /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */

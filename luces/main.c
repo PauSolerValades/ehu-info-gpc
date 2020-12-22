@@ -104,6 +104,8 @@ int main(int argc, char** argv) {
     glEnable(GL_LIGHT6);
     glEnable(GL_LIGHT7);
 
+    printf("Modo en main: %d\n", mode);
+    printf("FLatsmpooth: %d\n", flat_smooth);
 
     if(!flat_smooth)
         glShadeModel(GL_SMOOTH);

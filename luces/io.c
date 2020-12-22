@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
@@ -63,9 +64,10 @@ void keyboard(unsigned char key, int x, int y)
 	int i;
 
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
+	char *yesno;
 	int read = 0;
 	int mname = 0;
-	int luz_actual, typeLight;
+	int luz_actual, typeLight, counter;
 
 	object3d *auxiliar_object = 0;
 	camera *auxiliar_camera = 0;
@@ -238,76 +240,77 @@ void keyboard(unsigned char key, int x, int y)
 				//array position 0:sol, 1: focombilla
 				//array cutoff 0-90 foco 180 si bombilla
 
-				typeLight = (modoIluminacion[luz_actual] +1) % 3;
+				yesno = malloc(sizeof(char));
+				counter = 0;
+				
+				while(1)
+				{
+					modoIluminacion[luz_actual] = (modoIluminacion[luz_actual] +1) % 3;
+					counter++;
 
-				printf("%d\n", modoIluminacion[luz_actual]);
+					printf("%d\n", modoIluminacion[luz_actual]);
 
-				if(modoIluminacion[luz_actual] == 1){		
-					printf("Modo bombilla? [y/n]\n");
-				}else if(modoIluminacion[luz_actual] == 2){					
-					printf("Modo foco? [y/n]\n");
-				}else{
-					printf("Modo sol? [y/n]\n");
-				}	
+					if(modoIluminacion[luz_actual] == 1){		
+						printf("Modo bombilla? [y/n]\n");
+					}else if(modoIluminacion[luz_actual] == 2){					
+						printf("Modo foco? [y/n]\n");
+					}else{
+						printf("Modo sol? [y/n]\n");
+					}	
 
-				scanf("%s",fname);
-				printf("%s\n", fname);
+					scanf("%s",yesno);
+				
+					if(!strcmp(yesno,"y"))
+					{	
+						switch (modoIluminacion[luz_actual])
+						{
+						case 0: //sol
+							printf("Introduce los valores red green blue alpha separados por espacios: \n");
+							scanf(" %f %f %f %f", &(diffuse[luz_actual][0]), &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
+							printf("Valores cambiados correctamente\n");
+							break;
+						
+						case 1:
+							printf("Introduce los valores red green blue alpha separados por espacios: \n");
+							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
+							printf("Valores cambiados correctamente\n");
+							break;
 
-				if(!strcmp(fname,"y"))
-				{	
-					printf("He entrau \n");
-					switch (modoIluminacion[luz_actual])
-					{
-					case 0: //sol
-						printf("Valor Red Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][0]);
-						printf("Valor Green Difuse (0-1): \n");
-						scanf("%f\n",&diffuse[luz_actual][1]);
-						printf("Valor Blue Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][2]);
-						printf("Valor Alpha (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][3]);
-						printf("Valores cambiados correctamente\n");
-						break;
-					
-					case 1:
-						printf("Valor Red Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][0]);
-						printf("Valor Green Difuse (0-1): \n");
-						scanf("%f\n",&diffuse[luz_actual][1]);
-						printf("Valor Blue Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][2]);
-						printf("Valor Alpha (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][3]);
-						printf("Valores cambiados correctamente\n");
-						break;
+						case 2:
+							printf("Introduce los valores red green blue alpha separados por espacios: \n");
+							scanf(" %f %f %f %f", &diffuse[luz_actual][0], &diffuse[luz_actual][1], &diffuse[luz_actual][2], &diffuse[luz_actual][3]);
+							printf("Valores cambiados correctamente\n");
+							break;
+						default:
+							break;
+						}
 
-					case 2:
-						printf("Valor Red Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][0]);
-						printf("Valor Green Difuse (0-1): \n");
-						scanf("%f\n",&diffuse[luz_actual][1]);
-						printf("Valor Blue Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][2]);
-						printf("Valor Alpha (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][3]);
-						printf("Valor Red Difuse (0-1): \n");
-						scanf("%f\n", &diffuse[luz_actual][0]);
-						printf("Valor angulo camara (0-90): \n");
-						scanf("%f\n",);
-						printf("Valores cambiados correctamente\n");
-						break;
-					default:
 						break;
 					}
-				}
-				else
-				{
-					printf("Se deja como estaba");
-				}
+					else
+					{
+						if(counter == 3)
+						{	
+							printf("Quieres dejar la luz como estaba? [y/n]\n");
+							scanf(" %s", yesno);
+							if(!strcmp("y", yesno))
+							{
+								printf("De acuerdo\n");
+								break;
+							}
+							else
+							{
+								counter = 0;
+							}
+						}
+					}
 				
-			
+				}
 			}
+			
+			free(yesno);
+
+			print_help();
 			break;
 			
 
@@ -339,8 +342,6 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 
 	case 'C': /* Activa/desactiva la camara interna del objeto */
-		printf("CAMBIO A MODO OBJETO\n");
-
 		if(camara_interna)
 		{
 			printf("Camara No Interna\n");	
@@ -454,13 +455,18 @@ void keyboard(unsigned char key, int x, int y)
 	default:
 		/* In default we call the other two functions. If the program has reached this line a key with two functionalities has been pressed */
 		
-		if(mode == 1)
-			keyboard_camera(key, x, y);
-		else if (mode == 0)
+		if(mode == 0)
 			keyboard_object(key, x, y);
 		else
-			keyboard_luces(key,x,y);
+		{
+			if(mode == 1)
+				keyboard_camera(key, x, y);
 
+			else
+				keyboard_luces(key,x,y);
+		}
+		
+		
         break;
 	}
 

@@ -15,6 +15,8 @@ extern object3d *_selected_object;
 extern camera * _first_camera;
 extern camera * _selected_camera;
 
+extern int mode;
+
 extern int camara_interna; //0: camara no interna, 1: camara interna
 
 void dibuja_normales(object3d *aux_obj, GLint f);
@@ -202,6 +204,8 @@ void display(void) {
         else
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
+
+    printf("Mode en display: %d\n", mode);
 
     int poligonos = 0;
 
