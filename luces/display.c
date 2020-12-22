@@ -19,7 +19,7 @@ extern int flat_smooth; //0: flat, 1: smooth
 
 extern int mode;
 
-extern int angulo[8];
+extern GLfloat angulo[8];
 extern int modoIluminacion[8];
 
 void dibuja_normales(object3d *aux_obj, GLint f);
@@ -100,6 +100,7 @@ void init_luces()
         vector[0] = _selected_object->display->M[8];
         vector[1] = _selected_object->display->M[9];
         vector[2] = _selected_object->display->M[10];
+
 
         glLightfv(GL_LIGHT2, GL_POSITION, posicion2);
         glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, vector);
@@ -251,7 +252,7 @@ void display(void) {
     /* Parametrizamos las luces */
     /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */
 
-    //if(modoIluminacion[2] == 0)
+    if(modoIluminacion[2] == 0)
         init_luces();
 
     int poligonos = 0;

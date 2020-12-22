@@ -134,6 +134,16 @@ typedef struct camera
     struct camera *nextptr;
 } camera;
 
+typedef struct light
+{
+    GLenum light;
+    struct elem_matrix *mptr;
+    GLfloat position[4];
+    GLfloat direction[4];
+    GLfloat RGBA[4];
+    int type; //0: sol, 1: bombilla, 2: foco
+} light;
+
 /****************************
  * Structure to store a     *
  * pile of 3D objects       *

@@ -26,7 +26,7 @@ extern int flat_smooth; //0: flat, 1: smooth
 
 extern int fill_polygons;
 extern GLfloat diffuse[8][4];
-extern int angulo[8];
+extern GLfloat angulo[8];
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -459,7 +459,7 @@ void keyboard(unsigned char key, int x, int y)
 		else if(mode == 1)
 			keyboard_camera(key, x, y);
 		else if(mode == 2)
-				keyboard_luces(key, x, y);
+			keyboard_luces(key, x, y);
 		else
 			printf("Mode en keayboard %d\n", mode);
 		
@@ -486,11 +486,12 @@ void keyboard_luces(unsigned char key, int x,int y)
 			transformacion = 1;
 			printf("Rotaciones OBJECTO ACTIVADAS\n");
 			break;
+
 		case '+':
 			for(int i = 0; i < 9;i++){
 				if(iluminacion[i] == 1){
 					if(modoIluminacion[i] == 2){
-
+						//TODO: HACER
 					}	
 
 				}else{
@@ -503,62 +504,17 @@ void keyboard_luces(unsigned char key, int x,int y)
 			for(int i = 0; i < 9;i++){
 				if(iluminacion[i] == 1){
 					if(modoIluminacion[i] == 2){
-
+						//TODO: HACER
 					}	
 
 				}else{
 					printf("No se puede modificar un sol o bombilla\n");
 				}
 			}
-		switch (transformacion)
-		{
-			case 0:
-				switch (key)
-				{
-					case GLUT_KEY_UP:
-						glTranslated(0.0, T, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glTranslated(0.0, -T, 0.0);
-						break;
-					case GLUT_KEY_RIGHT:
-						glTranslated(T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT:
-						glTranslated(-T, 0.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glTranslated(0.0, 0.0, T);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glTranslated(0.0, 0.0, -T);
-						break;
-					}
-				break;
-			case 1:
-				switch (key)
-				{
-					case GLUT_KEY_UP :
-						glRotated(A, -1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_DOWN:
-						glRotated(A, 1.0, 0.0, 0.0);
-						break;
-					case GLUT_KEY_RIGHT :
-						glRotated(A, 0.0, 1.0, 0.0);
-						break;
-					case GLUT_KEY_LEFT :
-						glRotated(A, 0.0, -1.0, 0.0);
-						break;
-					case GLUT_KEY_PAGE_UP:
-						glRotated(A, 0.0, 0.0, 1.0);
-						break;
-					case GLUT_KEY_PAGE_DOWN:
-						glRotated(A, 0.0, 0.0, -1.0);
-						break;
-				}
-				break;
-			}	
+			break;
+		
+		default:
+			printf("%d %c\n", key, key);
 			break;
 	}
 
@@ -1160,6 +1116,46 @@ void funcion_transformacion(int k)
 
 		glMatrixMode(GL_MODELVIEW);
 
+		switch (mode)
+		{
+		case 0:
+
+			if(!referencia)
+				glLoadMatrixd(_selected_object->display->M);
+			else
+				glLoadIdentity();
+
+			switch_transformaciones(k, &isAKey); //aquí hi ha el switch on es multiplica tot.
+
+			if(referencia)
+				glMultMatrixd(_selected_object->display->M);
+			
+			if(!isAKey)
+				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+
+			break;
+		case 1:
+
+			if(_selected_camera->type == 0)
+			{
+				glLoadMatrixd(_selected_camera->actual->M);
+				switch_transformaciones(k, &isAKey);
+			}
+			else
+				switch_transformaciones_analisis(k, &isAKey);
+
+			if(!isAKey)
+				new_camera_transformation();
+			break;
+
+		case 2:
+
+			break;
+
+		default:
+			break;
+		}
+		/*
 		if(mode) //todo modo camara
 		{
 			if(_selected_camera->type == 0)
@@ -1189,6 +1185,7 @@ void funcion_transformacion(int k)
 			if(!isAKey)
 				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 		}
+		*/
 
 		glutPostRedisplay();
 	}
