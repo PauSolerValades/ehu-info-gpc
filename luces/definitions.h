@@ -142,6 +142,7 @@ typedef struct light
     GLfloat direction[4];
     GLfloat RGBA[4];
     int type; //0: sol, 1: bombilla, 2: foco
+    GLfloat angulo;
 } light;
 
 /****************************

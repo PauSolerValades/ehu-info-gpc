@@ -28,6 +28,8 @@ extern int fill_polygons;
 extern GLfloat diffuse[8][4];
 extern GLfloat angulo[8];
 
+extern light* luces[8];
+
 /* all the functions declared to improve the order of aperance */
 void print_help();
 void print_enonmode();
@@ -935,7 +937,8 @@ void special(int k, int x, int y)
 			printf("Luz 1 Activada\n");
 			glEnable(GL_LIGHT0);
 		}
-		break;k;
+		break;
+		
 	case GLUT_KEY_F2:
 		if(glIsEnabled(GL_LIGHT1))
 		{

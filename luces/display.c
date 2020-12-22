@@ -21,7 +21,7 @@ extern int mode;
 
 extern GLfloat angulo[8];
 extern int modoIluminacion[8];
-
+extern light* luces[8];
 void dibuja_normales(object3d *aux_obj, GLint f);
 void init_luces();
 
@@ -63,19 +63,81 @@ void reshape(int width, int height) {
     _window_ratio = (GLdouble) width / (GLdouble) height;
 }
 
+void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4], GLfloat direction[4], GLfloat RGBA[4], GLfloat angulo, int type)
+{
+    int i;
+
+    *luz = (light *)malloc(sizeof(light));
+
+    *mluz = (elem_matrix *)malloc(sizeof(elem_matrix));
+    (*mluz)->nextptr = NULL;
+
+    //llenamos la tabla M
+    for (i = 1; i < 15; i++)
+    {
+        (*mluz)->M[i] = 0.0;
+        (*mluz)->inv_M[i] = 0.0;
+    }
+
+    //cutríssim pero va
+    (*mluz)->M[0] = 1.0;
+    (*mluz)->M[5] = 1.0;
+    (*mluz)->M[10] = 1.0;
+    (*mluz)->M[15] = 1.0;
+
+    (*mluz)->inv_M[0] = 1.0;
+    (*mluz)->inv_M[5] = 1.0;
+    (*mluz)->inv_M[10] = 1.0;
+    (*mluz)->inv_M[15] = 1.0;
+
+    for(i=0; i<4; i++)
+    {
+        (*luz)->position[i] = position[i];
+        (*luz)->direction[i] = direction[i];
+        (*luz)->RGBA[i] = RGBA[i];
+    }
+    
+    (*luz)->angulo = angulo;
+    (*luz)->type = type;
+    (*luz)->light = glluz;
+
+    glLightfv((*luz)->type, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
+    glLightfv((*luz)->type, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
+    glLightfv((*luz)->type, GL_DIFFUSE, RGBA);
+
+    if(type !=0)
+    {
+        glLightfv((*luz)->type, GL_SPOT_CUTOFF, &luces[i]->angulo);
+        glLightfv((*luz)->type, GL_SPOT_DIRECTION, luces[i]->direction);
+    }
+}
+
 void init_luces()
 {
+    light *luz1, *luz2, *luz3, *luz4, *luz5, *luz6, *luz7, *luz8;
+    elem_matrix *mluz1, *mluz2, *mluz3, *mluz4, *mluz5, *mluz6, *mluz7, *mluz8;
 
-    //TODO: pasarle el vector normalizado
+    GLfloat position1[4] = {5,5,0,0};
+    GLfloat direction1[4] = {0,0,0,1};
+    GLfloat RGBA1[4] = {0.8,0.8,0.8,1.0};
 
-    GLfloat posiSol[4] = {5,5,0,0}; 
-    GLfloat rgba[4] = {0.8,0.8,0.8,1.0};
-    
-    //un sol
-    glLightfv(GL_LIGHT0, GL_SPECULAR, rgba); //Joseba dice queesta siempre con el mismo valro que la otra
-    glLightfv(GL_LIGHT0, GL_POSITION, posiSol); //aquí tocar el vector para que el sol no se mueva con la cámara
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, rgba);
+    init_luz(GL_LIGHT0, &luz1, &mluz1, position1, direction1, RGBA1, 0.0, 0);
+
+    luces[0] = luz1;
     modoIluminacion[0] = 0;
+    
+    GLfloat position2[4] = {-2,7,0,1};
+
+    init_luz(GL_LIGHT1, &luz2, &mluz2, position2, direction1, RGBA1, 0.0, 1);
+    luces[0] = luz2;
+    modoIluminacion[1] = 1;
+    
+    modoIluminacion[2] = 2;
+
+}
+
+void init_luces_old()
+{
     
     GLfloat posiBomb[4] = {-2,7,0,1};
 
@@ -207,7 +269,7 @@ GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
  */
 //_first_objectfunción que SOLO DIBUJA. No modifica nada. Este es el observador.
 void display(void) {
-    GLint v_index, v, f, dibuja;
+    GLint v_index, v, f, dibuja, i;
 
     GLfloat vectorMaterial[3] = {0.75164,0.60648,0.22648};
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
@@ -247,13 +309,31 @@ void display(void) {
             glLoadMatrixd(_selected_camera->actual->inv_M); //Cargar la matriz de la camara actual cuando funcione.
     }
 
-    printf("Modo en display: %d\n", mode);
 
     /* Parametrizamos las luces */
-    /* TODO: tenemos que inicialitzar las cosas de cada luz, hacer una función fuera. */
-
-    if(modoIluminacion[2] == 0)
+    if(modoIluminacion[2] == 0){
         init_luces();
+    }
+    else
+    {
+        printf("He entrau\n");
+        luces[0]->position[0] = -5;
+
+        for(i = 0; i<1; i++)
+        {   
+            printf("No exploto!\n");
+            glLightfv(luces[i]->light, GL_POSITION, luces[i]->position);
+            glLightfv(luces[i]->light, GL_DIFFUSE, luces[i]->RGBA);
+            glLightfv(luces[i]->light, GL_SPECULAR, luces[i]->RGBA);
+
+            if(luces[i]->type != 0)
+            {
+                glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo);
+                glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
+            }
+        }
+    }
+    
 
     int poligonos = 0;
 

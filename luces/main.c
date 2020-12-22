@@ -33,6 +33,8 @@ int fill_polygons; //controla si se pintan los polígonos o no
 int iluminacion[8];
 int modoIluminacion[8]; //0 sol,1 bombilla, 2 foco
 int flat_smooth; //0: flat, 1: smooth
+light* luces[8];
+
 GLfloat angulo[8];
 GLfloat diffuse[8][4];
 
