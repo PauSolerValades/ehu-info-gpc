@@ -1123,11 +1123,47 @@ void funcion_transformacion(int k)
 		case 2:
 
 			//TODO: hacer las cosas que se tienen que modificar uwu, solo las transformaciones
-			if(luces[selected_light-1]->type == 2)
+			if(transformacion != 2)
 			{
+				switch (luces[selected_light-1]->type)
+				{
+				case 0: //sol solo puede trasladarse
+					if(transformacion == 0)
+					{
+						switch_transformaciones(luces[(selected_light-1)]->mptr->M);
 
+					}
+					else
+						printf("Los soles no se pueden escalar ni rotar\n");
+					
+					break;
+
+				case 1: //tanto bombilla como foco pueden rotar
+					
+					switch_transformaciones(luces[selected_light-1]->mptr->M));
+					
+					break;
+
+				case 2:
+					
+					switch_transformaciones(luces[selected_light-1]->mptr->M));
+
+					break;
+
+				default:
+					break;
+				}
+
+				new_light_transformation();
+				
 			}
+			else
+			{
+				printf("Las luces no se pueden escalar\n");
+			}
+
 			break;
+			
 
 		default:
 			break;
@@ -1319,6 +1355,27 @@ void switch_transformaciones(int k, int *isAKey)
 	}
 }
 
+void new_light_transformation()
+{
+	int i;
+	//NO hay redo ni undo ni creo que lo vaya a poner
+	elem_matrix *new_mptr, *aux;
+
+	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
+
+	new_mptr->nextptr = luces[selected_light-1]->mptr;
+	luces[selected_light-1]->mptr = new_mptr;
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
+	inverse(luces[selected_light-1]->mptr->M, luces[selected_light-1]->mptr->inv_M);
+
+	//reasignamos los valores de la matriz a los vectores del struct light para su correcta actualización:
+	for(i=0; i<4; i++)
+	{
+		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
+		luces[selected_light-1]->directon[i] = luces[selected_light-1]->mptr->M[8+i];
+	}
+}
 
 
 void new_camera_transformation()

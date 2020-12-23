@@ -94,6 +94,9 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
         (*luz)->position[i] = position[i];
         (*luz)->direction[i] = direction[i];
         (*luz)->RGBA[i] = RGBA[i];
+
+        (*mluz)->M[12+i] = position[i];
+        (*mluz)->M[8+i] = direction[i];
     }
     
     (*luz)->angulo = angulo;
