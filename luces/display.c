@@ -103,14 +103,14 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
     (*luz)->type = type;
     (*luz)->light = glluz;
 
-    glLightfv((*luz)->type, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
-    glLightfv((*luz)->type, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
-    glLightfv((*luz)->type, GL_DIFFUSE, RGBA);
+    glLightfv((*luz)->light, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
+    glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
+    glLightfv((*luz)->light, GL_DIFFUSE, RGBA);
 
     if(type != 0)
     {
-        glLightfv((*luz)->type, GL_SPOT_CUTOFF, &luces[i]->angulo);
-        glLightfv((*luz)->type, GL_SPOT_DIRECTION, luces[i]->direction);
+        glLightfv((*luz)->light, GL_SPOT_DIRECTION, direction);
+        //glLightfv((*luz)->light, GL_SPOT_CUTOFF, &angulo);
     }
 }
 
@@ -118,7 +118,8 @@ void actualizar_luces()
 {
     int i;
 
-    if(_selected_object != NULL)
+    printf("actualizo luces\n");
+    if(_selected_object != NULL) //este for actualiza exclusivamente la camara 3, el foco interno del objeto
     {
         for(i = 0; i<3; i++)
         {
@@ -141,7 +142,7 @@ void actualizar_luces()
 
         if(luces[i]->type != 0)
         {
-            glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo);
+            //glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
             glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
         }
     }
@@ -170,7 +171,11 @@ void init_luces()
     init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0, 2);    
     luces[2] = luz3;
 
-    init_luz(GL_LIGHT3, &luz4, &mluz4, position2, direction1, RGBA1, 0.0, 0);
+    GLfloat position4[4] = {0, 0, 10, 1};
+    GLfloat vector4[4] = {0, 0, 1, 1};
+    GLfloat angle = 180.0;
+
+    init_luz(GL_LIGHT3, &luz4, &mluz4, position4, vector4, RGBA1, angle, 2);
     luces[3] = luz4;
 
     init_luz(GL_LIGHT4, &luz5, &mluz5, position2, direction1, RGBA1, 0.0, 0);

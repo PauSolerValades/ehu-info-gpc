@@ -49,6 +49,8 @@ void keyboard_luces(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
+void new_light_transformation();
+
 /**
  * @brief Callback function to control the basic keys
  * @param key Key that has been pressed
@@ -458,13 +460,13 @@ void keyboard_luces(unsigned char key, int x,int y)
 		case 'm':
 		case 'M': /* Translación */
 			transformacion = 0;
-			printf("Translaciones ACTIVADAS\n");
+			printf("Translaciones LUCES ACTIVADAS\n");
 			break;
 		
 		case 'b':
 		case 'B': /* Rotación */
 			transformacion = 1;
-			printf("Rotaciones OBJECTO ACTIVADAS\n");
+			printf("Rotaciones LUCES ACTIVADAS\n");
 			break;
 
 		case '+':
@@ -1125,12 +1127,15 @@ void funcion_transformacion(int k)
 			//TODO: hacer las cosas que se tienen que modificar uwu, solo las transformaciones
 			if(transformacion != 2)
 			{
+				printf("Fent transformacions\n");
+				glLoadMatrixd(luces[selected_light-1]->mptr->M);
+
 				switch (luces[selected_light-1]->type)
 				{
 				case 0: //sol solo puede trasladarse
 					if(transformacion == 0)
 					{
-						switch_transformaciones(luces[(selected_light-1)]->mptr->M);
+						switch_transformaciones(k, &isAKey);
 
 					}
 					else
@@ -1139,14 +1144,13 @@ void funcion_transformacion(int k)
 					break;
 
 				case 1: //tanto bombilla como foco pueden rotar
-					
-					switch_transformaciones(luces[selected_light-1]->mptr->M));
+					switch_transformaciones(k, &isAKey);
 					
 					break;
 
 				case 2:
 					
-					switch_transformaciones(luces[selected_light-1]->mptr->M));
+					switch_transformaciones(k, &isAKey);
 
 					break;
 
@@ -1363,7 +1367,7 @@ void new_light_transformation()
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 
-	new_mptr->nextptr = luces[selected_light-1]->mptr;
+	new_mptr->nextptr = luces[(selected_light-1)]->mptr;
 	luces[selected_light-1]->mptr = new_mptr;
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
@@ -1373,7 +1377,7 @@ void new_light_transformation()
 	for(i=0; i<4; i++)
 	{
 		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
-		luces[selected_light-1]->directon[i] = luces[selected_light-1]->mptr->M[8+i];
+		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
 	}
 }
 
