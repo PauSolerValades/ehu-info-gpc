@@ -1363,13 +1363,13 @@ void new_light_transformation()
 {
 	int i;
 	//NO hay redo ni undo ni creo que lo vaya a poner
-	elem_matrix *new_mptr, *aux;
+	/*elem_matrix *new_mptr, *aux;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 
 	new_mptr->nextptr = luces[(selected_light-1)]->mptr;
 	luces[selected_light-1]->mptr = new_mptr;
-
+	*/
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
 	inverse(luces[selected_light-1]->mptr->M, luces[selected_light-1]->mptr->inv_M);
 
@@ -1379,6 +1379,8 @@ void new_light_transformation()
 		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
 		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
 	}
+
+	print_matrix(luces[selected_light-1]->mptr->M);
 }
 
 

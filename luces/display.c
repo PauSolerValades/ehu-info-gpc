@@ -99,6 +99,7 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
         (*mluz)->M[8+i] = direction[i];
     }
     
+    (*luz)->mptr = *mluz;
     (*luz)->angulo = angulo;
     (*luz)->type = type;
     (*luz)->light = glluz;
