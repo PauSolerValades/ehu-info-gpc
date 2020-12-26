@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 extern object3d *_first_object;
 extern object3d *_selected_object;
@@ -33,6 +34,7 @@ void print_enonmode();
 void print_eworld();
 void print_enonobject();
 void print_matrix();
+void print_lista_materiales();
 void destructor_objeto(object3d *object);
 void destructor_camara(camera *camera);
 void new_transformation();
@@ -66,10 +68,10 @@ void keyboard(unsigned char key, int x, int y)
 	int i;
 
 	char *fname = malloc(sizeof(char) * 128); /* Note that scanf adds a null character at the end of the vector*/
-	char *yesno;
+	
 	int read = 0;
 	int mname = 0;
-	int luz_actual, typeLight, counter;
+	int typeLight;
 
 	object3d *auxiliar_object = 0;
 	camera *auxiliar_camera = 0;
@@ -102,6 +104,7 @@ void keyboard(unsigned char key, int x, int y)
 		/*Read OK*/
 		case 0:
 
+			//cargamos el oro por defecto porque pau es daltónico
 			auxiliar_object->vectorMaterial[0] = 0.75164;
 			auxiliar_object->vectorMaterial[1] = 0.60648;
 			auxiliar_object->vectorMaterial[2] = 0.22648;
@@ -192,7 +195,6 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			if (_selected_object == _first_object)
 			{
-				/*DONE el free de elem_matrix*/
 				/*To remove the first object we just set the first as the current's next*/
 				_first_object = _first_object->next;
 				/*Once updated the pointer to the first object it is save to free the memory*/
@@ -217,7 +219,167 @@ void keyboard(unsigned char key, int x, int y)
 				_selected_object = auxiliar_object;
 			}
 		}
+		break;			
+
+	case 'o':
+	case 'O': /* Sistema referencia objeto */
+		if(mode != 0)
+		{
+			printf("TRANSFORMACIONES DE OBJETOS\n");
+			mode = 0;
+		}
+		else
+		{
+			printf("Ya estás en modo objeto...\n");
+		}
 		break;
+
+	case 'c': /* cambia a la siguiente camara */
+		if (_first_camera != 0)
+		{
+			_selected_camera = _selected_camera->nextptr;
+			/*The selection is circular, thus if we move out of the list we go back to the first element*/
+			if (_selected_camera == 0)
+				_selected_camera = _first_camera;
+			if(_selected_camera->type)
+			{
+				double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
+				apuntar_punto(_selected_camera->actual, puntoObjeto);
+			}
+			printf("Siguiente camara\n");
+		}
+
+		break;
+
+	case 'C': /* Activa/desactiva la camara interna del objeto */
+		if(camara_interna)
+		{
+			printf("Camara No Interna\n");	
+			camara_interna = 0;
+		}
+		else
+		{
+			printf("Camara Interna\n");
+			camara_interna = 1;
+			mode = 0; //volvemos en modo transformación.
+			referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
+		}
+		break;
+
+	case 'k': /* ACTIVA EL MODO CÁMARA */
+	case 'K': /* Transformaciones camara actual */
+		if(mode != 1)
+		{
+			mode = 1;
+			printf("TRANSFORMACIONES DE CAMARAS\n");
+		}
+		else
+		{
+			printf("Ya estas en modo camara...\n");
+		}
+		
+		
+		break;
+
+	case 'a':
+	case 'A': /* Transformaciones luz selecionada */
+		if(fill_polygons)
+		{
+			if(mode != 2)
+			{
+				printf("TRANSFORMACIONES DE LUCES\n");
+				mode = 2;
+
+			}
+			else
+			{
+				printf("Ya estás en modo luces...\n");
+			}
+		}
+		else
+		{
+			printf("No hay luces en modo GL_LINE. Cambia a GL_FILL con F9\n");
+		}
+		
+		break;
+
+	case '?':
+		print_help();
+		break;
+
+	case 27: /* <ESC> */
+		exit(0);
+		break;
+
+	default:
+		/* In default we call the other two functions. If the program has reached this line a key with two functionalities has been pressed */
+		
+		if(mode == 0)
+			keyboard_object(key, x, y);
+		else if(mode == 1)
+			keyboard_camera(key, x, y);
+		else if(mode == 2)
+			keyboard_luces(key, x, y);
+		else
+			printf("polla\n");
+		
+        break;
+	}
+
+	free(fname); /* We have to free the memory used in the scanf */
+	glutPostRedisplay();
+}
+
+
+void keyboard_luces(unsigned char key, int x,int y)
+{
+	float newangulo;
+	int luz_actual, counter; 
+	char *yesno;
+
+	switch (key)
+	{
+		case 'm':
+		case 'M': /* Translación */
+			transformacion = 0;
+			printf("Translaciones LUCES ACTIVADAS\n");
+			break;
+		
+		case 'b':
+		case 'B': /* Rotación */
+			transformacion = 1;
+			printf("Rotaciones LUCES ACTIVADAS\n");
+			break;
+
+		case '+':
+			if(luces[(selected_light-1)]->type == 2)
+			{
+				newangulo = 0;
+				newangulo = luces[selected_light-1]->angulo + A/2;
+				if(newangulo <= 90)
+					luces[selected_light-1]->angulo = newangulo;
+				else
+					printf("Los focos tienen un rango de [0,90]\n");	
+			}else{
+				printf("Sólo se pueden modificar los focos\n");
+			}
+
+			break;
+		
+		case '-':
+			if(luces[(selected_light-1)]->type == 2)
+			{
+				newangulo = 0;
+				newangulo = luces[selected_light-1]->angulo - A/2;
+				if(newangulo >= 0)
+					luces[selected_light-1]->angulo = newangulo;
+				else
+					printf("Los focos tienen un rango de [0,90]\n");
+			}else{
+				printf("Sólo se pueden modificar los focos\n");
+			}
+
+			break;
 
 	case '0':
 
@@ -303,9 +465,7 @@ void keyboard(unsigned char key, int x, int y)
 							break;
 						}
 						else
-						{
 							counter = 0;
-						}
 					}
 				}
 			}
@@ -314,82 +474,6 @@ void keyboard(unsigned char key, int x, int y)
 		}
 
 		break;
-			
-
-	case 'o':
-	case 'O': /* Sistema referencia objeto */
-		if(mode != 0)
-		{
-			printf("TRANSFORMACIONES DE OBJETOS\n");
-			mode = 0;
-		}
-		else
-		{
-			printf("Ya estás en modo objeto...\n");
-		}
-		break;
-
-	case 'c': /* cambia a la siguiente camara */
-		if (_first_camera != 0)
-		{
-			_selected_camera = _selected_camera->nextptr;
-			/*The selection is circular, thus if we move out of the list we go back to the first element*/
-			if (_selected_camera == 0)
-				_selected_camera = _first_camera;
-			if(_selected_camera->type)
-			{
-				double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
-				apuntar_punto(_selected_camera->actual, puntoObjeto);
-			}
-			printf("Siguiente camara\n");
-		}
-
-		break;
-
-	case 'C': /* Activa/desactiva la camara interna del objeto */
-		if(camara_interna)
-		{
-			printf("Camara No Interna\n");	
-			camara_interna = 0;
-		}
-		else
-		{
-			printf("Camara Interna\n");
-			camara_interna = 1;
-			mode = 0; //volvemos en modo transformación.
-			referencia = 0; /* No tiene sntido transformar la cámara cuando estás desde la perspectiva del objeto. */
-		}
-		break;
-
-	case 'k': /* ACTIVA EL MODO CÁMARA */
-	case 'K': /* Transformaciones camara actual */
-		if(mode != 1)
-		{
-			mode = 1;
-			printf("TRANSFORMACIONES DE CAMARAS\n");
-		}
-		else
-		{
-			printf("Ya estas en modo camara...\n");
-		}
-		
-		
-		break;
-
-	case 'a':
-	case 'A': /* Transformaciones luz selecionada */
-		if(mode != 2)
-		{
-			printf("TRANSFORMACIONES DE LUCES\n");
-			mode = 2;
-
-		}
-		else
-		{
-			printf("Ya estás en modo luces...\n");
-		}
-		break;
-
 
 	case '1':
 		printf("Luz 1 selecionada\n");
@@ -430,68 +514,6 @@ void keyboard(unsigned char key, int x, int y)
 		printf("Luz 8 selecionada\n");
 		selected_light = 8;
 		break;
-
-	case '?':
-		print_help();
-		break;
-
-	case 27: /* <ESC> */
-		exit(0);
-		break;
-
-	default:
-		/* In default we call the other two functions. If the program has reached this line a key with two functionalities has been pressed */
-		
-		if(mode == 0)
-			keyboard_object(key, x, y);
-		else if(mode == 1)
-			keyboard_camera(key, x, y);
-		else if(mode == 2)
-			keyboard_luces(key, x, y);
-		else
-			printf("Mode en keayboard %d\n", mode);
-		
-        break;
-	}
-
-	free(fname); /* We have to free the memory used in the scanf */
-	glutPostRedisplay();
-}
-
-
-void keyboard_luces(unsigned char key, int x,int y)
-{
-	switch (key)
-	{
-		case 'm':
-		case 'M': /* Translación */
-			transformacion = 0;
-			printf("Translaciones LUCES ACTIVADAS\n");
-			break;
-		
-		case 'b':
-		case 'B': /* Rotación */
-			transformacion = 1;
-			printf("Rotaciones LUCES ACTIVADAS\n");
-			break;
-
-		case '+':
-			if(luces[(selected_light-1)]->type == 2){
-				//TODO: FALTA FER-HO
-			}else{
-				printf("Sólo se pueden modificar los focos\n");
-			}
-
-			break;
-		
-		case '-':
-			if(luces[(selected_light-1)]->type == 2){
-				//TODO: FALTA FER-HO
-			}else{
-				printf("Sólo se pueden modificar los focos\n");
-			}
-
-			break;
 		
 		default:
 			printf("%d %c\n", key, key);
@@ -546,7 +568,6 @@ void keyboard_object(unsigned char key, int x, int y)
 			}
 			break;
 		
-		//cambia los límites de la camara
 		case '-': //hace que todo se vea mas pequeño
 
 			if (glutGetModifiers() == GLUT_ACTIVE_CTRL)
@@ -836,17 +857,15 @@ void keyboard_camera(unsigned char key, int x, int y)
 					
 					while(1)
 					{
-
 						if(_selected_camera->actual==iter)
 							break;
 
 						ant = iter;
-						iter = iter->nextptr;
-						
+						iter = iter->nextptr;	
 					}
 					
 					_selected_camera->actual = ant;
-					}
+				}
 				else
 				{
 					printf("No más redo\n");
@@ -902,6 +921,9 @@ void keyboard_camera(unsigned char key, int x, int y)
 void special(int k, int x, int y)
 {
 	int mname = 0;
+	time_t t;
+	srand((unsigned) time(&t));
+
     switch (k)
 	{
 	case GLUT_KEY_F1:
@@ -1011,13 +1033,15 @@ void special(int k, int x, int y)
 	case GLUT_KEY_F9: /* cambia de rejilla a polígonos pintados. */
 		if(fill_polygons) //pinto polígonos
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			fill_polygons = 0;
+			printf("Estás en modo rejilla (GL_LINE)\n");
 		}
 		else //ahora en lineas
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			fill_polygons = 1;
+			printf("Estás en modo relleno (GL_FILL)\n");
 		}
 		
 		glutPostRedisplay();
@@ -1038,14 +1062,16 @@ void special(int k, int x, int y)
 		break;
 	
 	case GLUT_KEY_INSERT:
-		
 
-		printf("\nQue material deseas asignarle al objeto?:\n\n");
-		printf("1 - Oro\n");
-		printf("2 - Rubí\n");
-		printf("3 - Zafiro\n");
-		printf("4 - Aleatorio\n\n");
+		print_lista_materiales();
+
 		scanf("%d", &mname);
+
+		if(mname == 4)
+		{
+			mname = (rand() % 3) + 1;
+			printf("%d\n", mname);
+		}
 		switch (mname)
 			{
 			case 1:
@@ -1132,23 +1158,19 @@ void funcion_transformacion(int k)
 
 		case 2:
 
-			//TODO: hacer las cosas que se tienen que modificar uwu, solo las transformaciones
 			if(transformacion != 2)
 			{
-				printf("Fent transformacions\n");
+
 				glLoadMatrixd(luces[selected_light-1]->mptr->M);
 
 				switch (luces[selected_light-1]->type)
 				{
 				case 0: //sol solo puede trasladarse
 					if(transformacion == 0)
-					{
 						switch_transformaciones(k, &isAKey);
-
-					}
 					else
 						printf("Los soles no se pueden escalar ni rotar\n");
-					
+
 					break;
 
 				case 1: //tanto bombilla como foco pueden rotar
@@ -1157,7 +1179,6 @@ void funcion_transformacion(int k)
 					break;
 
 				case 2:
-					
 					switch_transformaciones(k, &isAKey);
 
 					break;
@@ -1180,39 +1201,6 @@ void funcion_transformacion(int k)
 		default:
 			break;
 		}
-		/*
-		if(mode) //todo modo camara
-		{
-			if(_selected_camera->type == 0)
-			{
-				glLoadMatrixd(_selected_camera->actual->M);
-				switch_transformaciones(k, &isAKey);
-			}
-			else
-				switch_transformaciones_analisis(k, &isAKey);
-
-			if(!isAKey)
-				new_camera_transformation();
-			
-		}
-		else //todo modo objeto
-		{
-			if(!referencia)
-				glLoadMatrixd(_selected_object->display->M);
-			else
-				glLoadIdentity();
-
-			switch_transformaciones(k, &isAKey); //aquí hi ha el switch on es multiplica tot.
-
-			if(referencia)
-				glMultMatrixd(_selected_object->display->M);
-			
-			if(!isAKey)
-				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
-		}
-		*/
-
-		glutPostRedisplay();
 	}
 }
 
@@ -1378,44 +1366,15 @@ void new_light_transformation()
 	new_mptr->nextptr = luces[(selected_light-1)]->mptr;
 	luces[selected_light-1]->mptr = new_mptr;
 	*/
-	double puntAnterior[4], module;
-
-	for(i = 0; i<4; i++)
-		puntAnterior[i] = luces[selected_light-1]->mptr->M[12+i];
-
-	module = euclidean_norm(luces[selected_light-1]->direction[0]-puntAnterior[0], luces[selected_light-1]->direction[1]-puntAnterior[1], luces[selected_light-1]->direction[2]-puntAnterior[2]);
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
 	inverse(luces[selected_light-1]->mptr->M, luces[selected_light-1]->mptr->inv_M);
-	if(transformacion)
-	{
-		for(i=0; i<3; i++)
-		{
-			luces[selected_light-1]->direction[i] = luces[selected_light-1]->position[i] + luces[selected_light-1]->mptr->M[8+i];
-			printf("%f ", luces[selected_light-1]->direction[i]);
-		} 
-		printf("\n");
-	}
-	else
-	{
-		for(i=0; i<3; i++)
-		{
-			luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
-			luces[selected_light-1]->direction[i] = luces[selected_light-1]->direction[i] + (luces[selected_light-1]->position[i] - puntAnterior[i]);
-		}
-	}
-	
-	
-	//reasignamos los valores de la matriz a los vectores del struct light para su correcta actualización:
-	/*
-	if(transformacion) //hem fet una rotació, així que hem de calcular quin punt es el de spot direction.
-	{
-		for(i = 0; i<4; i++)
-			luces[selected_light-1]->direction[i] = luces[selected_light-1]->position[i] + luces[selected_light-1]->direction[i];
 
-		//apuntar_punto(luces[selected_light]->mptr, (double*)luces[selected_light-1]->direction);
+	for(i=0; i<3; i++)
+	{
+		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
+		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
 	}
-	*/
 
 	print_matrix(luces[selected_light-1]->mptr->M);
 	
@@ -1753,6 +1712,15 @@ void print_matrix(double * mptr)
 		printf("\n");
 	}
 	printf("\n");
+}
+
+void print_lista_materiales()
+{
+	printf("\nQue material deseas asignarle al objeto?:\n\n");
+	printf("1 - Oro\n");
+	printf("2 - Rubí\n");
+	printf("3 - Zafiro\n");
+	printf("4 - Aleatorio\n\n");
 }
 
 

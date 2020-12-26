@@ -18,6 +18,7 @@ extern int camara_interna; //0: camara no interna, 1: camara interna
 extern int flat_smooth; //0: flat, 1: smooth
 
 extern int mode;
+extern int fill_polygons;
 
 extern int selected_light;
 extern light* luces[8];
@@ -62,7 +63,7 @@ void reshape(int width, int height) {
     _window_ratio = (GLdouble) width / (GLdouble) height;
 }
 
-void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4], GLfloat direction[4], GLfloat RGBA[4], GLfloat angulo, int type)
+void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4], GLfloat direction[3], GLfloat RGBA[4], GLfloat angulo, int type)
 {
     int i;
 
@@ -91,11 +92,15 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
 
     for(i=0; i<4; i++)
     {
-        (*luz)->position[i] = position[i];
-        (*luz)->direction[i] = direction[i];
+        (*luz)->position[i] = position[i];  
         (*luz)->RGBA[i] = RGBA[i];
-
         (*mluz)->M[12+i] = position[i];
+        
+    }
+    
+    for(i=0; i<3; i++)
+    {
+        (*luz)->direction[i] = direction[i];
         (*mluz)->M[8+i] = direction[i];
     }
     
@@ -105,13 +110,13 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
     (*luz)->light = glluz;
 
     glLightfv((*luz)->light, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
-    glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
     glLightfv((*luz)->light, GL_DIFFUSE, RGBA);
-
+    glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
+    
     if(type != 0)
     {
         glLightfv((*luz)->light, GL_SPOT_DIRECTION, direction);
-        //glLightfv((*luz)->light, GL_SPOT_CUTOFF, &angulo);
+        glLightf((*luz)->light, GL_SPOT_CUTOFF, angulo);
     }
 }
 
@@ -119,7 +124,6 @@ void actualizar_luces()
 {
     int i;
 
-    printf("actualizo luces\n");
     if(_selected_object != NULL) //este for actualiza exclusivamente la camara 3, el foco interno del objeto
     {
         for(i = 0; i<3; i++)
@@ -129,10 +133,7 @@ void actualizar_luces()
         }
 
         luces[2]->position[4] = 1.0;
-        luces[2]->direction[4] = 1.0;
 
-        GLfloat puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], 1.0};
-        GLfloat vector[4] = {_selected_object->display->M[8], _selected_object->display->M[9],_selected_object->display->M[10], 1.0};
     }
 
     for(i = 0; i<8; i++)
@@ -143,8 +144,8 @@ void actualizar_luces()
 
         if(luces[i]->type != 0)
         {
-            //glLightfv(luces[i]->light, GL_SPOT_CUTOFF, &luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
             glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
+            glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
         }
     }
 }
@@ -156,7 +157,7 @@ void init_luces()
 
     GLfloat position1[4] = {5,5,0,0};
     GLfloat direction1[4] = {0,0,0,1};
-    GLfloat RGBA1[4] = {0.8,0.8,0.8,1.0};
+    GLfloat RGBA1[4] = {0.8f,0.8f,0.8f,1.0f};
 
     init_luz(GL_LIGHT0, &luz1, &mluz1, position1, direction1, RGBA1, 0.0, 0);
     luces[0] = luz1;
@@ -167,14 +168,14 @@ void init_luces()
     luces[1] = luz2;
 
     GLfloat puntoObjeto[4] = {0,0,5,1};
-    GLfloat vector[4] = {0,0,1,1};
+    GLfloat vector[4] = {0,0,1};
     
-    init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0, 2);    
+    init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0f, 2); 
     luces[2] = luz3;
 
-    GLfloat position4[4] = {0, 0, 10, 1};
-    GLfloat vector4[4] = {0, 0, 1, 1};
-    GLfloat angle = 180.0;
+    GLfloat position4[4] = {0.0f,0.0f,5.0f,1.0f};
+    GLfloat vector4[3] = {0.0f, 0.0f, -1.0f};
+    GLfloat angle = 20.0f;
 
     init_luz(GL_LIGHT3, &luz4, &mluz4, position4, vector4, RGBA1, angle, 2);
     luces[3] = luz4;
@@ -234,7 +235,6 @@ void init_camera(){
 
 GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
 {
-
     int i;
     double *N, Eo[3], eval;
 
@@ -319,7 +319,7 @@ void display(void) {
 
         //Select the color, depending on whether the current object is the selected one or not 
         if (aux_obj == _selected_object){
-            glColor3f(KG_COL_SELECTED_R,KG_COL_SELECTED_G,KG_COL_SELECTED_B);
+            glColor3f(KG_COL_SELECTED_R, KG_COL_SELECTED_G, KG_COL_SELECTED_B);
         }else{
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
         }

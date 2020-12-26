@@ -28,7 +28,7 @@ int referencia;
 
 int camara_interna;
 
-int fill_polygons; //controla si se pintan los polígonos o no
+int fill_polygons; //0: rejilla; 1: rellenos
 
 int selected_light;
 int flat_smooth; //0: flat, 1: smooth
@@ -52,8 +52,6 @@ void initialization (){
     /*Initialization of all the variables with the default values*/
     //definimos puntos maximos y minimos de lo que vamos a poder visualizar.
     //zona tridimensional donde se van a tener que ver en pantalla.
-    
-
     _window_ratio = (GLdouble) KG_WINDOW_WIDTH / (GLdouble) KG_WINDOW_HEIGHT;
 
     /*Definition of the background color*/
