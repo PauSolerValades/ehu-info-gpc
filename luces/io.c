@@ -32,6 +32,7 @@ void print_help();
 void print_enonmode();
 void print_eworld();
 void print_enonobject();
+void print_matrix();
 void destructor_objeto(object3d *object);
 void destructor_camara(camera *camera);
 void new_transformation();
@@ -50,6 +51,7 @@ void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
 void new_light_transformation();
+void apuntar_punto(elem_matrix *object, double P[4]);
 
 /**
  * @brief Callback function to control the basic keys
@@ -155,9 +157,10 @@ void keyboard(unsigned char key, int x, int y)
 			if (_selected_object == 0)
 				_selected_object = _first_object;
 
-			if(mode && transformacion == 0) //TODO: NO RECORDO QUÈ FA AIXÒ.
-				apuntar_objeto();
-			
+			if(mode && transformacion == 0){ //TODO: NO RECORDO QUÈ FA AIXÒ.
+				double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
+				apuntar_punto(_selected_camera->actual, puntoObjeto);
+			}
 		}
 		break;
 
@@ -334,7 +337,10 @@ void keyboard(unsigned char key, int x, int y)
 			if (_selected_camera == 0)
 				_selected_camera = _first_camera;
 			if(_selected_camera->type)
-				apuntar_objeto();
+			{
+				double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
+				apuntar_punto(_selected_camera->actual, puntoObjeto);
+			}
 			printf("Siguiente camara\n");
 		}
 
@@ -773,7 +779,9 @@ void keyboard_camera(unsigned char key, int x, int y)
 			referencia = 0; //cambiamos a modo objeto porque no tiene sentido el global.
 			transformacion = 0;
 			_selected_camera->type = 1;
-			apuntar_objeto();
+			
+			double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
+			apuntar_punto(_selected_camera->actual, puntoObjeto);
 			
 			//print_matrix(_selected_camera->M);
 			break;
@@ -1362,7 +1370,7 @@ void switch_transformaciones(int k, int *isAKey)
 void new_light_transformation()
 {
 	int i;
-	//NO hay redo ni undo ni creo que lo vaya a poner
+	//NO hay redo ni undo ni creo que lo vaya a poner, por eso reutilizamos elem_matrix y no guardamos memoria
 	/*elem_matrix *new_mptr, *aux;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
@@ -1370,17 +1378,47 @@ void new_light_transformation()
 	new_mptr->nextptr = luces[(selected_light-1)]->mptr;
 	luces[selected_light-1]->mptr = new_mptr;
 	*/
+	double puntAnterior[4], module;
+
+	for(i = 0; i<4; i++)
+		puntAnterior[i] = luces[selected_light-1]->mptr->M[12+i];
+
+	module = euclidean_norm(luces[selected_light-1]->direction[0]-puntAnterior[0], luces[selected_light-1]->direction[1]-puntAnterior[1], luces[selected_light-1]->direction[2]-puntAnterior[2]);
+
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
 	inverse(luces[selected_light-1]->mptr->M, luces[selected_light-1]->mptr->inv_M);
-
-	//reasignamos los valores de la matriz a los vectores del struct light para su correcta actualización:
-	for(i=0; i<4; i++)
+	if(transformacion)
 	{
-		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
-		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
+		for(i=0; i<3; i++)
+		{
+			luces[selected_light-1]->direction[i] = luces[selected_light-1]->position[i] + luces[selected_light-1]->mptr->M[8+i];
+			printf("%f ", luces[selected_light-1]->direction[i]);
+		} 
+		printf("\n");
 	}
+	else
+	{
+		for(i=0; i<3; i++)
+		{
+			luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
+			luces[selected_light-1]->direction[i] = luces[selected_light-1]->direction[i] + (luces[selected_light-1]->position[i] - puntAnterior[i]);
+		}
+	}
+	
+	
+	//reasignamos los valores de la matriz a los vectores del struct light para su correcta actualización:
+	/*
+	if(transformacion) //hem fet una rotació, així que hem de calcular quin punt es el de spot direction.
+	{
+		for(i = 0; i<4; i++)
+			luces[selected_light-1]->direction[i] = luces[selected_light-1]->position[i] + luces[selected_light-1]->direction[i];
+
+		//apuntar_punto(luces[selected_light]->mptr, (double*)luces[selected_light-1]->direction);
+	}
+	*/
 
 	print_matrix(luces[selected_light-1]->mptr->M);
+	
 }
 
 
@@ -1554,24 +1592,22 @@ void inverse(double *b, double *a)
 
 double euclidean_norm(double x, double y, double z) { return sqrt(x*x + y*y + z*z); }
 
-/* Centers the camera in the object owo. */
-void apuntar_objeto()
+/* Cambia los vectores de la matriz del primer argumento para que apunten al punto P del segundo argumento. */
+void apuntar_punto(elem_matrix *object, double P[4])
 {
 	int i, centrado_mismo_punto;
 	double module_z, module_x;
 
-	double E[3], P[3], U[3], x_c[3], y_c[3], z_c[3];
+	double E[3], U[3], x_c[3], y_c[3], z_c[3];
 
 	centrado_mismo_punto = 0;
 
 	for(i = 0; i<3; i++){
-		E[i] = _selected_camera->actual->M[12+i];
-		P[i] = _selected_object->display->M[12+i];
-		U[i] = _selected_camera->actual->M[i+4];
+		E[i] = object->M[12+i];
+		U[i] = object->M[i+4];
 
-		if(E[i]==P[i]){
+		if(E[i]==P[i])
 			centrado_mismo_punto++;
-		}
 	}
 
 	if(centrado_mismo_punto != 3)
@@ -1607,13 +1643,13 @@ void apuntar_objeto()
 
 		for(i = 0; i<3; i++)
 		{
-			_selected_camera->actual->M[i] = x_c[i];
-			_selected_camera->actual->M[4+i] = y_c[i];
-			_selected_camera->actual->M[i+8] = z_c[i];
-			_selected_camera->actual->M[i+12] = E[i];
+			object->M[i] = x_c[i];
+			object->M[4+i] = y_c[i];
+			object->M[i+8] = z_c[i];
+			object->M[i+12] = E[i];
 		}
 
-		inverse(_selected_camera->actual->M, _selected_camera->actual->inv_M);
+		inverse(object->M, object->inv_M);
 	}
 }
 
