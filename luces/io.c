@@ -1681,9 +1681,19 @@ void print_help()
 	printf("<M> \t\t Mode translation\n");
 	printf("<B> \t\t Mode rotation\n");
 	printf("<T> \t\t Mode scaling\n");
+	printf("<A> \t\t Mode lightning\n");
 	printf("<L> \t\t Object Reference\n");
 	printf("<G> \t\t Global Reference\n");
 	printf("<+/- in T> \t Scale up/down all the object axis\n\n");
+	printf("<F1-F8> \t Amatatu edo piztu argiak\n");
+	printf("<1-8> \t Hautatu modifikatu nahi dozun argia\n");
+	printf("<INSERT> \t Material aldaketa menua\n ");
+	printf("<0> \t\t Argi aldaketa menua \n");
+	printf("<F9> \t\t Aldatu material edo linea modu artean\n");
+	printf("<+> \t\t Hautatuko argia foko bat baldin bada, bere proiekzio angelua handitu\n");
+	printf("<-> \t\t Hautatuko argia foko bat baldin bada, bere proiekzio angelua txikitu\n");
+
+
 	
 	printf("Use the UP, DOWN, LEFT, RIGHT, AV_PAG, RE_PAG keys to apply the transformations M, B, T to the object selected respect himself (object reference) or respect to the axis (global reference)\n");
 	printf("\n\n");
@@ -1722,6 +1732,3 @@ void print_lista_materiales()
 	printf("3 - Zafiro\n");
 	printf("4 - Aleatorio\n\n");
 }
-
-
-
