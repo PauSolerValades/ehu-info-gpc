@@ -137,16 +137,16 @@ void actualizar_luces()
 
         }
     if(req_upt){  
-            glLightfv(luces[selected_light]->light, GL_POSITION, luces[i]->position);
-            glLightfv(luces[selected_light]->light, GL_DIFFUSE, luces[i]->RGBA);
-            glLightfv(luces[selected_light]->light, GL_SPECULAR, luces[i]->RGBA);
-            glLightfv(luces[selected_light]->light, GL_AMBIENT, luces[i]->RGBA);
+            glLightfv(luces[selected_light-1]->light, GL_POSITION, luces[selected_light-1]->position);
+            glLightfv(luces[selected_light-1]->light, GL_DIFFUSE, luces[selected_light-1]->RGBA);
+            glLightfv(luces[selected_light-1]->light, GL_SPECULAR, luces[selected_light-1]->RGBA);
+            glLightfv(luces[selected_light-1]->light, GL_AMBIENT, luces[selected_light-1]->RGBA);
 
 
-            if(luces[selected_light]->type != 0)
+            if(luces[selected_light-1]->type != 0)
             {
-                glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
-                glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
+                glLightfv(luces[selected_light-1]->light, GL_SPOT_DIRECTION, luces[selected_light-1]->direction);
+                glLightf(luces[selected_light-1]->light, GL_SPOT_CUTOFF, luces[selected_light-1]->angulo); //okay no tenim ni idea de com va aquesta linia
             }
         req_upt = 0;
     }

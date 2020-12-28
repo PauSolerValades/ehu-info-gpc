@@ -357,11 +357,14 @@ void keyboard_luces(unsigned char key, int x,int y)
 			{
 				newangulo = 0;
 				newangulo = luces[selected_light-1]->angulo + A/2;
-				if(newangulo <= 90){
+				if(newangulo <= 90)
+				{
 					luces[selected_light-1]->angulo = newangulo;
 					req_upt = 1;
-				}else
-					printf("Los focos tienen un rango de [0,90]\n");	
+				}
+				else{
+					printf("Los focos tienen un rango de [0,90]\n");
+				}	
 			}else{
 				printf("Sólo se pueden modificar los focos\n");
 			}
@@ -373,11 +376,14 @@ void keyboard_luces(unsigned char key, int x,int y)
 			{
 				newangulo = 0;
 				newangulo = luces[selected_light-1]->angulo - A/2;
-				if(newangulo >= 0){
+				if(newangulo >= 0)
+				{
 					luces[selected_light-1]->angulo = newangulo;
 					req_upt = 1;
-				}else
+				}
+				else{
 					printf("Los focos tienen un rango de [0,90]\n");
+				}	
 			}else{
 				printf("Sólo se pueden modificar los focos\n");
 			}
@@ -422,8 +428,8 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores entre [0,1] red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 0.0;
-						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
+						req_upt = 1;
 						break;
 					
 					case 1: //bombilla
@@ -434,8 +440,9 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
-						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
+						req_upt = 1;
+						printf("Hola;");
 						break;
 
 					case 2: //foco
@@ -448,8 +455,8 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
-						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
+						req_upt = 1;
 						break;
 
 					default:
@@ -1174,8 +1181,10 @@ void funcion_transformacion(int k)
 				case 0: //sol solo puede trasladarse
 					if(transformacion == 0)
 						switch_transformaciones(k, &isAKey);
-					else
-						printf("Los soles no se pueden escalar ni rotar\n");
+					else{
+						printf("Los soles no se pueden escalar ni rotar. Volviendo al modo translacion\n");
+						transformacion = 0;
+						}
 
 					break;
 
