@@ -138,6 +138,7 @@ typedef struct light
 {
     GLenum light;
     struct elem_matrix *mptr;
+    struct elem_matrix *first;
     GLfloat position[4];
     GLfloat direction[3];
     GLfloat RGBA[4];

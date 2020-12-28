@@ -36,25 +36,30 @@ void print_eworld();
 void print_enonobject();
 void print_matrix();
 void print_lista_materiales();
+
 void destructor_objeto(object3d *object);
 void destructor_camara(camera *camera);
-void new_transformation();
+void destructor_luz();
+
+void new_object_transformation();
 void new_camera_transformation();
-void inverse();
-void apuntar_objeto();
-void calcular_normales();
+void new_light_transformation();
+
 void special(int k, int x, int y);
-void keyboard(unsigned char key, int x, int y);
-double euclidean_norm(double x, double y, double z);
-void cross_product(double *u, double *v, double *w);
-void keyboard_object(unsigned char key, int x, int y);
-void keyboard_camera(unsigned char key, int x, int y);
-void keyboard_luces(unsigned char key, int x, int y);
 void switch_transformaciones_analisis(int k, int *isAKey);
 void switch_transformaciones(int k, int *isAKey);
 void funcion_transformacion(int k);
-void new_light_transformation();
+
+void keyboard(unsigned char key, int x, int y);
+void keyboard_object(unsigned char key, int x, int y);
+void keyboard_camera(unsigned char key, int x, int y);
+void keyboard_luces(unsigned char key, int x, int y);
+
+void inverse();
+void calcular_normales();
+void cross_product(double *u, double *v, double *w);
 void apuntar_punto(elem_matrix *object, double P[4]);
+double euclidean_norm(double x, double y, double z);
 
 /**
  * @brief Callback function to control the basic keys
@@ -275,10 +280,7 @@ void keyboard(unsigned char key, int x, int y)
 			printf("TRANSFORMACIONES DE CAMARAS\n");
 		}
 		else
-		{
 			printf("Ya estas en modo camara...\n");
-		}
-		
 		
 		break;
 
@@ -290,17 +292,12 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				printf("TRANSFORMACIONES DE LUCES\n");
 				mode = 2;
-
 			}
 			else
-			{
 				printf("Ya estás en modo luces...\n");
-			}
 		}
 		else
-		{
 			printf("No hay luces en modo GL_LINE. Cambia a GL_FILL con F9\n");
-		}
 		
 		break;
 
@@ -322,20 +319,19 @@ void keyboard(unsigned char key, int x, int y)
 		else if(mode == 2)
 			keyboard_luces(key, x, y);
 		else
-			printf("polla\n");
+			printf("Cosas grandes\n");
 		
         break;
 	}
 
 	free(fname); /* We have to free the memory used in the scanf */
-	glutPostRedisplay();
 }
 
 
 void keyboard_luces(unsigned char key, int x,int y)
 {
 	float newangulo;
-	int luz_actual, counter; 
+	int luz_actual, counter, i; 
 	char *yesno;
 
 	switch (key)
@@ -362,12 +358,11 @@ void keyboard_luces(unsigned char key, int x,int y)
 					luces[selected_light-1]->angulo = newangulo;
 					req_upt = 1;
 				}
-				else{
+				else
 					printf("Los focos tienen un rango de [0,90]\n");
-				}	
-			}else{
+				
+			}else
 				printf("Sólo se pueden modificar los focos\n");
-			}
 
 			break;
 		
@@ -381,12 +376,11 @@ void keyboard_luces(unsigned char key, int x,int y)
 					luces[selected_light-1]->angulo = newangulo;
 					req_upt = 1;
 				}
-				else{
+				else
 					printf("Los focos tienen un rango de [0,90]\n");
-				}	
-			}else{
+
+			}else
 				printf("Sólo se pueden modificar los focos\n");
-			}
 
 			break;
 
@@ -429,6 +423,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 0.0;
 						printf("Valores cambiados correctamente\n");
+						luces[luz_actual]->type = 0;
 						req_upt = 1;
 						break;
 					
@@ -441,6 +436,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
 						printf("Valores cambiados correctamente\n");
+						luces[luz_actual]->type = 2;
 						req_upt = 1;
 						printf("Hola;");
 						break;
@@ -456,6 +452,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
 						printf("Valores cambiados correctamente\n");
+						luces[luz_actual]->type = 3;
 						req_upt = 1;
 						break;
 
@@ -482,7 +479,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 					}
 				}
 			}
-
+			destructor_luz(); //deja solo una matriz en la luz
 			free(yesno);
 		}
 
@@ -527,10 +524,66 @@ void keyboard_luces(unsigned char key, int x,int y)
 		printf("Luz 8 selecionada\n");
 		selected_light = 8;
 		break;
+
+	case 25:
+        
+		if(luces[selected_light-1]->mptr != luces[selected_light-1]->first)
+		{
+			printf("Rehacer LUZ %d\n", selected_light);
+			
+			elem_matrix *iter;
+			elem_matrix *ant;
+
+			iter = luces[selected_light-1]->first->nextptr;
+			ant = luces[selected_light-1]->first;
+			
+			while(1)
+			{
+				if(luces[selected_light-1]->mptr==iter)
+					break;
+
+				ant = iter;
+				iter = iter->nextptr;
+			}
+			
+			luces[selected_light-1]->mptr = ant;
+			}
+		else
+			printf("No más redo\n");
+
+		//asignamos los valores de la matriz actual a la struct para su correcta actualización en display
+		for(i=0; i<3; i++)
+		{
+			luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
+			luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
+		}
+		req_upt = 1;
+
+		break;
+
+	case 26: /* CONTROL+Z */
+
+		if (luces[selected_light-1]->mptr->nextptr != 0)
+		{
+			printf("Deshacer LUZ %d\n", selected_light);
+				
+			luces[selected_light-1]->mptr = luces[selected_light-1]->mptr->nextptr;
+		}
+		else
+			printf("No más undo\n");
 		
-		default:
-			printf("%d %c\n", key, key);
-			break;
+		for(i=0; i<3; i++)
+		{
+			luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
+			luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
+		}
+
+		req_upt = 1;
+		break;
+		
+	default:
+		printf("%d %c\n", key, key);
+		break;
 	}
 
 }
@@ -654,7 +707,7 @@ void keyboard_object(unsigned char key, int x, int y)
 				glutPostRedisplay();
 
 			}else{
-				printf("Cargue un objecto, por favor\n");        
+				printf("Cargue un objeto, por favor\n");        
 			}
 
 			break;
@@ -1091,14 +1144,14 @@ void special(int k, int x, int y)
 					_selected_object->vectorMaterial[0] = 0.75164;
 					_selected_object->vectorMaterial[1] = 0.60648;
 					_selected_object->vectorMaterial[2] = 0.22648;
-					_selected_object->shine = 0,4;
+					_selected_object->shine = 0.4;
 					printf("\nMaterial cambiado satisfactoriamente\n");
 				break;
 			case 2:
 					_selected_object->vectorMaterial[0] = 0.61424;
 					_selected_object->vectorMaterial[1] = 0.04136;
 					_selected_object->vectorMaterial[2] = 0.04136;
-					_selected_object->shine = 0,6;
+					_selected_object->shine = 0.6;
 					printf("\nMaterial cambiado satisfactoriamente\n");
 				break;
 			case 3:
@@ -1151,7 +1204,7 @@ void funcion_transformacion(int k)
 				glMultMatrixd(_selected_object->display->M);
 			
 			if(!isAKey)
-				new_transformation(); //crea el nou elem_matrix buit i el posa a la llista
+				new_object_transformation(); //crea el nou elem_matrix buit i el posa a la llista
 
 			break;
 
@@ -1181,28 +1234,28 @@ void funcion_transformacion(int k)
 				case 0: //sol solo puede trasladarse
 					if(transformacion == 0)
 						switch_transformaciones(k, &isAKey);
-					else{
+					else
+					{
 						printf("Los soles no se pueden escalar ni rotar. Volviendo al modo translacion\n");
 						transformacion = 0;
-						}
+					}
 
 					break;
 
 				case 1: //tanto bombilla como foco pueden rotar
 					switch_transformaciones(k, &isAKey);
-					
 					break;
 
 				case 2:
 					switch_transformaciones(k, &isAKey);
-
 					break;
 
 				default:
 					break;
 				}
 
-				new_light_transformation();
+				if(!isAKey)
+					new_light_transformation();
 				
 			}
 			else
@@ -1370,28 +1423,59 @@ void switch_transformaciones(int k, int *isAKey)
 	}
 }
 
+void destructor_luz()
+{
+	//esta funcion borra todas las matrices de la luz selecionada excepto la primera
+	elem_matrix *aux;
+	int i;
+	
+	while(luces[selected_light-1]->first->nextptr != NULL)
+	{
+		luces[selected_light-1]->mptr = luces[selected_light-1]->first->nextptr;
+		free(luces[selected_light-1]->mptr);
+	}
+	luces[selected_light-1]->mptr = luces[selected_light-1]->first;
+
+	aux = luces[selected_light-1]->first;
+
+	i=0;
+	
+	while(aux != NULL)
+	{
+		aux = aux->nextptr;
+		i++;
+	}
+
+	printf("%d", i);
+}
+
 void new_light_transformation()
 {
 	int i;
-	
-	//NO hay redo ni undo ni creo que lo vaya a poner, por eso reutilizamos elem_matrix y no guardamos memoria
-	/*elem_matrix *new_mptr, *aux;
+	elem_matrix *new_mptr, *aux;
 
 	new_mptr = (elem_matrix *)malloc(sizeof(elem_matrix));
 
-	new_mptr->nextptr = luces[(selected_light-1)]->mptr;
+	while(luces[selected_light-1]->first != luces[selected_light-1]->mptr)
+	{
+		aux = luces[selected_light-1]->first;
+		luces[selected_light-1]->first = luces[selected_light-1]->first->nextptr;
+		free(aux);
+	}
+
+	luces[selected_light-1]->first = new_mptr;
+	new_mptr->nextptr = luces[selected_light-1]->mptr;
 	luces[selected_light-1]->mptr = new_mptr;
-	*/
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
+
 	for(i=0; i<3; i++)
 	{
 		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
 		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
 	}
-	req_upt = 1;
-	print_matrix(luces[selected_light-1]->mptr->M);
-	
+
+	req_upt = 1;	
 }
 
 
@@ -1422,7 +1506,7 @@ void new_camera_transformation()
 new_transformation() allocates memory for a new element matrix, adds it to the first element in the linked list matrixes of object3d and deletes all the matrixes that cannot be used again due to redo and undo functions.
 1
 */
-void new_transformation()
+void new_object_transformation()
 {
 	int control;
 	elem_matrix *new_mptr, *aux;

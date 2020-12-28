@@ -64,203 +64,6 @@ void reshape(int width, int height) {
     _window_ratio = (GLdouble) width / (GLdouble) height;
 }
 
-void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4], GLfloat direction[3], GLfloat RGBA[4], GLfloat angulo, int type)
-{
-    int i;
-
-    *luz = (light *)malloc(sizeof(light));
-
-    *mluz = (elem_matrix *)malloc(sizeof(elem_matrix));
-    (*mluz)->nextptr = NULL;
-
-    //llenamos la tabla M
-    for (i = 1; i < 15; i++)
-    {
-        (*mluz)->M[i] = 0.0;
-        (*mluz)->inv_M[i] = 0.0;
-    }
-
-    //cutríssim pero va
-    (*mluz)->M[0] = 1.0;
-    (*mluz)->M[5] = 1.0;
-    (*mluz)->M[10] = 1.0;
-    (*mluz)->M[15] = 1.0;
-
-    (*mluz)->inv_M[0] = 1.0;
-    (*mluz)->inv_M[5] = 1.0;
-    (*mluz)->inv_M[10] = 1.0;
-    (*mluz)->inv_M[15] = 1.0;
-
-    for(i=0; i<4; i++)
-    {
-        (*luz)->position[i] = position[i];  
-        (*luz)->RGBA[i] = RGBA[i];
-        (*mluz)->M[12+i] = position[i];
-        
-    }
-    
-    for(i=0; i<3; i++)
-    {
-        (*luz)->direction[i] = direction[i];
-        (*mluz)->M[8+i] = direction[i];
-    }
-    
-    (*luz)->mptr = *mluz;
-    (*luz)->angulo = angulo;
-    (*luz)->type = type;
-    (*luz)->light = glluz;
-
-    glLightfv((*luz)->light, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
-    glLightfv((*luz)->light, GL_DIFFUSE, RGBA);
-    glLightfv((*luz)->light, GL_AMBIENT, RGBA);
-    glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
-    
-    if(type != 0)
-    {
-        glLightfv((*luz)->light, GL_SPOT_DIRECTION, direction);
-        glLightf((*luz)->light, GL_SPOT_CUTOFF, angulo);
-    }
-}
-
-void actualizar_luces()
-{   
-    int i;
-    if(_selected_object != NULL) //este for actualiza exclusivamente la camara 3, el foco interno del objeto
-        {
-            for(i = 0; i<3; i++)
-            {
-                luces[2]->position[i] = _selected_object->display->M[12+i];
-                luces[2]->direction[i] = _selected_object->display->M[8+i];
-            }
-
-            luces[2]->position[4] = 1.0;
-
-        }
-    if(req_upt){  
-            glLightfv(luces[selected_light-1]->light, GL_POSITION, luces[selected_light-1]->position);
-            glLightfv(luces[selected_light-1]->light, GL_DIFFUSE, luces[selected_light-1]->RGBA);
-            glLightfv(luces[selected_light-1]->light, GL_SPECULAR, luces[selected_light-1]->RGBA);
-            glLightfv(luces[selected_light-1]->light, GL_AMBIENT, luces[selected_light-1]->RGBA);
-
-
-            if(luces[selected_light-1]->type != 0)
-            {
-                glLightfv(luces[selected_light-1]->light, GL_SPOT_DIRECTION, luces[selected_light-1]->direction);
-                glLightf(luces[selected_light-1]->light, GL_SPOT_CUTOFF, luces[selected_light-1]->angulo); //okay no tenim ni idea de com va aquesta linia
-            }
-        req_upt = 0;
-    }
-    
-}
-
-void init_luces()
-{
-    light *luz1, *luz2, *luz3, *luz4, *luz5, *luz6, *luz7, *luz8;
-    elem_matrix *mluz1, *mluz2, *mluz3, *mluz4, *mluz5, *mluz6, *mluz7, *mluz8;
-
-    GLfloat position1[4] = {5,5,0,0};
-    GLfloat direction1[4] = {0,0,0,1};
-    GLfloat RGBA1[4] = {0.8f,0.8f,0.8f,1.0f};
-
-    init_luz(GL_LIGHT0, &luz1, &mluz1, position1, direction1, RGBA1, 0.0, 0);
-    luces[0] = luz1;
-    
-    GLfloat position2[4] = {-2,7,0,1};
-
-    init_luz(GL_LIGHT1, &luz2, &mluz2, position2, direction1, RGBA1, 0.0, 1);
-    luces[1] = luz2;
-
-    GLfloat puntoObjeto[4] = {0,0,5,1};
-    GLfloat vector[4] = {0,0,1};
-    
-    init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0f, 2); 
-    luces[2] = luz3;
-
-    GLfloat position4[4] = {0.0f,0.0f,5.0f,1.0f};
-    GLfloat vector4[3] = {0.0f, 0.0f, -1.0f};
-    GLfloat angle = 20.0f;
-
-    init_luz(GL_LIGHT3, &luz4, &mluz4, position4, vector4, RGBA1, angle, 2);
-    luces[3] = luz4;
-
-    init_luz(GL_LIGHT4, &luz5, &mluz5, position2, direction1, RGBA1, 0.0, 0);
-    luces[4] = luz5;
-
-    init_luz(GL_LIGHT5, &luz6, &mluz6, position2, direction1, RGBA1, 0.0, 0);
-    luces[5] = luz6;
-
-    init_luz(GL_LIGHT6, &luz7, &mluz7, position2, direction1, RGBA1, 0.0, 0);
-    luces[6] = luz7;
-
-    init_luz(GL_LIGHT7, &luz8, &mluz8, position2, direction1, RGBA1, 0.0, 0);
-    luces[7] = luz8;
-
-    selected_light = 1;
-
-}
-
-void init_camera(){
-    
-    camera *new_camera;
-    elem_matrix *matrix_camera;
-
-    new_camera = (camera *)malloc(sizeof(camera));
-    new_camera->nextptr = NULL;//apuntem el seguent punter a 0
-
-    matrix_camera = (elem_matrix *)malloc(sizeof(elem_matrix));
-    matrix_camera->nextptr = NULL;
-
-    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->M);
-    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->inv_M);
-
-    matrix_camera->M[14] = INIT_CAMERA;
-    matrix_camera->inv_M[14] = -INIT_CAMERA;
-
-    new_camera-> r = 0.1;
-    new_camera-> l = -0.1;
-    new_camera-> t = 0.1;
-    new_camera-> b = -0.1;
-    new_camera-> n = 0.1;
-    new_camera-> f = 1000.0;
-
-    new_camera->first = matrix_camera;
-    new_camera->actual = matrix_camera;
-
-    //asignamos la matriz a la id.
-    _selected_camera = new_camera;
-    _first_camera = new_camera;
-    
-    _selected_camera->type = 0; //modo vuelo
-    _selected_camera->pers = 1; //modo paralelo.
-
-    mode = 0; //esto esque sinó revienta todo el programa por algun moticvo | Secundo la mocion de no borrarlo
-}
-
-GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
-{
-    int i;
-    double *N, Eo[3], eval;
-
-    //cambio sistema referencia de la camara al objeto
-    if(camara_interna)
-        N = &(_selected_object->display->M[0]);
-    else
-        N = &(_selected_camera->actual->M[0]);
-    
-    Eo[0] = M[0]*N[12] + M[4]*N[13] + M[8]*N[14] + M[12];
-    Eo[1] = M[1]*N[12] + M[5]*N[13] + M[9]*N[14] + M[13];
-    Eo[2] = M[2]*N[12] + M[6]*N[13] + M[10]*N[14] + M[14];
-
-    //Ax+By+Cz+D=0
-    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
-
-    if(eval < 0.0)
-        return 0;
-    else
-        return 1;
-
-}
-
 /**
  * @brief Callback display function
  */
@@ -374,6 +177,218 @@ void display(void) {
     }
     /*Do the actual drawing and paint*/
     glutSwapBuffers();
+}
+
+void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4], GLfloat direction[3], GLfloat RGBA[4], GLfloat angulo, int type)
+{
+    int i;
+
+    *luz = (light *)malloc(sizeof(light));
+
+    *mluz = (elem_matrix *)malloc(sizeof(elem_matrix));
+    (*mluz)->nextptr = NULL;
+
+    //llenamos la tabla M
+    for (i = 1; i < 15; i++)
+    {
+        (*mluz)->M[i] = 0.0;
+        (*mluz)->inv_M[i] = 0.0;
+    }
+
+    //cutríssim pero va
+    (*mluz)->M[0] = 1.0;
+    (*mluz)->M[5] = 1.0;
+    (*mluz)->M[10] = 1.0;
+    (*mluz)->M[15] = 1.0;
+
+    (*mluz)->inv_M[0] = 1.0;
+    (*mluz)->inv_M[5] = 1.0;
+    (*mluz)->inv_M[10] = 1.0;
+    (*mluz)->inv_M[15] = 1.0;
+
+    for(i=0; i<4; i++)
+    {
+        (*luz)->position[i] = position[i];  
+        (*luz)->RGBA[i] = RGBA[i];
+        (*mluz)->M[12+i] = position[i];
+        
+    }
+    
+    for(i=0; i<3; i++)
+    {
+        (*luz)->direction[i] = direction[i];
+        (*mluz)->M[8+i] = direction[i];
+    }
+    
+    (*luz)->mptr = *mluz;
+    (*luz)->first = *mluz;
+    (*luz)->angulo = angulo;
+    (*luz)->type = type;
+    (*luz)->light = glluz;
+
+    glLightfv((*luz)->light, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
+    glLightfv((*luz)->light, GL_DIFFUSE, RGBA);
+    glLightfv((*luz)->light, GL_AMBIENT, RGBA);
+    glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
+    
+    if(type != 0)
+    {
+        glLightfv((*luz)->light, GL_SPOT_DIRECTION, direction);
+        glLightf((*luz)->light, GL_SPOT_CUTOFF, angulo);
+    }
+}
+
+void actualizar_luces()
+{   
+    int i;
+    if(_selected_object != NULL) //este for actualiza exclusivamente la camara 3, el foco interno del objeto
+    {
+        for(i = 0; i<3; i++)
+        {
+            luces[2]->position[i] = _selected_object->display->M[12+i];
+            luces[2]->direction[i] = _selected_object->display->M[8+i];
+        }
+
+        luces[2]->position[4] = 1.0;
+    }
+
+    if(req_upt)
+    {  
+        glLightfv(luces[selected_light-1]->light, GL_POSITION, luces[selected_light-1]->position);
+        glLightfv(luces[selected_light-1]->light, GL_DIFFUSE, luces[selected_light-1]->RGBA);
+        glLightfv(luces[selected_light-1]->light, GL_SPECULAR, luces[selected_light-1]->RGBA);
+        glLightfv(luces[selected_light-1]->light, GL_AMBIENT, luces[selected_light-1]->RGBA);
+
+        if(luces[selected_light-1]->type != 0)
+        {
+            glLightfv(luces[selected_light-1]->light, GL_SPOT_DIRECTION, luces[selected_light-1]->direction);
+            glLightf(luces[selected_light-1]->light, GL_SPOT_CUTOFF, luces[selected_light-1]->angulo);
+        }
+        req_upt = 0;
+    }
+    
+}
+
+void init_luces()
+{
+    int i;
+    light *luz1, *luz2, *luz3, *luz4, *luz5, *luz6, *luz7, *luz8;
+    elem_matrix *mluz1, *mluz2, *mluz3, *mluz4, *mluz5, *mluz6, *mluz7, *mluz8;
+
+    GLfloat position1[4] = {5,5,0,0};
+    GLfloat direction1[4] = {0.0f,0.0f,-1.0f};
+    GLfloat RGBA1[4] = {0.8f,0.8f,0.8f,1.0f};
+
+    init_luz(GL_LIGHT0, &luz1, &mluz1, position1, direction1, RGBA1, 0.0, 0);
+    luces[0] = luz1;
+    
+    GLfloat position2[4] = {0.0, 0.0f, 0.0f, 1.0f};//{-2,7,0,1};
+    GLfloat anguloBombilla = 180.0f;
+
+    init_luz(GL_LIGHT1, &luz2, &mluz2, position2, direction1, RGBA1, anguloBombilla, 1);
+    luces[1] = luz2;
+
+    GLfloat puntoObjeto[4] = {0,0,5,1};
+    GLfloat vector[4] = {0,0,1};
+    
+    init_luz(GL_LIGHT2, &luz3, &mluz3, puntoObjeto, vector, RGBA1, 60.0f, 2); 
+    luces[2] = luz3;
+
+    GLfloat position4[4] = {0.0f,0.0f,5.0f,1.0f};
+    GLfloat vector4[3] = {0.0f, 0.0f, -1.0f};
+    GLfloat angle = 20.0f;
+
+    init_luz(GL_LIGHT3, &luz4, &mluz4, position4, vector4, RGBA1, angle, 2);
+    luces[3] = luz4;
+
+    init_luz(GL_LIGHT4, &luz5, &mluz5, position2, direction1, RGBA1, 0.0, 0);
+    luces[4] = luz5;
+
+    init_luz(GL_LIGHT5, &luz6, &mluz6, position2, direction1, RGBA1, 0.0, 0);
+    luces[5] = luz6;
+
+    init_luz(GL_LIGHT6, &luz7, &mluz7, position2, direction1, RGBA1, 0.0, 0);
+    luces[6] = luz7;
+
+    init_luz(GL_LIGHT7, &luz8, &mluz8, position2, direction1, RGBA1, 0.0, 0);
+    luces[7] = luz8;
+
+    //hacemos una primera pasada para inicializar las luces correctamente
+    for(i=0; i<8; i++)
+    {  
+        glLightfv(luces[i]->light, GL_POSITION, luces[i]->position);
+        glLightfv(luces[i]->light, GL_DIFFUSE, luces[i]->RGBA);
+        glLightfv(luces[i]->light, GL_SPECULAR, luces[i]->RGBA);
+        glLightfv(luces[i]->light, GL_AMBIENT, luces[i]->RGBA);
+
+        if(luces[i]->type != 0)
+        {
+            glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
+            glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo);
+        }
+    }
+}
+
+void init_camera(){
+    
+    camera *new_camera;
+    elem_matrix *matrix_camera;
+
+    new_camera = (camera *)malloc(sizeof(camera));
+    new_camera->nextptr = NULL;//apuntem el seguent punter a 0
+
+    matrix_camera = (elem_matrix *)malloc(sizeof(elem_matrix));
+    matrix_camera->nextptr = NULL;
+
+    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->M);
+    glGetDoublev(GL_PROJECTION_MATRIX, matrix_camera->inv_M);
+
+    matrix_camera->M[14] = INIT_CAMERA;
+    matrix_camera->inv_M[14] = -INIT_CAMERA;
+
+    new_camera-> r = 0.1;
+    new_camera-> l = -0.1;
+    new_camera-> t = 0.1;
+    new_camera-> b = -0.1;
+    new_camera-> n = 0.1;
+    new_camera-> f = 1000.0;
+
+    new_camera->first = matrix_camera;
+    new_camera->actual = matrix_camera;
+
+    //asignamos la matriz a la id.
+    _selected_camera = new_camera;
+    _first_camera = new_camera;
+    
+    _selected_camera->type = 0; //modo vuelo
+    _selected_camera->pers = 1; //modo paralelo.
+
+    mode = 0; //esto esque sinó revienta todo el programa por algun moticvo | Secundo la mocion de no borrarlo
+}
+
+GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
+{
+    int i;
+    double *N, Eo[3], eval;
+
+    //cambio sistema referencia de la camara al objeto
+    if(camara_interna)
+        N = &(_selected_object->display->M[0]);
+    else
+        N = &(_selected_camera->actual->M[0]);
+    
+    Eo[0] = M[0]*N[12] + M[4]*N[13] + M[8]*N[14] + M[12];
+    Eo[1] = M[1]*N[12] + M[5]*N[13] + M[9]*N[14] + M[13];
+    Eo[2] = M[2]*N[12] + M[6]*N[13] + M[10]*N[14] + M[14];
+
+    //Ax+By+Cz+D=0
+    eval = Eo[0]*Av + Eo[1]*Bv + Eo[2]*Cv + Dv;
+
+    if(eval < 0.0)
+        return 0;
+    else
+        return 1;
+
 }
 
 void dibuja_normales(object3d *aux_obj, GLint f)
