@@ -27,6 +27,7 @@ extern int fill_polygons;
 
 extern int selected_light; //uno para cada luz
 extern light* luces[8];
+extern int req_upt;
 
 /* all the functions declared to improve the order of aperance */
 void print_help();
@@ -356,9 +357,10 @@ void keyboard_luces(unsigned char key, int x,int y)
 			{
 				newangulo = 0;
 				newangulo = luces[selected_light-1]->angulo + A/2;
-				if(newangulo <= 90)
+				if(newangulo <= 90){
 					luces[selected_light-1]->angulo = newangulo;
-				else
+					req_upt = 1;
+				}else
 					printf("Los focos tienen un rango de [0,90]\n");	
 			}else{
 				printf("Sólo se pueden modificar los focos\n");
@@ -371,9 +373,10 @@ void keyboard_luces(unsigned char key, int x,int y)
 			{
 				newangulo = 0;
 				newangulo = luces[selected_light-1]->angulo - A/2;
-				if(newangulo >= 0)
+				if(newangulo >= 0){
 					luces[selected_light-1]->angulo = newangulo;
-				else
+					req_upt = 1;
+				}else
 					printf("Los focos tienen un rango de [0,90]\n");
 			}else{
 				printf("Sólo se pueden modificar los focos\n");
@@ -419,6 +422,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores entre [0,1] red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 0.0;
+						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
 						break;
 					
@@ -430,6 +434,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
+						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
 						break;
 
@@ -443,6 +448,7 @@ void keyboard_luces(unsigned char key, int x,int y)
 						printf("Introduce los valores red green blue alpha separados por espacios: \n");
 						scanf(" %f %f %f %f", &luces[luz_actual]->RGBA[0], &luces[luz_actual]->RGBA[1], &luces[luz_actual]->RGBA[2], &luces[luz_actual]->RGBA[3]);
 						luces[luz_actual]->position[4] = 1.0;
+						req_upt = 1;
 						printf("Valores cambiados correctamente\n");
 						break;
 
@@ -1358,6 +1364,7 @@ void switch_transformaciones(int k, int *isAKey)
 void new_light_transformation()
 {
 	int i;
+	
 	//NO hay redo ni undo ni creo que lo vaya a poner, por eso reutilizamos elem_matrix y no guardamos memoria
 	/*elem_matrix *new_mptr, *aux;
 
@@ -1368,14 +1375,12 @@ void new_light_transformation()
 	*/
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, luces[selected_light-1]->mptr->M);
-	inverse(luces[selected_light-1]->mptr->M, luces[selected_light-1]->mptr->inv_M);
-
 	for(i=0; i<3; i++)
 	{
 		luces[selected_light-1]->position[i] = luces[selected_light-1]->mptr->M[12+i];
 		luces[selected_light-1]->direction[i] = luces[selected_light-1]->mptr->M[8+i];
 	}
-
+	req_upt = 1;
 	print_matrix(luces[selected_light-1]->mptr->M);
 	
 }

@@ -32,6 +32,7 @@ int fill_polygons; //0: rejilla; 1: rellenos
 
 int selected_light;
 int flat_smooth; //0: flat, 1: smooth
+int req_upt; // 0 No es necesario, 1: necesario
 light* luces[8];
 
 
@@ -46,7 +47,7 @@ void initialization (){
     referencia = 0; //por defecto a objeto.
     camara_interna = 0;
     flat_smooth = 1; //0: flat, 1: smooth
-
+    req_upt = 0;
     selected_light = 0; //0 no es una light, pero hasta que no esten cargadas no se pone a 1
 
     /*Initialization of all the variables with the default values*/

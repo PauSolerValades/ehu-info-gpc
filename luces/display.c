@@ -22,6 +22,7 @@ extern int fill_polygons;
 
 extern int selected_light;
 extern light* luces[8];
+extern int req_upt;
 void dibuja_normales(object3d *aux_obj, GLint f);
 void init_luces();
 
@@ -111,6 +112,7 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
 
     glLightfv((*luz)->light, GL_SPECULAR, RGBA); //Joseba dice queesta siempre con el mismo valro que la otra
     glLightfv((*luz)->light, GL_DIFFUSE, RGBA);
+    glLightfv((*luz)->light, GL_AMBIENT, RGBA);
     glLightfv((*luz)->light, GL_POSITION, position); //aquí tocar el vector para que el sol no se mueva con la cámara
     
     if(type != 0)
@@ -121,33 +123,34 @@ void init_luz(GLenum glluz, light **luz, elem_matrix **mluz, GLfloat position[4]
 }
 
 void actualizar_luces()
-{
+{   
     int i;
-
     if(_selected_object != NULL) //este for actualiza exclusivamente la camara 3, el foco interno del objeto
-    {
-        for(i = 0; i<3; i++)
         {
-            luces[2]->position[i] = _selected_object->display->M[12+i];
-            luces[2]->direction[i] = _selected_object->display->M[8+i];
+            for(i = 0; i<3; i++)
+            {
+                luces[2]->position[i] = _selected_object->display->M[12+i];
+                luces[2]->direction[i] = _selected_object->display->M[8+i];
+            }
+
+            luces[2]->position[4] = 1.0;
+
         }
+    if(req_upt){  
+            glLightfv(luces[selected_light]->light, GL_POSITION, luces[i]->position);
+            glLightfv(luces[selected_light]->light, GL_DIFFUSE, luces[i]->RGBA);
+            glLightfv(luces[selected_light]->light, GL_SPECULAR, luces[i]->RGBA);
+            glLightfv(luces[selected_light]->light, GL_AMBIENT, luces[i]->RGBA);
 
-        luces[2]->position[4] = 1.0;
 
+            if(luces[selected_light]->type != 0)
+            {
+                glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
+                glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
+            }
+        req_upt = 0;
     }
-
-    for(i = 0; i<8; i++)
-    {   
-        glLightfv(luces[i]->light, GL_POSITION, luces[i]->position);
-        glLightfv(luces[i]->light, GL_DIFFUSE, luces[i]->RGBA);
-        glLightfv(luces[i]->light, GL_SPECULAR, luces[i]->RGBA);
-
-        if(luces[i]->type != 0)
-        {
-            glLightfv(luces[i]->light, GL_SPOT_DIRECTION, luces[i]->direction);
-            glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo); //okay no tenim ni idea de com va aquesta linia
-        }
-    }
+    
 }
 
 void init_luces()
@@ -230,7 +233,7 @@ void init_camera(){
     _selected_camera->type = 0; //modo vuelo
     _selected_camera->pers = 1; //modo paralelo.
 
-    mode = 0; //esto esque sinó revienta todo el programa por algun moticvo
+    mode = 0; //esto esque sinó revienta todo el programa por algun moticvo | Secundo la mocion de no borrarlo
 }
 
 GLint poligono_visible(double *M, double Av, double Bv, double Cv, double Dv)
