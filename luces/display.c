@@ -23,6 +23,11 @@ extern int fill_polygons;
 extern int selected_light;
 extern light* luces[8];
 extern int req_upt;
+
+void init_camera();
+void actualizar_luces();
+GLint poligono_visible();
+
 void dibuja_normales(object3d *aux_obj, GLint f);
 void init_luces();
 
@@ -63,6 +68,7 @@ void reshape(int width, int height) {
      *  rounding the ratio to integer values we need to cast width and height before computing the ratio */
     _window_ratio = (GLdouble) width / (GLdouble) height;
 }
+
 
 /**
  * @brief Callback display function
@@ -327,6 +333,8 @@ void init_luces()
             glLightf(luces[i]->light, GL_SPOT_CUTOFF, luces[i]->angulo);
         }
     }
+
+    selected_light = 1; //ponemos la luz seleccionada a uno
 }
 
 void init_camera(){

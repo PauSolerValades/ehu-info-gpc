@@ -325,6 +325,7 @@ void keyboard(unsigned char key, int x, int y)
 	}
 
 	free(fname); /* We have to free the memory used in the scanf */
+	glutPostRedisplay();
 }
 
 
@@ -1766,7 +1767,7 @@ void destructor_objeto(object3d *object)
 void print_help()
 {
 	printf("KbG Irakasgaiaren Praktika. Programa honek 3D objektuak \n");
-	printf("aldatzen eta bistaratzen ditu.  \n\n");
+	printf("aldatzen eta bistaratzen ditu.  \n");
 	printf("\n\n");
 	printf("FUNTZIO NAGUSIAK \n");
 	printf("<?>\t\t Laguntza hau bistaratu \n");
@@ -1784,12 +1785,12 @@ void print_help()
 	printf("<G> \t\t Global Reference\n");
 	printf("<+/- in T> \t Scale up/down all the object axis\n\n");
 	printf("<F1-F8> \t Amatatu edo piztu argiak\n");
-	printf("<1-8> \t Hautatu modifikatu nahi dozun argia\n");
+	printf("<1-8> \t\t Hautatu modifikatu nahi dozun argia\n");
 	printf("<INSERT> \t Material aldaketa menua\n ");
 	printf("<0> \t\t Argi aldaketa menua \n");
 	printf("<F9> \t\t Aldatu material edo linea modu artean\n");
 	printf("<+> \t\t Hautatuko argia foko bat baldin bada, bere proiekzio angelua handitu\n");
-	printf("<-> \t\t Hautatuko argia foko bat baldin bada, bere proiekzio angelua txikitu\n");
+	printf("<-> \t\t Hautatuko argia foko bat baldin bada, bere proiekzio angelua txikitu\n\n");
 
 
 	
