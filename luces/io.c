@@ -166,7 +166,7 @@ void keyboard(unsigned char key, int x, int y)
 			if (_selected_object == 0)
 				_selected_object = _first_object;
 
-			if(mode && transformacion == 0){ //TODO: NO RECORDO QUÈ FA AIXÒ.
+			if(mode && _selected_camera->type){ //TODO: NO RECORDO QUÈ FA AIXÒ.
 				double puntoObjeto[4] = {_selected_object->display->M[12], _selected_object->display->M[13], _selected_object->display->M[14], _selected_object->display->M[15]};
 				apuntar_punto(_selected_camera->actual, puntoObjeto);
 			}
@@ -301,6 +301,46 @@ void keyboard(unsigned char key, int x, int y)
 		
 		break;
 
+	case '1':
+		printf("Luz 1 selecionada\n");
+		selected_light = 1;
+		break;
+
+	case '2':
+		printf("Luz 2 selecionada\n");
+		selected_light = 2;
+ 		break;
+
+	case '3':
+		printf("Luz 3 selecionada\n");
+		selected_light = 3;
+		break;
+
+	case '4':
+		printf("Luz 4 selecionada\n");
+		selected_light = 4;
+		break;
+
+	case '5':
+		printf("Luz 5 selecionada\n");
+		selected_light = 5;
+		break;
+
+	case '6':
+		printf("Luz 6 selecionada\n");
+		selected_light = 6;
+		break;
+
+	case '7':
+		printf("Luz 7 selecionada\n");
+		selected_light = 7;
+		break;
+
+	case '8':
+		printf("Luz 8 selecionada\n");
+		selected_light = 8;
+		break;
+		
 	case '?':
 		print_help();
 		break;
@@ -484,46 +524,6 @@ void keyboard_luces(unsigned char key, int x,int y)
 			free(yesno);
 		}
 
-		break;
-
-	case '1':
-		printf("Luz 1 selecionada\n");
-		selected_light = 1;
-		break;
-
-	case '2':
-		printf("Luz 2 selecionada\n");
-		selected_light = 2;
- 		break;
-
-	case '3':
-		printf("Luz 3 selecionada\n");
-		selected_light = 3;
-		break;
-
-	case '4':
-		printf("Luz 4 selecionada\n");
-		selected_light = 4;
-		break;
-
-	case '5':
-		printf("Luz 5 selecionada\n");
-		selected_light = 5;
-		break;
-
-	case '6':
-		printf("Luz 6 selecionada\n");
-		selected_light = 6;
-		break;
-
-	case '7':
-		printf("Luz 7 selecionada\n");
-		selected_light = 7;
-		break;
-
-	case '8':
-		printf("Luz 8 selecionada\n");
-		selected_light = 8;
 		break;
 
 	case 25:

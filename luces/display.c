@@ -78,6 +78,7 @@ void display(void) {
     GLint v_index, v, f, dibuja, i;
 
     GLfloat vectorMaterial[3] = {0.75164,0.60648,0.22648};
+    GLfloat vx, vy, vz;
     object3d *aux_obj = _first_object; //puntero al primer elemento de la lista de objetos.
     
     /* Clear the screen */
@@ -136,9 +137,6 @@ void display(void) {
             glColor3f(KG_COL_NONSELECTED_R,KG_COL_NONSELECTED_G,KG_COL_NONSELECTED_B);
         }
         
-        // Por revisar, asignar con vectores los valores del material  
-        
-        
         /* Draw the object; for each face create a new polygon with the corresponding vertices */
         glMultMatrixd(aux_obj->display->M); //debemos cambiar mptr por display, dado que display necesita el puntero que apunta a la matriz actual del objeto.
         for (f = 0; f < aux_obj->num_faces; f++) {
@@ -176,11 +174,82 @@ void display(void) {
             //dibuja_normales(aux_obj, f); //aquesta funció dibuixa les normals de tots els poligons..
         }
 
+        //dibujamos el cubo para saber qué objeto está seleccionado
+        if(_selected_object == aux_obj)
+        {
+            vx = aux_obj->max.x - aux_obj->min.x;
+            vy = aux_obj->max.y - aux_obj->min.y;
+            vz = aux_obj->max.z - aux_obj->min.z;
+
+            
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y, aux_obj->min.z);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y+vy, aux_obj->min.z);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y+vy, aux_obj->min.z);
+                glVertex3d(aux_obj->min.x+vx, aux_obj->min.y+vy, aux_obj->min.z);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y+vy, aux_obj->min.z);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y+vy, aux_obj->min.z+vz);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y, aux_obj->min.z);
+                glVertex3d(aux_obj->min.x+vx, aux_obj->min.y, aux_obj->min.z);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y, aux_obj->min.z);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y, aux_obj->min.z+vz);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y, aux_obj->min.z+vz);
+                glVertex3d(aux_obj->min.x, aux_obj->min.y+vy, aux_obj->min.z+vz);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y, aux_obj->max.z);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y, aux_obj->max.z-vz);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y, aux_obj->max.z);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y-vy, aux_obj->max.z);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y, aux_obj->max.z);
+                glVertex3d(aux_obj->max.x-vx, aux_obj->max.y, aux_obj->max.z);
+            glEnd();
+
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y-vy, aux_obj->max.z);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y-vy, aux_obj->max.z-vz);
+            glEnd();
+
+             glBegin(GL_LINES);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y-vy, aux_obj->max.z);
+                glVertex3d(aux_obj->max.x-vx, aux_obj->max.y-vy, aux_obj->max.z);
+            glEnd();
+            
+            glBegin(GL_LINES);
+                glVertex3d(aux_obj->min.x+vx, aux_obj->min.y, aux_obj->min.z);
+                glVertex3d(aux_obj->max.x, aux_obj->max.y, aux_obj->max.z-vz);
+            glEnd();
+        }
+
         //printf("He dibujado %d poligonos de %d totales\n", poligonos, aux_obj->num_faces);
         aux_obj = aux_obj->next;
 
         glPopMatrix();
     }
+
+
     /*Do the actual drawing and paint*/
     glutSwapBuffers();
 }
